@@ -2,7 +2,7 @@ import https from 'https';
 import http, { OutgoingHttpHeaders } from 'http';
 import { URL } from 'url';
 
-import { VERSION } from 'Vulkava';
+import { VERSION } from '../../';
 
 type ReqOptions = {
   method?: 'GET' | 'POST' | 'PATCH' | 'PUT' | 'DELETE';
