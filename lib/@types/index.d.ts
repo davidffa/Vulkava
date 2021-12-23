@@ -8,6 +8,20 @@ type VulkavaOptions = {
   sendWS: (guildId: string, payload: Record<string, unknown>) => void;
 };
 
+/** Vulkava events */
+interface EventListeners<T> {
+  (event: 'raw', listener: (payload: unknown) => void): T;
+  (event: 'nodeConnect', listener: (node: Node) => void): T;
+  (event: 'nodeResume', listener: (node: Node) => void): T;
+  (event: 'nodeDisconnect', listener: (node: Node) => void): T;
+  (event: 'nodeError', listener: (node: Node, error: Error) => void): T;
+}
+
+interface Vulkava {
+  once: EventListeners<this>;
+  on: EventListeners<this>;
+}
+
 /** Lavalink node options */
 type NodeOptions = {
   /** The node identifier */
