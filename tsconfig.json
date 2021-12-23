@@ -11,6 +11,10 @@
     "declaration": true,
     "outDir": "./dist",
     "declarationDir": "./typings",
+    "typeRoots": [
+      "node_modules/@types",
+      "lib/@types"
+    ],
 
     "esModuleInterop": true,
     "resolveJsonModule": true,
