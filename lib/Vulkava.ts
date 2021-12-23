@@ -1,1 +1,12 @@
-export const VERSION = '1.0.0';
+import { EventEmitter } from 'events';
+
+export default class Vulkava extends EventEmitter {
+  public readonly clientId: string;
+
+  constructor(options: VulkavaOptions) {
+    super();
+
+    this.clientId = options.clientId;
+    // TODO:
+  }
+}

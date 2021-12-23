@@ -12,9 +12,12 @@
     "url": "git+https://github.com/davidffa/Vulkava.git"
   },
   "license": "MIT",
-  "dependencies": {},
+  "dependencies": {
+    "ws": "^8.4.0"
+  },
   "devDependencies": {
     "@types/node": "^17.0.4",
+    "@types/ws": "^8.2.2",
     "@typescript-eslint/eslint-plugin": "^5.8.0",
     "@typescript-eslint/parser": "^5.8.0",
     "eslint": "^8.5.0",
