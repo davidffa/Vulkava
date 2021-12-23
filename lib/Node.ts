@@ -1,3 +1,4 @@
+import { IncomingMessage } from 'http';
 import Vulkava from 'Vulkava';
 import WebSocket, { CloseEvent, ErrorEvent, MessageEvent } from 'ws';
 import { VERSION } from '..';
@@ -48,13 +49,7 @@ export default class Node {
     this.ws.onmessage = this.message.bind(this);
     this.ws.onerror = this.error.bind(this);
     this.ws.onclose = this.close.bind(this);
-
-    this.ws.once('upgrade', (msg) => {
-      if (msg.headers['Session-Resumed']) {
-        this.resumed = true;
-        this.vulkava.emit('nodeResumed', this);
-      }
-    });
+    this.ws.once('upgrade', this.upgrade.bind(this));
   }
 
   public disconnect() {
@@ -84,7 +79,7 @@ export default class Node {
   // ---------- WebSocket event handlers ----------
   private open() {
     this.state = State.CONNECTED;
-    this.vulkava.emit('nodeConnected', this);
+    this.vulkava.emit('nodeConnect', this);
 
     if (!this.resumed) {
       this.setupResuming();
@@ -100,7 +95,7 @@ export default class Node {
   }
 
   private error({ error }: ErrorEvent) {
-    this.vulkava.emit('nodeError', error);
+    this.vulkava.emit('nodeError', this, error);
   }
 
   private close({ code, reason, wasClean }: CloseEvent) {
@@ -110,7 +105,14 @@ export default class Node {
       this.vulkava.emit('nodeDisconnect', this);
       return;
     }
-    this.vulkava.emit('nodeError', new Error(`WebSocket closed abnormally with code ${code}: ${reason}`));
+    this.vulkava.emit('nodeError', this, new Error(`WebSocket closed abnormally with code ${code}: ${reason}`));
     // TODO: Cleanup and reconnect
+  }
+
+  private upgrade(msg: IncomingMessage) {
+    if (msg.headers['Session-Resumed']) {
+      this.resumed = true;
+      this.vulkava.emit('nodeResume', this);
+    }
   }
 }
