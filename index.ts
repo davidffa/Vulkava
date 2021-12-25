@@ -1,5 +1,5 @@
-import Node from 'Node';
-import Vulkava from 'Vulkava';
+import Node from './lib/Node';
+import Vulkava from './lib/Vulkava';
 import { version } from './package.json';
 
 const VERSION = version;

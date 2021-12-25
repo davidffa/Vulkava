@@ -1,5 +1,7 @@
+import { Node } from '../..';
+
 /** Main constructor options */
-type VulkavaOptions = {
+export type VulkavaOptions = {
   /** The client (BOT) id */
   clientId: string;
   /** The array of lavalink nodes */
@@ -17,13 +19,13 @@ interface EventListeners<T> {
   (event: 'nodeError', listener: (node: Node, error: Error) => void): T;
 }
 
-interface Vulkava {
+export interface Vulkava {
   once: EventListeners<this>;
   on: EventListeners<this>;
 }
 
 /** Lavalink node options */
-type NodeOptions = {
+export type NodeOptions = {
   /** The node identifier */
   id?: string;
   /** The node hostname */

@@ -1,7 +1,9 @@
 import { IncomingMessage } from 'http';
-import Vulkava from 'Vulkava';
+import Vulkava from './Vulkava';
 import WebSocket, { CloseEvent, ErrorEvent, MessageEvent } from 'ws';
 import { VERSION } from '..';
+
+import type { NodeOptions } from './@types';
 
 enum State {
   CONNECTING,
