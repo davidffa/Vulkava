@@ -1,25 +1,25 @@
 import { Node } from '../..';
 
+type DiscordPayload = {
+  op: number;
+  d: Record<string, unknown>;
+}
+
 /** Main constructor options */
 export type VulkavaOptions = {
   /** The array of lavalink nodes */
   nodes: NodeOptions[];
   /** Function to send voice channel connect payloads to discord */
-  sendWS: (guildId: string, payload: Record<string, unknown>) => void;
+  sendWS: (guildId: string, payload: DiscordPayload) => void;
 };
 
 /** Vulkava events */
-interface EventListeners<T> {
+export type EventListeners<T> = {
   (event: 'raw', listener: (payload: unknown) => void): T;
   (event: 'nodeConnect', listener: (node: Node) => void): T;
   (event: 'nodeResume', listener: (node: Node) => void): T;
   (event: 'nodeDisconnect', listener: (node: Node) => void): T;
   (event: 'nodeError', listener: (node: Node, error: Error) => void): T;
-}
-
-export interface Vulkava {
-  once: EventListeners<this>;
-  on: EventListeners<this>;
 }
 
 /** Lavalink node options */

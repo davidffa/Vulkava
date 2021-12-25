@@ -1,9 +1,13 @@
 import { EventEmitter } from 'events';
 import Node from './Node';
 
-import type { VulkavaOptions } from './@types';
+import type { EventListeners, VulkavaOptions } from './@types';
 
-export default class Vulkava extends EventEmitter {
+export interface Vulkava {
+  once: EventListeners<this>;
+  on: EventListeners<this>;
+}
+export class Vulkava extends EventEmitter {
   public clientId: string;
   public nodes: Node[];
 

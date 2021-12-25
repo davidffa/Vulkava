@@ -1,5 +1,5 @@
 import Node from './lib/Node';
-import Vulkava from './lib/Vulkava';
+import { Vulkava } from './lib/Vulkava';
 
 import type {
   NodeOptions,
