@@ -6,7 +6,7 @@ import { VERSION } from '..';
 
 import type { NodeOptions, NodeStats, BasePayload, PlayerEventPayload } from './@types';
 
-enum State {
+export enum State {
   CONNECTING,
   CONNECTED,
   DISCONNECTED

@@ -1,4 +1,5 @@
 import { Node } from '../..';
+import Track from '../Track';
 
 // ---------- Vulkava typings ----------
 type DiscordPayload = {
@@ -58,11 +59,18 @@ type LoadException = {
   message: string;
   severity: 'COMMON' | 'SUSPIOUS' | 'FAULT';
 }
-export interface ILoadTracksResult {
+
+type LoadResultBase = {
   loadType: 'TRACK_LOADED' | 'PLAYLIST_LOADED' | 'SEARCH_RESULT' | 'NO_MATCHES' | 'LOAD_FAILED';
   playlistInfo: PlaylistInfo;
-  tracks: ITrack[];
   exception?: LoadException;
+}
+export type LoadTracksResult = LoadResultBase & {
+  tracks: ITrack[];
+}
+
+export type SearchResult = LoadResultBase & {
+  tracks: Track[];
 }
 
 // -- END REST --
