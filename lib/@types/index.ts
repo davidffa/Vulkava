@@ -1,5 +1,6 @@
 import { Node } from '../..';
 
+// ---------- Vulkava typings ----------
 type DiscordPayload = {
   op: number;
   d: Record<string, unknown>;
@@ -11,6 +12,8 @@ export type VulkavaOptions = {
   nodes: NodeOptions[];
   /** Function to send voice channel connect payloads to discord */
   sendWS: (guildId: string, payload: DiscordPayload) => void;
+  /** The defautl source to search for tracks */
+  defaultSearchSource?: SEARCH_SOURCE;
 };
 
 /** Vulkava events */
@@ -22,6 +25,51 @@ export type EventListeners<T> = {
   (event: 'nodeWarn', listener: (node: Node, warn: string) => void): T;
   (event: 'nodeError', listener: (node: Node, error: Error) => void): T;
 }
+
+// Search sources (the last two only works on my lavalink (https://github.com/davidffa/lavalink/releases) )
+export type SEARCH_SOURCE = 'youtube' | 'youtubemusic' | 'soundcloud' | 'odysee' | 'yandex';
+
+// -- REST --
+
+type PlaylistInfo = {
+  selectedTrack: number;
+  title: string;
+};
+
+type TrackInfo = {
+  identifier: string;
+  thumbnail?: string;
+  isSeekable: boolean;
+  author: string;
+  length: number;
+  isStream: boolean;
+  source?: string;
+  sourceName?: string;
+  position: number;
+  title: string;
+  uri: string;
+};
+export interface ITrack {
+  track: string;
+  info: TrackInfo;
+}
+
+type LoadException = {
+  message: string;
+  severity: 'COMMON' | 'SUSPIOUS' | 'FAULT';
+}
+export interface ILoadTracksResult {
+  loadType: 'TRACK_LOADED' | 'PLAYLIST_LOADED' | 'SEARCH_RESULT' | 'NO_MATCHES' | 'LOAD_FAILED';
+  playlistInfo: PlaylistInfo;
+  tracks: ITrack[];
+  exception?: LoadException;
+}
+
+// -- END REST --
+
+// ---------- End of Vulkava typings ----------
+
+// ---------- Node typings ----------
 
 /** Lavalink node options */
 export type NodeOptions = {
@@ -86,3 +134,5 @@ export interface PlayerEventPayload extends BasePayload {
   op: 'event';
   type: 'TrackStartEvent' | 'TrackEndEvent' | 'TrackExceptionEvent' | 'TrackStuckEvent';
 }
+
+// ---------- End of Node typings ----------
