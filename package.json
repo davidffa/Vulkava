@@ -2,7 +2,7 @@
   "name": "vulkava",
   "version": "1.0.0",
   "description": "A lavalink wrapper in Node.JS",
-  "main": "./dist/index.js",
+  "main": "./index.js",
   "author": "David Amorim",
   "scripts": {
     "build": "tsc"
