@@ -12,19 +12,22 @@ enum State {
 }
 
 export default class Node {
-  private resumed: boolean;
+  private resumed?: boolean;
   private readonly vulkava: Vulkava;
   private readonly options: NodeOptions;
   private ws: WebSocket | null;
 
+  public retryAttempts: number;
+
   public state: State;
 
   constructor(vulkava: Vulkava, options: NodeOptions) {
-    this.resumed = false;
     this.vulkava = vulkava;
     this.options = options;
 
+    this.retryAttempts = -1;
     this.state = State.DISCONNECTED;
+
     this.ws = null;
   }
 
@@ -34,6 +37,8 @@ export default class Node {
 
   public connect() {
     if (this.state !== State.DISCONNECTED) return;
+
+    ++this.retryAttempts;
 
     this.state = State.CONNECTING;
 
@@ -57,7 +62,7 @@ export default class Node {
   public disconnect() {
     if (this.state === State.DISCONNECTED || this.ws === null) return;
 
-    this.ws.close(1000);
+    this.ws.close(1000, 'Vulkava: disconnect');
   }
 
   public send(payload: Record<string, unknown>) {
@@ -71,7 +76,7 @@ export default class Node {
 
     const payload = {
       op: 'configureResuming',
-      resumeKey: this.options.resumeKey,
+      key: this.options.resumeKey,
       timeout: this.options.resumeTimeout ?? 60
     };
 
@@ -86,6 +91,8 @@ export default class Node {
     if (!this.resumed) {
       this.setupResuming();
     }
+
+    delete this.resumed;
   }
 
   private message({ data }: MessageEvent) {
@@ -101,18 +108,25 @@ export default class Node {
   }
 
   private close({ code, reason, wasClean }: CloseEvent) {
-    if (wasClean) {
-      this.state = State.DISCONNECTED;
+    this.state = State.DISCONNECTED;
 
+    this.ws?.removeAllListeners();
+    this.ws = null;
+
+    if (wasClean) {
       this.vulkava.emit('nodeDisconnect', this);
       return;
     }
+
     this.vulkava.emit('nodeError', this, new Error(`WebSocket closed abnormally with code ${code}: ${reason}`));
-    // TODO: Cleanup and reconnect
+
+    if (this.retryAttempts < (this.options.maxRetryAttempts ?? 10)) {
+      setTimeout(() => this.connect(), this.options.retryAttemptsInterval ?? 5000);
+    }
   }
 
   private upgrade(msg: IncomingMessage) {
-    if (msg.headers['Session-Resumed']) {
+    if (msg.headers['session-resumed'] === 'true') {
       this.resumed = true;
       this.vulkava.emit('nodeResume', this);
     }
