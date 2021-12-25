@@ -3,7 +3,7 @@ import { Vulkava } from './Vulkava';
 import WebSocket, { CloseEvent, ErrorEvent, MessageEvent } from 'ws';
 import { VERSION } from '..';
 
-import type { NodeOptions } from './@types';
+import type { NodeOptions, NodeStats, BasePayload, PlayerEventPayload } from './@types';
 
 enum State {
   CONNECTING,
@@ -20,6 +20,7 @@ export default class Node {
   public retryAttempts: number;
 
   public state: State;
+  public stats: NodeStats;
 
   constructor(vulkava: Vulkava, options: NodeOptions) {
     this.vulkava = vulkava;
@@ -27,6 +28,28 @@ export default class Node {
 
     this.retryAttempts = -1;
     this.state = State.DISCONNECTED;
+
+    this.stats = {
+      playingPlayers: 0,
+      players: 0,
+      uptime: 0,
+      memory: {
+        reservable: 0,
+        used: 0,
+        free: 0,
+        allocated: 0,
+      },
+      cpu: {
+        cores: 0,
+        systemLoad: 0,
+        lavalinkLoad: 0,
+      },
+      frameStats: {
+        sent: 0,
+        nulled: 0,
+        deficit: 0,
+      }
+    };
 
     this.ws = null;
   }
@@ -83,10 +106,29 @@ export default class Node {
     this.send(payload);
   }
 
+  private handlePlayerEvent(e: PlayerEventPayload) {
+    // TODO: Handle player events
+    switch (e.type) {
+      case 'TrackStartEvent':
+        break;
+      case 'TrackEndEvent':
+        break;
+      case 'TrackStuckEvent':
+        break;
+      case 'TrackExceptionEvent':
+        break;
+      default:
+        this.vulkava.emit('nodeWarn', this, `Unknown player event type: ${e.type}`);
+        break;
+    }
+  }
+
   // ---------- WebSocket event handlers ----------
   private open() {
     this.state = State.CONNECTED;
     this.vulkava.emit('nodeConnect', this);
+
+    this.retryAttempts = 0;
 
     if (!this.resumed) {
       this.setupResuming();
@@ -96,9 +138,26 @@ export default class Node {
   }
 
   private message({ data }: MessageEvent) {
-    const payload = JSON.parse(data as string);
+    const payload = JSON.parse(data as string) as BasePayload;
 
-    // TODO: Implement message handlers
+    switch (payload.op) {
+      case 'stats':
+        delete (payload as Record<string, unknown>).op;
+        this.stats = payload as unknown as NodeStats;
+        break;
+      case 'pong':
+        // TODO: Handle pong
+        break;
+      case 'playerUpdate':
+        // TODO: Update player stats
+        break;
+      case 'event':
+        this.handlePlayerEvent(payload as PlayerEventPayload);
+        break;
+      default:
+        this.vulkava.emit('nodeWarn', this, 'Unknown payload op: ' + payload.op);
+        break;
+    }
 
     this.vulkava.emit('raw', payload);
   }
@@ -108,6 +167,7 @@ export default class Node {
   }
 
   private close({ code, reason, wasClean }: CloseEvent) {
+    // TODO: Move all players to a connected node
     this.state = State.DISCONNECTED;
 
     this.ws?.removeAllListeners();
@@ -120,9 +180,8 @@ export default class Node {
 
     this.vulkava.emit('nodeError', this, new Error(`WebSocket closed abnormally with code ${code}: ${reason}`));
 
-    if (this.retryAttempts < (this.options.maxRetryAttempts ?? 10)) {
-      setTimeout(() => this.connect(), this.options.retryAttemptsInterval ?? 5000);
-    }
+    if (this.retryAttempts === 0) this.connect();
+    else setTimeout(() => this.connect, this.options.retryAttemptsInterval ?? 5000);
   }
 
   private upgrade(msg: IncomingMessage) {

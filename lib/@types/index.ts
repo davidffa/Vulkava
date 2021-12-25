@@ -19,6 +19,7 @@ export type EventListeners<T> = {
   (event: 'nodeConnect', listener: (node: Node) => void): T;
   (event: 'nodeResume', listener: (node: Node) => void): T;
   (event: 'nodeDisconnect', listener: (node: Node) => void): T;
+  (event: 'nodeWarn', listener: (node: Node, warn: string) => void): T;
   (event: 'nodeError', listener: (node: Node, error: Error) => void): T;
 }
 
@@ -45,3 +46,43 @@ export type NodeOptions = {
   /** The interval between retry attempts */
   retryAttemptsInterval?: number;
 };
+
+/** Lavalink node stats */
+export type NodeStats = {
+  /** The amount of playing players */
+  playingPlayers: number;
+  /** The total player amount */
+  players: number;
+  /** The lavalink node uptime, in seconds */
+  uptime: number;
+  /** RAM stats, in bytes */
+  memory: {
+    reservable: number;
+    used: number;
+    free: number;
+    allocated: number;
+  };
+  /** CPU stats, [0, 1] */
+  cpu: {
+    cores: number;
+    systemLoad: number;
+    lavalinkLoad: number;
+  };
+  /** Audio frame stats */
+  frameStats: {
+    sent: number;
+    nulled: number;
+    deficit: number;
+  };
+};
+
+/** Lavalink node incoming payloads */
+export interface BasePayload {
+  op: 'stats' | 'pong' | 'playerUpdate' | 'event';
+  [key: string]: unknown;
+}
+
+export interface PlayerEventPayload extends BasePayload {
+  op: 'event';
+  type: 'TrackStartEvent' | 'TrackEndEvent' | 'TrackExceptionEvent' | 'TrackStuckEvent';
+}
