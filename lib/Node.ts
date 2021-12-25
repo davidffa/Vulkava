@@ -1,6 +1,7 @@
 import { IncomingMessage } from 'http';
-import { Vulkava } from './Vulkava';
 import WebSocket, { CloseEvent, ErrorEvent, MessageEvent } from 'ws';
+import { Vulkava } from './Vulkava';
+import fetch, { HTTPMethods } from './utils/Request';
 import { VERSION } from '..';
 
 import type { NodeOptions, NodeStats, BasePayload, PlayerEventPayload } from './@types';
@@ -189,5 +190,16 @@ export default class Node {
       this.resumed = true;
       this.vulkava.emit('nodeResume', this);
     }
+  }
+
+  // REST
+  public request<T>(method: HTTPMethods, endpoint: string, body?: Record<string, unknown>): Promise<T> {
+    return fetch<T>(`http${this.options.secure ? 's' : ''}://${this.options.hostname}:${this.options.port}/${endpoint}`, {
+      method,
+      headers: {
+        Authorization: this.options.password,
+      },
+      body
+    });
   }
 }

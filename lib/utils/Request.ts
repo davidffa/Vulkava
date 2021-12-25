@@ -4,9 +4,11 @@ import { URL } from 'url';
 
 import { VERSION } from '../../';
 
+export type HTTPMethods = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
+
 type ReqOptions = {
-  method?: 'GET' | 'POST' | 'PATCH' | 'PUT' | 'DELETE';
-  body?: Record<string, unknown>;
+  method?: HTTPMethods;
+  body?: Record<string, unknown> | undefined;
   headers?: OutgoingHttpHeaders;
 }
 
