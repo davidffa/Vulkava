@@ -2,8 +2,6 @@ import { Node } from '../..';
 
 /** Main constructor options */
 export type VulkavaOptions = {
-  /** The client (BOT) id */
-  clientId: string;
   /** The array of lavalink nodes */
   nodes: NodeOptions[];
   /** Function to send voice channel connect payloads to discord */

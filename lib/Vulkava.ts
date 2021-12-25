@@ -4,15 +4,13 @@ import Node from './Node';
 import type { VulkavaOptions } from './@types';
 
 export default class Vulkava extends EventEmitter {
-  public readonly clientId: string;
+  public clientId: string;
   public nodes: Node[];
 
   constructor(options: VulkavaOptions) {
     super();
 
     // TODO: verify input
-
-    this.clientId = options.clientId;
 
     this.nodes = [];
 
@@ -22,7 +20,17 @@ export default class Vulkava extends EventEmitter {
     }
   }
 
-  public start() {
+  /**
+   * Connects to all lavalink nodes
+   * @param clientId String
+   */
+  public start(clientId: string) {
+    if (typeof clientId !== 'string') {
+      throw new TypeError('clientId must be a string');
+    }
+
+    this.clientId = clientId;
+
     for (const node of this.nodes) {
       node.connect();
     }
