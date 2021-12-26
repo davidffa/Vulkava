@@ -168,6 +168,22 @@ export type NodeStats = {
   };
 };
 
+/** Versions struct */
+export type Versions = {
+  /** Lavaplayer version */
+  LAVAPLAYER: string;
+  /** JVM version */
+  JVM: string;
+  /** Build number */
+  BUILD: string;
+  /** Timestamp of when .jar was built */
+  BUILDTIME: number;
+  /** Spring boot version */
+  SPRING: string;
+  /** Kotlin version */
+  KOTLIN: string;
+}
+
 /** Lavalink node incoming payloads */
 export interface PlayerEventPayload {
   op: 'event';

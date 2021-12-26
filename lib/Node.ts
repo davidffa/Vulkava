@@ -4,7 +4,17 @@ import { Vulkava } from './Vulkava';
 import fetch, { HTTPMethods } from './utils/Request';
 import { Player, VERSION } from '..';
 
-import type { NodeOptions, NodeStats, PlayerEventPayload, TrackEndEvent, TrackExceptionEvent, TrackStartEvent, TrackStuckEvent, WebSocketClosedEvent } from './@types';
+import type {
+  NodeOptions,
+  NodeStats,
+  PlayerEventPayload,
+  TrackEndEvent,
+  TrackExceptionEvent,
+  TrackStartEvent,
+  TrackStuckEvent,
+  Versions,
+  WebSocketClosedEvent
+} from './@types';
 
 export enum NodeState {
   CONNECTING,
@@ -22,6 +32,9 @@ export default class Node {
 
   public state: NodeState;
   public stats: NodeStats;
+
+  /** Version object for the node (null if lavalink does not support) */
+  public versions: Versions | null;
 
   constructor(vulkava: Vulkava, options: NodeOptions) {
     this.vulkava = vulkava;
@@ -87,6 +100,15 @@ export default class Node {
     if (this.state === NodeState.DISCONNECTED || this.ws === null) return;
 
     this.ws.close(1000, 'Vulkava: disconnect');
+  }
+
+  /** Fetches versions from lavalink Node */
+  private async fetchVersions(): Promise<void> {
+    try {
+      this.versions = await this.request('GET', 'versions');
+    } catch {
+      this.versions = null;
+    }
   }
 
   /**
@@ -220,6 +242,8 @@ export default class Node {
   private open() {
     this.state = NodeState.CONNECTED;
     this.vulkava.emit('nodeConnect', this);
+
+    if (!this.versions) this.fetchVersions();
 
     this.retryAttempts = 0;
 
