@@ -1,8 +1,9 @@
 import { EventEmitter } from 'events';
 import Node, { State } from './Node';
 
-import type { EventListeners, LoadTracksResult, SearchResult, SEARCH_SOURCE, VulkavaOptions } from './@types';
+import type { DiscordPayload, EventListeners, IncomingDiscordPayload, LoadTracksResult, SearchResult, SEARCH_SOURCE, VoiceServerUpdatePayload, VoiceStateUpdatePayload, VulkavaOptions } from './@types';
 import Track from './Track';
+import { Player } from '..';
 
 export interface Vulkava {
   once: EventListeners<this>;
@@ -11,7 +12,12 @@ export interface Vulkava {
 export class Vulkava extends EventEmitter {
   public clientId: string;
   public nodes: Node[];
-  private defaultSearchSource: SEARCH_SOURCE;
+  private readonly defaultSearchSource: SEARCH_SOURCE;
+
+  public readonly sendWS: (guildId: string, payload: DiscordPayload) => void;
+
+  // guildId <-> Player
+  public players: Map<string, Player>;
 
   constructor(options: VulkavaOptions) {
     super();
@@ -20,6 +26,10 @@ export class Vulkava extends EventEmitter {
 
     this.nodes = [];
     this.defaultSearchSource = options.defaultSearchSource ?? 'youtube';
+
+    this.sendWS = options.sendWS;
+
+    this.players = new Map();
 
     for (const nodeOp of options.nodes) {
       const node = new Node(this, nodeOp);
@@ -30,7 +40,7 @@ export class Vulkava extends EventEmitter {
   /**
    *
    * @param {String} query - The query to search for
-   * @param {('youtube' | 'youtubemusic' | 'soundcloud' | 'odysee' | 'yandex')?} source - The search source
+   * @param {('youtube' | 'youtubemusic' | 'soundcloud' | 'odysee' | 'yandex')} [source=youtube] - The search source
    */
   public async search(query: string, source: SEARCH_SOURCE = this.defaultSearchSource): Promise<SearchResult> {
     const node = this.nodes.find(n => n.state === State.CONNECTED);
@@ -56,9 +66,14 @@ export class Vulkava extends EventEmitter {
     if (res.loadType === 'LOAD_FAILED' || res.loadType === 'NO_MATCHES') {
       return res as unknown as SearchResult;
     } else {
+      const tracks = res.tracks.map(t => new Track(t));
+      if (res.loadType === 'PLAYLIST_LOADED') {
+        res.playlistInfo.duration = tracks.reduce((acc, cur) => acc + cur.duration, 0);
+      }
+
       return {
         ...res,
-        tracks: res.tracks.map(t => new Track(t))
+        tracks
       };
     }
   }
@@ -76,6 +91,34 @@ export class Vulkava extends EventEmitter {
 
     for (const node of this.nodes) {
       node.connect();
+    }
+  }
+
+  /**
+   * Handles voice state & voice server update packets
+   * @param payload - The voice packet
+   */
+  public handleVoiceUpdate(payload: IncomingDiscordPayload) {
+    if (payload.op !== 0) return;
+    if (!payload.d.guild_id) return;
+
+    const player = this.players.get(payload.d.guild_id as string);
+
+    if (!player) return;
+
+    if (payload.t === 'VOICE_STATE_UPDATE') {
+      const packet = payload as VoiceStateUpdatePayload;
+
+      if (packet.d.user_id !== this.clientId) return;
+
+      player.voiceState.sessionId = packet.d.session_id;
+    } else if (payload.t === 'VOICE_SERVER_UPDATE') {
+      // TODO: move to nearest node (region)
+      const packet = payload as VoiceServerUpdatePayload;
+
+      Object.assign(player.voiceState.event, packet.d);
+
+      player.sendVoiceUpdate();
     }
   }
 }

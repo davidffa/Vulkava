@@ -4,7 +4,7 @@ import { Vulkava } from './Vulkava';
 import fetch, { HTTPMethods } from './utils/Request';
 import { VERSION } from '..';
 
-import type { NodeOptions, NodeStats, BasePayload, PlayerEventPayload } from './@types';
+import type { NodeOptions, NodeStats, PlayerEventPayload } from './@types';
 
 export enum State {
   CONNECTING,
@@ -118,6 +118,8 @@ export default class Node {
         break;
       case 'TrackExceptionEvent':
         break;
+      case 'WebSocketClosedEvent':
+        break;
       default:
         this.vulkava.emit('nodeWarn', this, `Unknown player event type: ${e.type}`);
         break;
@@ -139,21 +141,21 @@ export default class Node {
   }
 
   private message({ data }: MessageEvent) {
-    const payload = JSON.parse(data as string) as BasePayload;
+    const payload = JSON.parse(data as string);
 
     switch (payload.op) {
       case 'stats':
-        delete (payload as Record<string, unknown>).op;
-        this.stats = payload as unknown as NodeStats;
+        delete payload.op;
+        this.stats = payload as NodeStats;
         break;
       case 'pong':
         // TODO: Handle pong
         break;
       case 'playerUpdate':
-        // TODO: Update player stats
+        this.vulkava.players.get(payload.guildId)?.updatePlayer(payload.state);
         break;
       case 'event':
-        this.handlePlayerEvent(payload as PlayerEventPayload);
+        this.handlePlayerEvent(payload);
         break;
       default:
         this.vulkava.emit('nodeWarn', this, 'Unknown payload op: ' + payload.op);

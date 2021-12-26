@@ -1,4 +1,5 @@
 import Node from './lib/Node';
+import Player from './lib/Player';
 import { Vulkava } from './lib/Vulkava';
 
 import type {
@@ -11,6 +12,7 @@ const VERSION = version;
 
 export {
   Node,
+  Player,
   Vulkava,
 
   NodeOptions,

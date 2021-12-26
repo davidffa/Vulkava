@@ -5,7 +5,7 @@ export default class Track {
   private readonly thumbnailUrl?: string;
   public readonly isSeekable: boolean;
   public readonly author: string;
-  public readonly length: number;
+  public readonly duration: number;
   public readonly isStream: boolean;
   public readonly source: string;
   public position?: number;
@@ -21,7 +21,7 @@ export default class Track {
     if (data.info.thumbnail) this.thumbnailUrl = data.info.thumbnail;
     this.isSeekable = data.info.isSeekable;
     this.author = data.info.author;
-    this.length = data.info.length;
+    this.duration = data.info.length;
     this.isStream = data.info.isStream;
     this.source = data.info.source ?? data.info.sourceName ?? 'unknown';
     this.position = data.info.position;

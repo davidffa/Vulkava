@@ -2,10 +2,34 @@ import { Node } from '../..';
 import Track from '../Track';
 
 // ---------- Vulkava typings ----------
-type DiscordPayload = {
+export type DiscordPayload = {
   op: number;
   d: Record<string, unknown>;
 }
+
+export type IncomingDiscordPayload = DiscordPayload & {
+  t: string;
+}
+
+export type VoiceStateUpdatePayload = IncomingDiscordPayload & {
+  t: 'VOICE_STATE_UPDATE';
+  d: {
+    session_id: string;
+    user_id: string;
+    guild_id: string;
+  };
+};
+
+type VoiceServerUpdateData = {
+  token: string;
+  guild_id: string;
+  endpoint: string;
+};
+
+export type VoiceServerUpdatePayload = IncomingDiscordPayload & {
+  t: 'VOICE_SERVER_UPDATE';
+  d: VoiceServerUpdateData;
+};
 
 /** Main constructor options */
 export type VulkavaOptions = {
@@ -35,6 +59,7 @@ export type SEARCH_SOURCE = 'youtube' | 'youtubemusic' | 'soundcloud' | 'odysee'
 type PlaylistInfo = {
   selectedTrack: number;
   title: string;
+  duration: number;
 };
 
 type TrackInfo = {
@@ -133,14 +158,48 @@ export type NodeStats = {
 };
 
 /** Lavalink node incoming payloads */
-export interface BasePayload {
-  op: 'stats' | 'pong' | 'playerUpdate' | 'event';
-  [key: string]: unknown;
+export interface PlayerEventPayload {
+  op: 'event';
+  type: 'TrackStartEvent' | 'TrackEndEvent' | 'TrackExceptionEvent' | 'TrackStuckEvent' | 'WebSocketClosedEvent';
 }
 
-export interface PlayerEventPayload extends BasePayload {
-  op: 'event';
-  type: 'TrackStartEvent' | 'TrackEndEvent' | 'TrackExceptionEvent' | 'TrackStuckEvent';
-}
+export type PlayerState = {
+  /** Unix timestamp when the position was picked */
+  time: number;
+  /** Track position in ms */
+  position?: number;
+  /** Whether the player is connected to discord voice gateway */
+  connected: boolean;
+};
 
 // ---------- End of Node typings ----------
+
+// ---------- Player typings ----------
+
+// Main constructor options
+export type PlayerOptions = {
+  /** The guild id that player belongs to */
+  guildId: string;
+  /** The voice channel id */
+  voiceChannelId: string;
+  /** The text channel id */
+  textChannelId?: string;
+  /** Whether the bot joins the voice channel deafened or not */
+  selfDeaf?: boolean;
+  /** Whether the bot joins the voice channel muted or not */
+  selfMute?: boolean;
+};
+
+export type VoiceState = {
+  sessionId: string;
+  event: VoiceServerUpdateData;
+};
+
+export type PlayOptions = {
+  startTime?: number;
+  endTime?: number;
+  pause?: boolean;
+  noReplace?: boolean;
+};
+
+// ---------- End of Player typings ----------
