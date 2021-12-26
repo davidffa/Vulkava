@@ -39,7 +39,7 @@ export default class Player {
   public state: State;
   public voiceState: VoiceState;
 
-  public moving: boolean;
+  public moving?: boolean;
 
   constructor(vulkava: Vulkava, options: PlayerOptions) {
     // TODO: verify input
