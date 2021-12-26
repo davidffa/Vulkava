@@ -58,6 +58,7 @@ export type EventListeners<T> = {
   (event: 'trackStuck', listener: (player: Player, track: Track, thresholdMs: number) => void): T;
   (event: 'trackException', listener: (player: Player, track: Track, exception: LoadException & { cause: string }) => void): T;
   (event: 'wsDisconnect', listener: (player: Player, code: number, reason: string) => void): T;
+  (event: 'pong', listener: (node: Node, ping?: number) => void): T;
 }
 
 // Search sources (the last two only works on my lavalink (https://github.com/davidffa/lavalink/releases) )

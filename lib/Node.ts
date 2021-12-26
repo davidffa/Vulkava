@@ -89,6 +89,34 @@ export default class Node {
     this.ws.close(1000, 'Vulkava: disconnect');
   }
 
+  /**
+   * Gets the node ws connection latency or the latency between discord gateway & lavalink if guildId param provided.
+   * @param {String} [guildId]
+   * @returns {Promise<Number>}
+   */
+  // Use this lavalink .jar in order to use this function https://github.com/davidffa/lavalink/releases
+  public ping(guildId?: string): Promise<number> {
+    return new Promise((resolve, reject) => {
+      if (this.state !== NodeState.CONNECTED) resolve(Infinity);
+
+      const t1 = Date.now();
+
+      const rejectTimeout = setTimeout(() => {
+        reject(new Error('Lavalink Node took more than 2 seconds to respond.\nDo your Lavalink Node supports ping op?'));
+      }, 2000);
+
+      const pong = (node: Node, ping?: number) => {
+        if (node !== this) return;
+        resolve(ping ?? (Date.now() - t1));
+        this.vulkava.removeListener('pong', pong);
+        clearTimeout(rejectTimeout);
+      };
+
+      this.vulkava.on('pong', pong);
+      this.send({ op: 'ping', guildId });
+    });
+  }
+
   public send(payload: Record<string, unknown>) {
     if (this.state !== NodeState.CONNECTED || !this.ws?.OPEN) return;
 
@@ -186,7 +214,7 @@ export default class Node {
         this.stats = payload as NodeStats;
         break;
       case 'pong':
-        // TODO: Handle pong
+        this.vulkava.emit('pong', this, payload.ping);
         break;
       case 'playerUpdate':
         this.vulkava.players.get(payload.guildId)?.updatePlayer(payload.state);

@@ -127,6 +127,14 @@ export default class Player {
   }
 
   /**
+   * Gets the latency between discord gateway & lavalink node.
+   * @returns {Promise<Number>}
+   */
+  public ping(): Promise<number> {
+    return this.node.ping(this.guildId);
+  }
+
+  /**
    * Plays a track
    * @param {Object} [options] - Play options
    * @param {Number} [options.startTime] - Start time in milliseconds
