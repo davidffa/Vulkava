@@ -2,14 +2,17 @@ import { Node } from '../..';
 import Track from '../Track';
 
 // ---------- Vulkava typings ----------
-export type DiscordPayload = {
+export type OutgoingDiscordPayload = {
   op: number;
   d: Record<string, unknown>;
-}
+};
 
-export type IncomingDiscordPayload = DiscordPayload & {
-  t: string;
-}
+export type IncomingDiscordPayload = {
+  op: number;
+  d?: unknown;
+  s?: number;
+  t?: string;
+};
 
 export type VoiceStateUpdatePayload = IncomingDiscordPayload & {
   t: 'VOICE_STATE_UPDATE';
@@ -36,7 +39,7 @@ export type VulkavaOptions = {
   /** The array of lavalink nodes */
   nodes: NodeOptions[];
   /** Function to send voice channel connect payloads to discord */
-  sendWS: (guildId: string, payload: DiscordPayload) => void;
+  sendWS: (guildId: string, payload: OutgoingDiscordPayload) => void;
   /** The defautl source to search for tracks */
   defaultSearchSource?: SEARCH_SOURCE;
 };
