@@ -2,9 +2,9 @@ import { IncomingMessage } from 'http';
 import WebSocket, { CloseEvent, ErrorEvent, MessageEvent } from 'ws';
 import { Vulkava } from './Vulkava';
 import fetch, { HTTPMethods } from './utils/Request';
-import { VERSION } from '..';
+import { Player, VERSION } from '..';
 
-import type { NodeOptions, NodeStats, PlayerEventPayload } from './@types';
+import type { NodeOptions, NodeStats, PlayerEventPayload, TrackEndEvent, TrackExceptionEvent, TrackStartEvent, TrackStuckEvent, WebSocketClosedEvent } from './@types';
 
 export enum NodeState {
   CONNECTING,
@@ -108,21 +108,58 @@ export default class Node {
   }
 
   private handlePlayerEvent(e: PlayerEventPayload) {
-    // TODO: Handle player events
+    const player = this.vulkava.players.get(e.guildId);
+
+    if (!player) {
+      this.vulkava.emit('warn', this, `Unhandled player event. Player not found for guild ${e.guildId}`);
+      return;
+    }
+
     switch (e.type) {
       case 'TrackStartEvent':
+        this.handleTrackStart(e as TrackStartEvent, player);
         break;
       case 'TrackEndEvent':
+        this.handleTrackEnd(e as TrackEndEvent, player);
         break;
       case 'TrackStuckEvent':
+        this.handleTrackStuck(e as TrackStuckEvent, player);
         break;
       case 'TrackExceptionEvent':
+        this.handleTrackExeption(e as TrackExceptionEvent, player);
         break;
       case 'WebSocketClosedEvent':
+        this.handleWSClose(e as WebSocketClosedEvent, player);
         break;
       default:
-        this.vulkava.emit('nodeWarn', this, `Unknown player event type: ${e.type}`);
+        this.vulkava.emit('warn', this, `Unhandled player event. Unknown event type: ${e.type}`);
         break;
+    }
+  }
+
+  private handleTrackStart(_: TrackStartEvent, player: Player) {
+    this.vulkava.emit('trackStart', player, player.current);
+  }
+
+  private handleTrackEnd(ev: TrackEndEvent, player: Player) {
+    this.vulkava.emit('trackEnd', player, player.current, ev.reason);
+  }
+
+  private handleTrackStuck(ev: TrackStuckEvent, player: Player) {
+    this.vulkava.emit('trackStuck', player, player.current, ev.thresholdMs);
+  }
+
+  private handleTrackExeption(ev: TrackExceptionEvent, player: Player) {
+    this.vulkava.emit('trackExeption', player, player.current, ev.exception);
+    player.skip();
+  }
+
+  private handleWSClose(ev: WebSocketClosedEvent, player: Player) {
+    if (ev.code !== 1000) {
+      this.vulkava.emit('warn', this, `Discord voice gateway connection closed abnormally with code ${ev.code}: ${ev.reason}, reconnecting...`);
+      player.sendVoiceUpdate();
+    } else {
+      this.vulkava.emit('wsDisconnect', player, ev.code, ev.reason);
     }
   }
 
@@ -158,7 +195,7 @@ export default class Node {
         this.handlePlayerEvent(payload);
         break;
       default:
-        this.vulkava.emit('nodeWarn', this, 'Unknown payload op: ' + payload.op);
+        this.vulkava.emit('warn', this, 'Unknown payload op: ' + payload.op);
         break;
     }
 
@@ -166,7 +203,7 @@ export default class Node {
   }
 
   private error({ error }: ErrorEvent) {
-    this.vulkava.emit('nodeError', this, error);
+    this.vulkava.emit('error', this, error);
   }
 
   private close({ code, reason, wasClean }: CloseEvent) {
@@ -181,7 +218,7 @@ export default class Node {
       return;
     }
 
-    this.vulkava.emit('nodeError', this, new Error(`WebSocket closed abnormally with code ${code}: ${reason}`));
+    this.vulkava.emit('error', this, new Error(`WebSocket closed abnormally with code ${code}: ${reason}`));
 
     if (this.retryAttempts === 0) this.connect();
     else setTimeout(() => this.connect, this.options.retryAttemptsInterval ?? 5000);

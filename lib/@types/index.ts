@@ -1,4 +1,5 @@
 import { Node } from '../..';
+import Player from '../Player';
 import Track from '../Track';
 
 // ---------- Vulkava typings ----------
@@ -50,8 +51,13 @@ export type EventListeners<T> = {
   (event: 'nodeConnect', listener: (node: Node) => void): T;
   (event: 'nodeResume', listener: (node: Node) => void): T;
   (event: 'nodeDisconnect', listener: (node: Node) => void): T;
-  (event: 'nodeWarn', listener: (node: Node, warn: string) => void): T;
-  (event: 'nodeError', listener: (node: Node, error: Error) => void): T;
+  (event: 'warn', listener: (node: Node, warn: string) => void): T;
+  (event: 'error', listener: (node: Node, error: Error) => void): T;
+  (event: 'trackStart', listener: (player: Player, track: Track) => void): T;
+  (event: 'trackEnd', listener: (player: Player, track: Track, reason: TrackEndReason) => void): T;
+  (event: 'trackStuck', listener: (player: Player, track: Track, thresholdMs: number) => void): T;
+  (event: 'trackException', listener: (player: Player, track: Track, exception: LoadException & { cause: string }) => void): T;
+  (event: 'wsDisconnect', listener: (player: Player, code: number, reason: string) => void): T;
 }
 
 // Search sources (the last two only works on my lavalink (https://github.com/davidffa/lavalink/releases) )
@@ -164,6 +170,39 @@ export type NodeStats = {
 export interface PlayerEventPayload {
   op: 'event';
   type: 'TrackStartEvent' | 'TrackEndEvent' | 'TrackExceptionEvent' | 'TrackStuckEvent' | 'WebSocketClosedEvent';
+  guildId: string;
+}
+
+export interface TrackStartEvent extends PlayerEventPayload {
+  type: 'TrackStartEvent';
+  track: string;
+}
+
+type TrackEndReason = 'FINISHED' | 'LOAD_FAILED' | 'STOPPED' | 'REPLACED' | 'CLEANUP';
+export interface TrackEndEvent extends PlayerEventPayload {
+  type: 'TrackEndEvent';
+  track: string;
+  reason: TrackEndReason;
+}
+
+export interface TrackExceptionEvent extends PlayerEventPayload {
+  type: 'TrackExceptionEvent';
+  track: string;
+  exception: LoadException & {
+    cause: string;
+  };
+}
+
+export interface TrackStuckEvent extends PlayerEventPayload {
+  type: 'TrackStuckEvent';
+  track: string;
+  thresholdMs: number;
+}
+
+export interface WebSocketClosedEvent extends PlayerEventPayload {
+  code: number;
+  reason: string;
+  byRemote: boolean;
 }
 
 export type PlayerState = {
