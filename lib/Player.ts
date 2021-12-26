@@ -242,6 +242,15 @@ export default class Player {
   }
 
   /**
+   * Shuffles the queue
+   */
+  public shuffleQueue() {
+    if (this.queue.length) {
+      this.queue = this.queue.sort(() => Math.random() - 0.5);
+    }
+  }
+
+  /**
    * Skips the current playing track
    * @param {Number} [amount=1] - The amount of tracks to skip
    */
