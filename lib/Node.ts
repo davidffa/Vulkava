@@ -188,12 +188,15 @@ export default class Node {
   }
 
   private handleTrackStart(_: TrackStartEvent, player: Player) {
+    player.playing = true;
     this.vulkava.emit('trackStart', player, player.current);
   }
 
   private handleTrackEnd(ev: TrackEndEvent, player: Player) {
     // If a player is moving node
     if (player.node !== this) return;
+
+    player.playing = false;
 
     if (['LOAD_FAILED', 'CLEANUP'].includes(ev.reason)) {
       this.vulkava.emit('trackEnd', player, player.current, ev.reason);
