@@ -6,7 +6,7 @@ import { VERSION } from '..';
 
 import type { NodeOptions, NodeStats, PlayerEventPayload } from './@types';
 
-export enum State {
+export enum NodeState {
   CONNECTING,
   CONNECTED,
   DISCONNECTED
@@ -20,7 +20,7 @@ export default class Node {
 
   public retryAttempts: number;
 
-  public state: State;
+  public state: NodeState;
   public stats: NodeStats;
 
   constructor(vulkava: Vulkava, options: NodeOptions) {
@@ -28,7 +28,7 @@ export default class Node {
     this.options = options;
 
     this.retryAttempts = -1;
-    this.state = State.DISCONNECTED;
+    this.state = NodeState.DISCONNECTED;
 
     this.stats = {
       playingPlayers: 0,
@@ -60,11 +60,11 @@ export default class Node {
   }
 
   public connect() {
-    if (this.state !== State.DISCONNECTED) return;
+    if (this.state !== NodeState.DISCONNECTED) return;
 
     ++this.retryAttempts;
 
-    this.state = State.CONNECTING;
+    this.state = NodeState.CONNECTING;
 
     const headers = {
       Authorization: this.options.password,
@@ -84,13 +84,13 @@ export default class Node {
   }
 
   public disconnect() {
-    if (this.state === State.DISCONNECTED || this.ws === null) return;
+    if (this.state === NodeState.DISCONNECTED || this.ws === null) return;
 
     this.ws.close(1000, 'Vulkava: disconnect');
   }
 
   public send(payload: Record<string, unknown>) {
-    if (this.state !== State.CONNECTED || !this.ws?.OPEN) return;
+    if (this.state !== NodeState.CONNECTED || !this.ws?.OPEN) return;
 
     this.ws.send(JSON.stringify(payload));
   }
@@ -128,7 +128,7 @@ export default class Node {
 
   // ---------- WebSocket event handlers ----------
   private open() {
-    this.state = State.CONNECTED;
+    this.state = NodeState.CONNECTED;
     this.vulkava.emit('nodeConnect', this);
 
     this.retryAttempts = 0;
@@ -171,7 +171,7 @@ export default class Node {
 
   private close({ code, reason, wasClean }: CloseEvent) {
     // TODO: Move all players to a connected node
-    this.state = State.DISCONNECTED;
+    this.state = NodeState.DISCONNECTED;
 
     this.ws?.removeAllListeners();
     this.ws = null;

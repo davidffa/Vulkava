@@ -1,5 +1,5 @@
 import { EventEmitter } from 'events';
-import Node, { State } from './Node';
+import Node, { NodeState } from './Node';
 
 import type { DiscordPayload, EventListeners, IncomingDiscordPayload, LoadTracksResult, PlayerOptions, SearchResult, SEARCH_SOURCE, VoiceServerUpdatePayload, VoiceStateUpdatePayload, VulkavaOptions } from './@types';
 import Track from './Track';
@@ -66,7 +66,7 @@ export class Vulkava extends EventEmitter {
    * @param {('youtube' | 'youtubemusic' | 'soundcloud' | 'odysee' | 'yandex')} [source=youtube] - The search source
    */
   public async search(query: string, source: SEARCH_SOURCE = this.defaultSearchSource): Promise<SearchResult> {
-    const node = this.nodes.find(n => n.state === State.CONNECTED);
+    const node = this.nodes.find(n => n.state === NodeState.CONNECTED);
 
     if (!node) {
       throw new Error('No connected nodes found');

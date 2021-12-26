@@ -1,5 +1,6 @@
 import { Node, Vulkava } from '..';
 import { PlayerOptions, PlayerState, PlayOptions, VoiceState } from './@types';
+import { NodeState } from './Node';
 import Track from './Track';
 
 enum State {
@@ -58,7 +59,7 @@ export default class Player {
     this.playing = false;
     this.paused = false;
 
-    this.node = this.vulkava.nodes.filter(n => n.state === State.CONNECTED).sort((a, b) => a.stats.playingPlayers - b.stats.playingPlayers)[0];
+    this.node = this.vulkava.nodes.filter(n => n.state === NodeState.CONNECTED).sort((a, b) => a.stats.playingPlayers - b.stats.playingPlayers)[0];
 
     this.state = State.DISCONNECTED;
     this.voiceState = {} as VoiceState;
