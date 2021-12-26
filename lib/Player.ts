@@ -317,6 +317,8 @@ export default class Player {
   }
 
   public sendVoiceUpdate() {
+    this.state = State.CONNECTED;
+
     this.node.send({
       op: 'voiceUpdate',
       guildId: this.guildId,
@@ -327,10 +329,11 @@ export default class Player {
   public updatePlayer(state: PlayerState): void {
     if (state.position) this.position = state.position;
 
-    if (state.connected) {
-      if (this.state !== State.CONNECTED) this.state = State.CONNECTED;
-    } else if (this.state !== State.DISCONNECTED) {
-      this.state = State.DISCONNECTED;
-    }
+    // Lavalink not sending this?
+    // if (state.connected) {
+    //   if (this.state !== State.CONNECTED) this.state = State.CONNECTED;
+    // } else if (this.state !== State.DISCONNECTED) {
+    //   this.state = State.DISCONNECTED;
+    // }
   }
 }
