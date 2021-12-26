@@ -1,5 +1,6 @@
 import { Node, Vulkava } from '..';
 import { PlayerOptions, PlayerState, PlayOptions, VoiceState } from './@types';
+import { Filters } from './Filters';
 import { NodeState } from './Node';
 import Track from './Track';
 
@@ -14,6 +15,8 @@ export default class Player {
   public node: Node;
 
   public readonly guildId: string;
+
+  public readonly filters: Filters;
 
   public voiceChannelId: string;
   public textChannelId?: string | null;
@@ -42,6 +45,8 @@ export default class Player {
     // TODO: verify input
     this.vulkava = vulkava;
     this.guildId = options.guildId;
+
+    this.filters = new Filters(this);
 
     this.voiceChannelId = options.voiceChannelId;
     this.textChannelId = options.textChannelId ?? null;
@@ -157,7 +162,9 @@ export default class Player {
       this.state = State.CONNECTED;
     }
 
-    // TODO: Re-apply the filters
+    if (this.filters.enabled) {
+      this.filters.apply();
+    }
 
     if (this.playing && this.current) {
       const payload = {
