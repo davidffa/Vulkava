@@ -1,7 +1,7 @@
 import { EventEmitter } from 'events';
 import Node, { NodeState } from './Node';
 
-import type { DiscordPayload, EventListeners, IncomingDiscordPayload, LoadTracksResult, PlayerOptions, SearchResult, SEARCH_SOURCE, VoiceServerUpdatePayload, VoiceStateUpdatePayload, VulkavaOptions } from './@types';
+import type { IncomingDiscordPayload, OutgoingDiscordPayload, EventListeners, LoadTracksResult, PlayerOptions, SearchResult, SEARCH_SOURCE, VoiceServerUpdatePayload, VoiceStateUpdatePayload, VulkavaOptions } from './@types';
 import Track from './Track';
 import { Player } from '..';
 
@@ -14,7 +14,7 @@ export class Vulkava extends EventEmitter {
   public nodes: Node[];
   private readonly defaultSearchSource: SEARCH_SOURCE;
 
-  public readonly sendWS: (guildId: string, payload: DiscordPayload) => void;
+  public readonly sendWS: (guildId: string, payload: OutgoingDiscordPayload) => void;
 
   // guildId <-> Player
   public players: Map<string, Player>;
@@ -122,10 +122,9 @@ export class Vulkava extends EventEmitter {
    * @param payload - The voice packet
    */
   public handleVoiceUpdate(payload: IncomingDiscordPayload) {
-    if (payload.op !== 0) return;
-    if (!payload.d.guild_id) return;
+    if (payload.op !== 0 || !(payload.d as Record<string, unknown>).guild_id) return;
 
-    const player = this.players.get(payload.d.guild_id as string);
+    const player = this.players.get((payload.d as Record<string, unknown>).guild_id as string);
 
     if (!player) return;
 
@@ -139,7 +138,9 @@ export class Vulkava extends EventEmitter {
       // TODO: move to nearest node (region)
       const packet = payload as VoiceServerUpdatePayload;
 
-      Object.assign(player.voiceState.event, packet.d);
+      player.voiceState.event = {
+        ...packet.d
+      };
 
       player.sendVoiceUpdate();
     }
