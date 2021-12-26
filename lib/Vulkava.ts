@@ -1,7 +1,7 @@
 import { EventEmitter } from 'events';
 import Node, { NodeState } from './Node';
 
-import type { IncomingDiscordPayload, OutgoingDiscordPayload, EventListeners, LoadTracksResult, PlayerOptions, SearchResult, SEARCH_SOURCE, VoiceServerUpdatePayload, VoiceStateUpdatePayload, VulkavaOptions } from './@types';
+import type { IncomingDiscordPayload, OutgoingDiscordPayload, EventListeners, LoadTracksResult, PlayerOptions, SearchResult, SEARCH_SOURCE, VoiceServerUpdatePayload, VoiceStateUpdatePayload, VulkavaOptions, TrackInfo, ITrack } from './@types';
 import Track from './Track';
 import { Player } from '..';
 
@@ -35,6 +35,40 @@ export class Vulkava extends EventEmitter {
       const node = new Node(this, nodeOp);
       this.nodes.push(node);
     }
+  }
+
+  /**
+   * Decodes a track by its base64 string
+   * @param {String} encodedTrack - The base64 encoded track
+   * @returns {Promise<Track>}
+   */
+  public async decodeTrack(encodedTrack: string): Promise<Track> {
+    const node = this.nodes.find(n => n.state === NodeState.CONNECTED);
+
+    if (!node) {
+      throw new Error('No connected nodes found');
+    }
+
+    const trackInfo = await node.request<TrackInfo>('GET', `decodetrack?track=${encodedTrack}`);
+
+    return new Track({ track: encodedTrack, info: { ...trackInfo } });
+  }
+
+  /**
+   * Decodes multiple tracks by their base64 string
+   * @param {String[]} encodedTracks - The base64 encoded tracks
+   * @returns {Promise<Track[]>}
+   */
+  public async decodeTracks(encodedTracks: string[]): Promise<Track[]> {
+    const node = this.nodes.find(n => n.state === NodeState.CONNECTED);
+
+    if (!node) {
+      throw new Error('No connected nodes found');
+    }
+
+    const res = await node.request<ITrack[]>('POST', 'decodetracks', encodedTracks);
+
+    return res.map(it => new Track(it));
   }
 
   /**

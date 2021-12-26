@@ -65,7 +65,7 @@ type PlaylistInfo = {
   duration: number;
 };
 
-type TrackInfo = {
+export type TrackInfo = {
   identifier: string;
   thumbnail?: string;
   isSeekable: boolean;

@@ -8,7 +8,7 @@ export type HTTPMethods = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
 
 type ReqOptions = {
   method?: HTTPMethods;
-  body?: Record<string, unknown> | undefined;
+  body?: Record<string, unknown> | Array<unknown> | undefined;
   headers?: OutgoingHttpHeaders;
 }
 

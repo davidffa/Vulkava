@@ -195,7 +195,7 @@ export default class Node {
   }
 
   // REST
-  public request<T>(method: HTTPMethods, endpoint: string, body?: Record<string, unknown>): Promise<T> {
+  public request<T>(method: HTTPMethods, endpoint: string, body?: Record<string, unknown> | Array<unknown>): Promise<T> {
     return fetch<T>(`http${this.options.secure ? 's' : ''}://${this.options.hostname}:${this.options.port}/${endpoint}`, {
       method,
       headers: {
