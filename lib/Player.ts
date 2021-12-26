@@ -1,6 +1,6 @@
 import { Node, Vulkava } from '..';
 import { PlayerOptions, PlayerState, PlayOptions, VoiceState } from './@types';
-import { Filters } from './Filters';
+import Filters from './Filters';
 import { NodeState } from './Node';
 import Track from './Track';
 

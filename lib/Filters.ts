@@ -11,7 +11,7 @@ import {
 } from './@types';
 import Player from './Player';
 
-export class Filters {
+export default class Filters {
   private readonly player: Player;
 
   private options: FilterOptions;
