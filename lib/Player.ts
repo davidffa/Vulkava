@@ -87,6 +87,13 @@ export default class Player {
   }
 
   /**
+   * Gets the volume of the player
+   */
+  get volume(): number {
+    return (this.filters.active.volume ?? 1) * 100;
+  }
+
+  /**
    * Connects to the voice channel
    */
   public connect() {

@@ -315,6 +315,7 @@ export type FilterOptions = {
   timescale?: TimescaleOptions;
   tremolo?: TremoloOptions;
   vibrato?: VibratoOptions;
+  volume?: number;
 
   [key: string]: unknown;
 }

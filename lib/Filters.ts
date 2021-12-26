@@ -126,6 +126,17 @@ export default class Filters {
     return this;
   }
 
+  /** Sets the volume */
+  public setVolume(vol: number, apply = true): this {
+    if (typeof vol !== 'number') throw new TypeError('Volume must be an number.');
+
+    if (vol === 100) delete this.options.volume;
+    else this.options.volume = vol / 100;
+
+    if (apply) this.apply();
+    return this;
+  }
+
   /** Sets all filters */
   public set(filters: FilterOptions): void {
     this.options = {};
