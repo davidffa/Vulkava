@@ -11,7 +11,7 @@ enum State {
 
 export default class Player {
   private readonly vulkava: Vulkava;
-  private node: Node;
+  public node: Node;
 
   public readonly guildId: string;
 
@@ -36,6 +36,8 @@ export default class Player {
   public state: State;
   public voiceState: VoiceState;
 
+  public moving: boolean;
+
   constructor(vulkava: Vulkava, options: PlayerOptions) {
     // TODO: verify input
     this.vulkava = vulkava;
@@ -59,7 +61,7 @@ export default class Player {
     this.playing = false;
     this.paused = false;
 
-    this.node = this.vulkava.nodes.filter(n => n.state === NodeState.CONNECTED).sort((a, b) => a.stats.playingPlayers - b.stats.playingPlayers)[0];
+    this.node = this.vulkava.nodes.filter(n => n.state === NodeState.CONNECTED).sort((a, b) => a.stats.players - b.stats.players)[0];
 
     this.state = State.DISCONNECTED;
     this.voiceState = {} as VoiceState;
@@ -77,6 +79,10 @@ export default class Player {
    */
   public connect() {
     if (this.state === State.CONNECTED) return;
+
+    if (this.node === null) {
+      throw new Error('No available nodes!');
+    }
 
     if (!this.voiceChannelId) {
       throw new Error('No voice channel id provided');
@@ -127,6 +133,47 @@ export default class Player {
   }
 
   /**
+   * @param {Node} node - The node to move the player to
+   */
+  public moveNode(node: Node) {
+    if (!node) throw new TypeError('You must provide a Node instance.');
+    if (node.state !== NodeState.CONNECTED) throw new Error('The provided node is not connected.');
+    if (this.node === node) return;
+
+    this.moving = true;
+
+    this.node.send({
+      op: 'destroy',
+      guildId: this.guildId,
+    });
+
+    this.node = node;
+
+    if (Object.keys(this.voiceState).length) {
+      this.state = State.CONNECTING;
+
+      this.sendVoiceUpdate();
+
+      this.state = State.CONNECTED;
+    }
+
+    // TODO: Re-apply the filters
+
+    if (this.playing && this.current) {
+      const payload = {
+        op: 'play',
+        guildId: this.guildId,
+        track: this.current.encodedTrack,
+        startTime: this.position
+      };
+
+      this.node.send(payload);
+    } else {
+      this.moving = false;
+    }
+  }
+
+  /**
    * Gets the latency between discord gateway & lavalink node.
    * @returns {Promise<Number>}
    */
@@ -142,6 +189,10 @@ export default class Player {
    * @param {Boolean} [options.noReplace] - Whether to ignore operation if a track is already playing or paused
    */
   public play(options?: PlayOptions) {
+    if (this.node === null) {
+      throw new Error('No available nodes!');
+    }
+
     if (!this.current && !this.trackRepeat && !this.queue.length) {
       throw new Error('The queue is empty!');
     }

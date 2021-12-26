@@ -15,7 +15,7 @@ export enum NodeState {
 export default class Node {
   private resumed?: boolean;
   private readonly vulkava: Vulkava;
-  private readonly options: NodeOptions;
+  public readonly options: NodeOptions;
   private ws: WebSocket | null;
 
   public retryAttempts: number;
@@ -170,7 +170,26 @@ export default class Node {
   }
 
   private handleTrackEnd(ev: TrackEndEvent, player: Player) {
+    // If a player is moving node
+    if (player.node !== this) return;
+
+    if (['LOAD_FAILED', 'CLEANUP'].includes(ev.reason)) {
+      this.vulkava.emit('trackEnd', player, player.current, ev.reason);
+      if (player.queue.length > 0) {
+        player.current = player.queue.shift() ?? null;
+
+        player.play();
+      } else {
+        this.vulkava.emit('queueEnd', player);
+      }
+      return;
+    }
+
+    if (player.queueRepeat && player.current) {
+      player.queue.push(player.current);
+    }
     this.vulkava.emit('trackEnd', player, player.current, ev.reason);
+    player.play();
   }
 
   private handleTrackStuck(ev: TrackStuckEvent, player: Player) {
@@ -235,7 +254,6 @@ export default class Node {
   }
 
   private close({ code, reason, wasClean }: CloseEvent) {
-    // TODO: Move all players to a connected node
     this.state = NodeState.DISCONNECTED;
 
     this.ws?.removeAllListeners();
@@ -244,6 +262,16 @@ export default class Node {
     if (wasClean) {
       this.vulkava.emit('nodeDisconnect', this);
       return;
+    }
+
+    const newNode = this.vulkava.nodes.find(n => n.state === NodeState.CONNECTED);
+
+    if (newNode) {
+      for (const player of this.vulkava.players.values()) {
+        if (player.node === this) {
+          player.moveNode(newNode);
+        }
+      }
     }
 
     this.vulkava.emit('error', this, new Error(`WebSocket closed abnormally with code ${code}: ${reason}`));

@@ -169,12 +169,29 @@ export class Vulkava extends EventEmitter {
 
       player.voiceState.sessionId = packet.d.session_id;
     } else if (payload.t === 'VOICE_SERVER_UPDATE') {
-      // TODO: move to nearest node (region)
       const packet = payload as VoiceServerUpdatePayload;
 
       player.voiceState.event = {
         ...packet.d
       };
+
+      if (['us', 'brazil', 'buenos-aires'].some(loc => player.voiceState.event.endpoint.startsWith(loc))) {
+        if (player.node.options.region && player.node.options.region !== 'USA') {
+          const usaNodes = this.nodes.filter(node => node.options.region === 'USA' && node.state === NodeState.CONNECTED);
+
+          if (usaNodes) {
+            player.moveNode(usaNodes.sort((a, b) => a.stats.players - b.stats.players)[0]);
+            return;
+          }
+        }
+      } else if (player.node.options.region && player.node.options.region !== 'EU') {
+        const europeNodes = this.nodes.filter(node => node.options.region === 'EU' && node.state === NodeState.CONNECTED);
+
+        if (europeNodes) {
+          player.moveNode(europeNodes.sort((a, b) => a.stats.players - b.stats.players)[0]);
+          return;
+        }
+      }
 
       player.sendVoiceUpdate();
     }

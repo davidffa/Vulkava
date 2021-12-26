@@ -58,6 +58,7 @@ export type EventListeners<T> = {
   (event: 'trackStuck', listener: (player: Player, track: Track, thresholdMs: number) => void): T;
   (event: 'trackException', listener: (player: Player, track: Track, exception: LoadException & { cause: string }) => void): T;
   (event: 'wsDisconnect', listener: (player: Player, code: number, reason: string) => void): T;
+  (event: 'queueEnd', listener: (player: Player) => void): T;
   (event: 'pong', listener: (node: Node, ping?: number) => void): T;
 }
 
