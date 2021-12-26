@@ -1,7 +1,7 @@
 import { EventEmitter } from 'events';
 import Node, { State } from './Node';
 
-import type { DiscordPayload, EventListeners, IncomingDiscordPayload, LoadTracksResult, SearchResult, SEARCH_SOURCE, VoiceServerUpdatePayload, VoiceStateUpdatePayload, VulkavaOptions } from './@types';
+import type { DiscordPayload, EventListeners, IncomingDiscordPayload, LoadTracksResult, PlayerOptions, SearchResult, SEARCH_SOURCE, VoiceServerUpdatePayload, VoiceStateUpdatePayload, VulkavaOptions } from './@types';
 import Track from './Track';
 import { Player } from '..';
 
@@ -35,6 +35,29 @@ export class Vulkava extends EventEmitter {
       const node = new Node(this, nodeOp);
       this.nodes.push(node);
     }
+  }
+
+  /**
+   * Creates a new player or returns an existing one
+   * @param {Object} options - The player options
+   * @param {String} options.guildId - The guild id that player belongs to
+   * @param {String} options.voiceChannelId - The voice channel id
+   * @param {String} [options.textChannelId] - The text channel id
+   * @param {Boolean} [options.selfDeaf=false] - Whether the bot joins the voice channel deafened or not
+   * @param {Boolean} [options.selfMute=false] - Whether the bot joins the voice channel muted or not
+   * @returns {Player}
+   */
+  public createPlayer(options: PlayerOptions): Player {
+    let player = this.players.get(options.guildId);
+
+    if (player) {
+      return player;
+    }
+
+    player = new Player(this, options);
+    this.players.set(options.guildId, player);
+
+    return player;
   }
 
   /**
