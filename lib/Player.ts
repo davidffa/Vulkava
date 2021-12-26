@@ -80,6 +80,13 @@ export default class Player {
   }
 
   /**
+   * Gets the queue duration in milliseconds
+   */
+  get queueDuration(): number {
+    return this.queue.reduce((acc, curr) => acc + curr.duration, 0);
+  }
+
+  /**
    * Connects to the voice channel
    */
   public connect() {
