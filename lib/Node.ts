@@ -233,8 +233,7 @@ export default class Node {
   }
 
   private handleWSClose(ev: WebSocketClosedEvent, player: Player) {
-    if (ev.code !== 1000) {
-      this.vulkava.emit('warn', this, `Discord voice gateway connection closed abnormally with code ${ev.code}: ${ev.reason}, reconnecting...`);
+    if (ev.code === 1006) {
       player.sendVoiceUpdate();
     } else {
       this.vulkava.emit('wsDisconnect', player, ev.code, ev.reason);
@@ -279,7 +278,7 @@ export default class Node {
         break;
     }
 
-    this.vulkava.emit('raw', payload);
+    this.vulkava.emit('raw', this, payload);
   }
 
   private error({ error }: ErrorEvent) {
