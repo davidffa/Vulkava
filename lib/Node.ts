@@ -189,7 +189,13 @@ export default class Node {
       player.queue.push(player.current);
     }
     this.vulkava.emit('trackEnd', player, player.current, ev.reason);
-    player.play();
+
+    if (player.trackRepeat || player.queue.length) {
+      player.play();
+      return;
+    }
+
+    this.vulkava.emit('queueEnd', player);
   }
 
   private handleTrackStuck(ev: TrackStuckEvent, player: Player) {

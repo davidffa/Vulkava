@@ -6,6 +6,8 @@ import { Vulkava } from './lib/Vulkava';
 
 import type {
   NodeOptions,
+  SearchResult,
+  SEARCH_SOURCE,
 } from './lib/@types';
 
 import { version } from './package.json';
@@ -19,6 +21,8 @@ export {
   Track,
   Vulkava,
 
+  SearchResult,
+  SEARCH_SOURCE,
   NodeOptions,
 
   VERSION
