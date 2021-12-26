@@ -1,16 +1,16 @@
 import { ITrack } from './@types';
 
 export default class Track {
-  public identifier: string;
-  private thumbnailUrl?: string;
-  public isSeekable: boolean;
-  public author: string;
-  public length: number;
-  public isStream: boolean;
-  public source: string;
-  public position: number;
-  public title: string;
-  public uri: string;
+  public readonly identifier: string;
+  private readonly thumbnailUrl?: string;
+  public readonly isSeekable: boolean;
+  public readonly author: string;
+  public readonly length: number;
+  public readonly isStream: boolean;
+  public readonly source: string;
+  public position?: number;
+  public readonly title: string;
+  public readonly uri: string;
 
   public encodedTrack: string;
 
