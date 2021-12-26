@@ -189,6 +189,13 @@ export default class Node {
 
   private handleTrackStart(_: TrackStartEvent, player: Player) {
     player.playing = true;
+    player.paused = false;
+
+    if (player.moving) {
+      player.moving = false;
+      return;
+    }
+
     this.vulkava.emit('trackStart', player, player.current);
   }
 
