@@ -174,6 +174,7 @@ export default class Node {
       }
 
       player.current = newTrack;
+      player.play();
       return;
     }
 
