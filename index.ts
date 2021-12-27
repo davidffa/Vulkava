@@ -1,6 +1,6 @@
 import Filters from './lib/Filters';
-import Node from './lib/Node';
-import Player from './lib/Player';
+import Node, { NodeState } from './lib/Node';
+import Player, { ConnectionState } from './lib/Player';
 import Track from './lib/Track';
 import { Vulkava } from './lib/Vulkava';
 
@@ -20,6 +20,9 @@ export {
   Player,
   Track,
   Vulkava,
+
+  NodeState,
+  ConnectionState,
 
   SearchResult,
   SEARCH_SOURCE,

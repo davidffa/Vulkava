@@ -4,7 +4,7 @@ import Filters from './Filters';
 import { NodeState } from './Node';
 import Track from './Track';
 
-enum State {
+export enum ConnectionState {
   DISCONNECTED,
   CONNECTING,
   CONNECTED
@@ -36,7 +36,7 @@ export default class Player {
   public playing: boolean;
   public paused: boolean;
 
-  public state: State;
+  public state: ConnectionState;
   public voiceState: VoiceState;
 
   public moving: boolean;
@@ -70,7 +70,7 @@ export default class Player {
 
     this.node = this.vulkava.nodes.filter(n => n.state === NodeState.CONNECTED).sort((a, b) => a.stats.players - b.stats.players)[0];
 
-    this.state = State.DISCONNECTED;
+    this.state = ConnectionState.DISCONNECTED;
     this.voiceState = {} as VoiceState;
   }
 
@@ -99,7 +99,7 @@ export default class Player {
    * Connects to the voice channel
    */
   public connect() {
-    if (this.state === State.CONNECTED) return;
+    if (this.state === ConnectionState.CONNECTED) return;
 
     if (this.node === null) {
       throw new Error('No available nodes!');
@@ -109,7 +109,7 @@ export default class Player {
       throw new Error('No voice channel id provided');
     }
 
-    this.state = State.CONNECTING;
+    this.state = ConnectionState.CONNECTING;
 
     this.vulkava.sendWS(this.guildId, {
       op: 4,
@@ -126,7 +126,7 @@ export default class Player {
    * Disconnects from the voice channel
    */
   public disconnect() {
-    if (this.state === State.DISCONNECTED) return;
+    if (this.state === ConnectionState.DISCONNECTED) return;
 
     this.vulkava.sendWS(this.guildId, {
       op: 4,
@@ -136,7 +136,7 @@ export default class Player {
       }
     });
 
-    this.state = State.DISCONNECTED;
+    this.state = ConnectionState.DISCONNECTED;
   }
 
   /**
@@ -171,11 +171,11 @@ export default class Player {
     this.node = node;
 
     if (Object.keys(this.voiceState).length) {
-      this.state = State.CONNECTING;
+      this.state = ConnectionState.CONNECTING;
 
       this.sendVoiceUpdate();
 
-      this.state = State.CONNECTED;
+      this.state = ConnectionState.CONNECTED;
     }
 
     if (this.filters.enabled) {
@@ -317,7 +317,7 @@ export default class Player {
   }
 
   public sendVoiceUpdate() {
-    this.state = State.CONNECTED;
+    this.state = ConnectionState.CONNECTED;
 
     this.node.send({
       op: 'voiceUpdate',

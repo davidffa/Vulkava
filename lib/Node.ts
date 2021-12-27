@@ -15,6 +15,7 @@ import type {
   Versions,
   WebSocketClosedEvent
 } from './@types';
+import { ConnectionState } from './Player';
 
 export enum NodeState {
   CONNECTING,
@@ -249,10 +250,18 @@ export default class Node {
   }
 
   private handleWSClose(ev: WebSocketClosedEvent, player: Player) {
-    if (ev.code === 1006) {
-      player.sendVoiceUpdate();
-    } else {
-      this.vulkava.emit('wsDisconnect', player, ev.code, ev.reason);
+    this.vulkava.emit('wsDisconnect', player, ev.code, ev.reason);
+
+    switch (ev.code) {
+      case 1006:
+      case 4015:
+        player.sendVoiceUpdate();
+        break;
+      case 4006:
+      case 4009:
+        player.state = ConnectionState.DISCONNECTED;
+        player.connect();
+        break;
     }
   }
 
