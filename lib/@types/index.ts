@@ -1,6 +1,7 @@
 import { Node } from '../..';
 import Player from '../Player';
 import Track from '../Track';
+import UnresolvedTrack from '../UnresolvedTrack';
 
 // ---------- Vulkava typings ----------
 export type OutgoingDiscordPayload = {
@@ -35,14 +36,23 @@ export type VoiceServerUpdatePayload = IncomingDiscordPayload & {
   d: VoiceServerUpdateData;
 };
 
+type SpotifyConfig = {
+  clientId: string;
+  clientSecret: string;
+}
+
 /** Main constructor options */
 export type VulkavaOptions = {
   /** The array of lavalink nodes */
   nodes: NodeOptions[];
   /** Function to send voice channel connect payloads to discord */
   sendWS: (guildId: string, payload: OutgoingDiscordPayload) => void;
-  /** The defautl source to search for tracks */
+  /** The default source to search for tracks */
   defaultSearchSource?: SEARCH_SOURCE;
+  /** The default source to search for unresolved tracks */
+  unresolvedSearchSource?: SEARCH_SOURCE;
+  /** The spotify credentials */
+  spotify?: SpotifyConfig;
 };
 
 /** Vulkava events */
@@ -67,7 +77,7 @@ export type SEARCH_SOURCE = 'youtube' | 'youtubemusic' | 'soundcloud' | 'odysee'
 
 // -- REST --
 
-type PlaylistInfo = {
+export type PlaylistInfo = {
   selectedTrack: number;
   title: string;
   duration: number;
@@ -106,7 +116,7 @@ export type LoadTracksResult = LoadResultBase & {
 }
 
 export type SearchResult = LoadResultBase & {
-  tracks: Track[];
+  tracks: Array<Track | UnresolvedTrack>;
 }
 
 // -- END REST --

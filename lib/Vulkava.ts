@@ -1,9 +1,10 @@
 import { EventEmitter } from 'events';
 import Node, { NodeState } from './Node';
 
-import type { IncomingDiscordPayload, OutgoingDiscordPayload, EventListeners, LoadTracksResult, PlayerOptions, SearchResult, SEARCH_SOURCE, VoiceServerUpdatePayload, VoiceStateUpdatePayload, VulkavaOptions, TrackInfo, ITrack } from './@types';
+import type { IncomingDiscordPayload, OutgoingDiscordPayload, EventListeners, LoadTracksResult, PlayerOptions, SearchResult, SEARCH_SOURCE, VoiceServerUpdatePayload, VoiceStateUpdatePayload, VulkavaOptions, TrackInfo, ITrack, PlaylistInfo } from './@types';
 import Track from './Track';
 import { Player } from '..';
+import Spotify from './sources/Spotify';
 
 export interface Vulkava {
   once: EventListeners<this>;
@@ -13,6 +14,8 @@ export class Vulkava extends EventEmitter {
   public clientId: string;
   public nodes: Node[];
   private readonly defaultSearchSource: SEARCH_SOURCE;
+  public readonly unresolvedSearchSource: SEARCH_SOURCE;
+  private readonly spotify: Spotify | null;
 
   public readonly sendWS: (guildId: string, payload: OutgoingDiscordPayload) => void;
 
@@ -26,6 +29,11 @@ export class Vulkava extends EventEmitter {
 
     this.nodes = [];
     this.defaultSearchSource = options.defaultSearchSource ?? 'youtube';
+    this.unresolvedSearchSource = options.unresolvedSearchSource ?? 'youtubemusic';
+
+    if (options.spotify) {
+      this.spotify = new Spotify(this, options.spotify.clientId, options.spotify.clientSecret);
+    }
 
     this.sendWS = options.sendWS;
 
@@ -104,6 +112,47 @@ export class Vulkava extends EventEmitter {
 
     if (!node) {
       throw new Error('No connected nodes found');
+    }
+
+    const spotifyRegex = /^(?:https?:\/\/(?:open\.)?spotify\.com|spotify)[/:](track|album|playlist)[/:]([a-zA-Z0-9]+)/;
+
+    if (this.spotify) {
+      const spotifyMatch = query.match(spotifyRegex);
+      if (spotifyMatch) {
+        let list;
+
+        switch (spotifyMatch[1]) {
+          case 'track':
+            return {
+              loadType: 'TRACK_LOADED',
+              playlistInfo: {} as PlaylistInfo,
+              tracks: [await this.spotify.getTrack(spotifyMatch[2])],
+            };
+          case 'album':
+            list = await this.spotify.getAlbum(spotifyMatch[2]);
+            return {
+              loadType: 'PLAYLIST_LOADED',
+              playlistInfo: {
+                title: list.title,
+                duration: list.tracks.reduce((acc, curr) => acc + curr.duration, 0),
+                selectedTrack: 0
+              },
+              tracks: list.tracks,
+            };
+          case 'playlist':
+            list = await this.spotify.getPlaylist(spotifyMatch[2]);
+
+            return {
+              loadType: 'PLAYLIST_LOADED',
+              playlistInfo: {
+                title: list.title,
+                duration: list.tracks.reduce((acc, curr) => acc + curr.duration, 0),
+                selectedTrack: 0
+              },
+              tracks: list.tracks
+            };
+        }
+      }
     }
 
     const sourceMap = {

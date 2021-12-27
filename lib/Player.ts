@@ -3,6 +3,7 @@ import { PlayerOptions, PlayerState, PlayOptions, VoiceState } from './@types';
 import Filters from './Filters';
 import { NodeState } from './Node';
 import Track from './Track';
+import UnresolvedTrack from './UnresolvedTrack';
 
 export enum ConnectionState {
   DISCONNECTED,
@@ -25,7 +26,7 @@ export default class Player {
   public selfMute?: boolean;
 
   public current: Track | null;
-  public queue: Track[];
+  public queue: Array<Track | UnresolvedTrack>;
 
   public queueRepeat: boolean;
   public trackRepeat: boolean;
@@ -211,17 +212,23 @@ export default class Player {
    * @param {Number} [options.endTime] - End time in milliseconds
    * @param {Boolean} [options.noReplace] - Whether to ignore operation if a track is already playing or paused
    */
-  public play(options?: PlayOptions) {
+  public async play(options?: PlayOptions) {
     if (this.node === null) {
       throw new Error('No available nodes!');
     }
 
     if (!this.current) {
-      if (this.queue.length) {
-        this.current = this.queue.shift() as Track;
+      let newTrack = this.queue.shift() ?? null;
+
+      if (newTrack) {
+        if (newTrack instanceof UnresolvedTrack) {
+          newTrack = await newTrack.build();
+        }
       } else {
         throw new Error('The queue is empty!');
       }
+
+      this.current = newTrack;
     }
 
     this.node.send({

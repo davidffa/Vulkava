@@ -16,6 +16,7 @@ import type {
   WebSocketClosedEvent
 } from './@types';
 import { ConnectionState } from './Player';
+import UnresolvedTrack from './UnresolvedTrack';
 
 export enum NodeState {
   CONNECTING,
@@ -158,6 +159,27 @@ export default class Node {
     this.send(payload);
   }
 
+  private async pollTrack(player: Player) {
+    let newTrack = player.queue.shift() ?? null;
+
+    if (newTrack) {
+      if (newTrack instanceof UnresolvedTrack) {
+        try {
+          newTrack = await newTrack.build();
+        } catch (err) {
+          this.vulkava.emit('error', this, err);
+          this.pollTrack(player);
+          return;
+        }
+      }
+
+      player.current = newTrack;
+      return;
+    }
+
+    this.vulkava.emit('queueEnd', player);
+  }
+
   private handlePlayerEvent(e: PlayerEventPayload) {
     const player = this.vulkava.players.get(e.guildId);
 
@@ -200,7 +222,7 @@ export default class Node {
     this.vulkava.emit('trackStart', player, player.current);
   }
 
-  private handleTrackEnd(ev: TrackEndEvent, player: Player) {
+  private async handleTrackEnd(ev: TrackEndEvent, player: Player) {
     // If a player is moving node
     if (player.node !== this) return;
 
@@ -208,13 +230,8 @@ export default class Node {
 
     if (['LOAD_FAILED', 'CLEANUP'].includes(ev.reason)) {
       this.vulkava.emit('trackEnd', player, player.current, ev.reason);
-      if (player.queue.length > 0) {
-        player.current = player.queue.shift() ?? null;
 
-        player.play();
-      } else {
-        this.vulkava.emit('queueEnd', player);
-      }
+      this.pollTrack(player);
       return;
     }
 
@@ -229,15 +246,7 @@ export default class Node {
       player.queue.push(player.current);
     }
 
-    const newTrack = player.queue.shift();
-
-    if (newTrack) {
-      player.current = newTrack;
-      player.play();
-      return;
-    }
-
-    this.vulkava.emit('queueEnd', player);
+    this.pollTrack(player);
   }
 
   private handleTrackStuck(ev: TrackStuckEvent, player: Player) {
