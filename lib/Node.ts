@@ -217,12 +217,21 @@ export default class Node {
       return;
     }
 
+    this.vulkava.emit('trackEnd', player, player.current, ev.reason);
+
+    if (player.trackRepeat) {
+      player.play();
+      return;
+    }
+
     if (player.queueRepeat && player.current) {
       player.queue.push(player.current);
     }
-    this.vulkava.emit('trackEnd', player, player.current, ev.reason);
 
-    if (player.trackRepeat || player.queue.length) {
+    const newTrack = player.queue.shift();
+
+    if (newTrack) {
+      player.current = newTrack;
       player.play();
       return;
     }

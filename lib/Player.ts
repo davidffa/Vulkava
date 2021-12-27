@@ -39,7 +39,7 @@ export default class Player {
   public state: State;
   public voiceState: VoiceState;
 
-  public moving?: boolean;
+  public moving: boolean;
 
   constructor(vulkava: Vulkava, options: PlayerOptions) {
     // TODO: verify input
@@ -65,6 +65,8 @@ export default class Player {
 
     this.playing = false;
     this.paused = false;
+
+    this.moving = false;
 
     this.node = this.vulkava.nodes.filter(n => n.state === NodeState.CONNECTED).sort((a, b) => a.stats.players - b.stats.players)[0];
 
@@ -214,14 +216,12 @@ export default class Player {
       throw new Error('No available nodes!');
     }
 
-    if (!this.current && !this.trackRepeat && !this.queue.length) {
-      throw new Error('The queue is empty!');
-    }
-
     if (!this.current) {
-      this.current = this.queue.shift() as Track;
-    } else if (!this.trackRepeat) {
-      this.current = this.queue.shift() as Track;
+      if (this.queue.length) {
+        this.current = this.queue.shift() as Track;
+      } else {
+        throw new Error('The queue is empty!');
+      }
     }
 
     this.node.send({
@@ -264,10 +264,10 @@ export default class Player {
   public skip(amount = 1) {
     if (!this.playing) return;
 
-    if (amount >= this.queue.length) {
+    if (amount > this.queue.length) {
       this.queue = [];
     } else {
-      this.queue.splice(0, amount);
+      this.queue.splice(0, amount - 1);
     }
 
     this.node.send({
