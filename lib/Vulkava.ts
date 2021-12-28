@@ -5,6 +5,7 @@ import type { IncomingDiscordPayload, OutgoingDiscordPayload, EventListeners, Lo
 import Track from './Track';
 import { Player } from '..';
 import Spotify from './sources/Spotify';
+import Deezer from './sources/Deezer';
 
 export interface Vulkava {
   once: EventListeners<this>;
@@ -24,6 +25,7 @@ export class Vulkava extends EventEmitter {
   private readonly defaultSearchSource: SEARCH_SOURCE;
   public readonly unresolvedSearchSource: SEARCH_SOURCE;
   private readonly spotify: Spotify | null;
+  private readonly deezer: Deezer;
 
   public readonly sendWS: (guildId: string, payload: OutgoingDiscordPayload) => void;
 
@@ -82,6 +84,8 @@ export class Vulkava extends EventEmitter {
     if (options.spotify) {
       this.spotify = new Spotify(this, options.spotify.clientId, options.spotify.clientSecret);
     }
+
+    this.deezer = new Deezer(this);
 
     this.sendWS = options.sendWS;
 
@@ -164,6 +168,45 @@ export class Vulkava extends EventEmitter {
     }
 
     const spotifyRegex = /^(?:https?:\/\/(?:open\.)?spotify\.com|spotify)[/:](track|album|playlist)[/:]([a-zA-Z0-9]+)/;
+    const deezerRegex = /^(?:https?:\/\/|)?(?:www\.)?deezer\.com\/(?:\w{2}\/)?(track|album|playlist)\/(\d+)/;
+
+    const deezerMatch = query.match(deezerRegex);
+
+    if (deezerMatch) {
+      let list;
+
+      switch (deezerMatch[1]) {
+        case 'track':
+          return {
+            loadType: 'TRACK_LOADED',
+            playlistInfo: {} as PlaylistInfo,
+            tracks: [await this.deezer.getTrack(deezerMatch[2])],
+          };
+        case 'album':
+          list = await this.deezer.getAlbum(deezerMatch[2]);
+          return {
+            loadType: 'PLAYLIST_LOADED',
+            playlistInfo: {
+              title: list.title,
+              duration: list.tracks.reduce((acc, curr) => acc + curr.duration, 0),
+              selectedTrack: 0
+            },
+            tracks: list.tracks,
+          };
+        case 'playlist':
+          list = await this.deezer.getPlaylist(deezerMatch[2]);
+
+          return {
+            loadType: 'PLAYLIST_LOADED',
+            playlistInfo: {
+              title: list.title,
+              duration: list.tracks.reduce((acc, curr) => acc + curr.duration, 0),
+              selectedTrack: 0
+            },
+            tracks: list.tracks
+          };
+      }
+    }
 
     if (this.spotify) {
       const spotifyMatch = query.match(spotifyRegex);
