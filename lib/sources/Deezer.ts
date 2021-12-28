@@ -48,7 +48,7 @@ export default class Deezer {
       name,
       duration * 1000,
       link,
-      null
+      'deezer'
     );
   }
 

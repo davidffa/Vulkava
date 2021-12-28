@@ -78,7 +78,7 @@ export default class Spotify {
       artistNames,
       duration_ms,
       spotify,
-      null
+      'spotify'
     );
   }
 

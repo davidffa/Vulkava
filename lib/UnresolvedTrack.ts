@@ -8,16 +8,19 @@ export default class UnresolvedTrack {
   public readonly artist: string;
   public readonly duration: number;
   public readonly uri: string;
+  public readonly source: string;
   public requester: unknown;
 
-  constructor(vulkava: Vulkava, title: string, artist: string, duration: number, uri: string, requester: unknown) {
+  constructor(vulkava: Vulkava, title: string, artist: string, duration: number, uri: string, source?: string) {
     this.vulkava = vulkava;
 
     this.title = title;
     this.artist = artist;
     this.duration = duration;
     this.uri = uri;
-    this.requester = requester;
+    this.source = source ?? 'Unknown';
+
+    this.requester = null;
   }
 
   public async build(): Promise<Track> {
