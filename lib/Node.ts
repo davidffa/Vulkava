@@ -280,7 +280,7 @@ export default class Node {
 
     this.vulkava.emit('trackEnd', player, player.current, ev.reason);
 
-    if (player.trackRepeat) {
+    if (player.trackRepeat && ev.reason !== 'REPLACED') {
       player.play();
       return;
     }
@@ -288,6 +288,8 @@ export default class Node {
     if (player.queueRepeat && player.current) {
       player.queue.push(player.current);
     }
+
+    if (ev.reason === 'REPLACED') return;
 
     this.pollTrack(player);
   }
