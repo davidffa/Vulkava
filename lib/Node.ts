@@ -24,6 +24,12 @@ export enum NodeState {
   DISCONNECTED
 }
 
+/**
+ * Represents a lavalink Node structure.
+ * @prop {State} state - The node state (CONNECTING, CONNECTED, DISCONNECTED)
+ * @prop {Object} stats - The node stats
+ * @prop {Object | null} versions - The lavalink node versions
+ */
 export default class Node {
   private resumed?: boolean;
   private readonly vulkava: Vulkava;
@@ -38,7 +44,43 @@ export default class Node {
   /** Version object for the node (null if lavalink does not support) */
   public versions: Versions | null;
 
+  static checkOptions(options: NodeOptions) {
+    if (typeof options !== 'object') throw new TypeError('NodeOptions must be an object');
+
+    if (!options.hostname) throw new TypeError('NodeOptions.hostname is required');
+    if (!options.port) throw new TypeError('NodeOptions.port is required');
+
+    if (typeof options.hostname !== 'string') throw new TypeError('NodeOptions.hostname must be a string');
+    if (typeof options.port !== 'number') throw new TypeError('NodeOptions.port must be a number');
+
+    if (options.id && typeof options.id !== 'string') throw new TypeError('NodeOptions.id must be a string');
+    if (options.password && typeof options.password !== 'string') throw new TypeError('NodeOptions.password must be a string');
+    if (options.region && (typeof options.region !== 'string' || !['USA', 'EU'].includes(options.region))) throw new TypeError('NodeOptions.region must be a string and must be either "USA" or "EU"');
+    if (options.resumeKey && typeof options.resumeKey !== 'string') throw new TypeError('NodeOptions.resumeKey must be a string');
+    if (options.resumeTimeout && typeof options.resumeTimeout !== 'number') throw new TypeError('NodeOptions.resumeTimeout must be a number');
+    if (options.secure && typeof options.secure !== 'boolean') throw new TypeError('NodeOptions.secure must be a boolean');
+    if (options.maxRetryAttempts && typeof options.maxRetryAttempts !== 'number') throw new TypeError('NodeOptions.maxRetryAttempts must be a number');
+    if (options.retryAttemptsInterval && typeof options.retryAttemptsInterval !== 'number') throw new TypeError('NodeOptions.retryAttemptsInterval must be a number');
+  }
+
+  /**
+   * Create a new Vulkava instance
+   * @param {Vulkava} vulkava - The Vulkava instance
+   * @param {Object} options - The node options
+   * @param {String} [options.id] - The lavalink node identifier
+   * @param {String} options.hostname - The lavalink node hostname
+   * @param {Number} options.port - The lavalink node port
+   * @param {String} [options.password] - The lavalink node password
+   * @param {Boolean} [options.secure] - Whether the lavalink node uses TLS/SSL or not
+   * @param {String} [options.region] - The lavalink node region
+   * @param {String} [options.resumeKey] - The resume key
+   * @param {Number} [options.resumeTimeout] - The resume timeout, in seconds
+   * @param {Number} [options.maxRetryAttempts] - The max number of reconnect attempts
+   * @param {Number} [options.retryAttemptsInterval] - The interval between reconnect attempts, in milliseconds
+   */
   constructor(vulkava: Vulkava, options: NodeOptions) {
+    Node.checkOptions(options);
+
     this.vulkava = vulkava;
     this.options = options;
 

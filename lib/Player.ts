@@ -11,6 +11,24 @@ export enum ConnectionState {
   CONNECTED
 }
 
+/**
+ * Represents a Player structure
+ * @prop {Node} node - The node that this player is connected to
+ * @prop {Filters} filters - The filters instance of this player
+ * @prop {String} guildId - The guild id of this player
+ * @prop {String} voiceChannelId - The voice channel id of this player
+ * @prop {String} [textChannelId] - The text channel id of this player
+ * @prop {Boolean} [selfMute] - Whether or not this player is muted
+ * @prop {Boolean} [selfDeaf] - Whether or not this player is deafened
+ * @prop {Track | null} current - The current track of this player
+ * @prop {Array<Track | UnresolvedTrack>} queue - The queue of this player
+ * @prop {Boolean} trackRepeat - Whether to repeat the current track
+ * @prop {Boolean} queueRepeat - Whether to repeat the queue
+ * @prop {Boolean} playing - Whether this player is playing or not
+ * @prop {Boolean} paused - Whether this player is paused or not
+ * @prop {State} state - The state of this player (CONNECTING, CONNECTED, DISCONNECTED)
+ * @prop {Object} voiceState - The player voicestate
+ */
 export default class Player {
   private readonly vulkava: Vulkava;
   public node: Node;
@@ -47,8 +65,21 @@ export default class Player {
     if (typeof options.guildId !== 'string') throw new TypeError('guildId must be a string.');
     if (!options.voiceChannelId) throw new TypeError('You must provide a voiceChannelId.');
     if (typeof options.voiceChannelId !== 'string') throw new TypeError('voiceChannelId must be a string.');
+    if (options.textChannelId && typeof options.textChannelId !== 'string') throw new TypeError('textChannelId must be a string.');
+    if (options.selfDeaf && typeof options.selfDeaf !== 'boolean') throw new TypeError('selfDeaf must be a boolean.');
+    if (options.selfMute && typeof options.selfMute !== 'boolean') throw new TypeError('selfMute must be a boolean.');
   }
 
+  /**
+   * Create a new Player instance
+   * @param {Vulkava} vulkava - The vulkava instance
+   * @param {Object} options - The player options
+   * @param {String} options.guildId - The guild id of this player
+   * @param {String} options.voiceChannelId - The voice channel id of this player
+   * @param {String} [options.textChannelId] - The text channel id of this player
+   * @param {Boolean} [options.selfMute] - Whether or not this player is muted
+   * @param {Boolean} [options.selfDeaf] - Whether or not this player is deafened
+   */
   constructor(vulkava: Vulkava, options: PlayerOptions) {
     Player.checkOptions(options);
 
@@ -343,6 +374,7 @@ export default class Player {
 
   public updatePlayer(state: PlayerState): void {
     if (state.position) this.position = state.position;
+    if (state.time) this.positionTimestamp = state.time;
 
     // Lavalink not sending this?
     // if (state.connected) {

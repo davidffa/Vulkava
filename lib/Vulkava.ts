@@ -10,6 +10,14 @@ export interface Vulkava {
   once: EventListeners<this>;
   on: EventListeners<this>;
 }
+
+/**
+ * Represents the main Vulkava client.
+ * @extends EventEmitter
+ * @prop {Array<Node>} nodes - The lavalink nodes array
+ * @prop {String} clientId - The bot id
+ * @prop {Map<String, Player>} players - The players map
+ */
 export class Vulkava extends EventEmitter {
   public clientId: string;
   public nodes: Node[];
@@ -39,31 +47,29 @@ export class Vulkava extends EventEmitter {
       throw new TypeError('VulkavaOptions.nodes must contain at least one node');
     }
 
-    if (options.nodes.some(n => typeof n !== 'object')) {
-      throw new TypeError('VulkavaOptions.nodes must only contain objects');
-    }
-
-    if (options.nodes.some(n => !n.hostname)) {
-      throw new TypeError('VulkavaOptions.nodes must contain a hostname property');
-    }
-
-    if (options.nodes.some(n => typeof n.hostname !== 'string')) {
-      throw new TypeError('VulkavaOptions.nodes.hostname must be a string');
-    }
-
-    if (options.nodes.some(n => !n.port)) {
-      throw new TypeError('VulkavaOptions.nodes must contain a port property');
-    }
-
-    if (options.nodes.some(n => typeof n.port !== 'number')) {
-      throw new TypeError('VulkavaOptions.nodes.port must be a number');
-    }
-
     if (!options.sendWS || typeof options.sendWS !== 'function') {
       throw new TypeError('VulkavaOptions.sendWS must be a function');
     }
   }
 
+  /**
+   * Create a new Vulkava instance
+   * @param {Object} options - The Vulkava options
+   * @param {Array<Object>} options.nodes - The lavalink nodes array
+   * @param {String} [options.nodes[].id] - The lavalink node identifier
+   * @param {String} options.nodes[].hostname - The lavalink node hostname
+   * @param {Number} options.nodes[].port - The lavalink node port
+   * @param {String} [options.nodes[].password] - The lavalink node password
+   * @param {Boolean} [options.nodes[].secure] - Whether the lavalink node uses TLS/SSL or not
+   * @param {String} [options.nodes[].region] - The lavalink node region
+   * @param {String} [options.nodes[].resumeKey] - The resume key
+   * @param {Number} [options.nodes[].resumeTimeout] - The resume timeout, in seconds
+   * @param {Number} [options.nodes[].maxRetryAttempts] - The max number of retry attempts
+   * @param {Number} [options.nodes[].retryAttemptsInterval] - The interval between retry attempts
+   * @param {String} [options.defaultSearchSource] - The default search source
+   * @param {String} [options.unresolvedSearchSource] - The unresolved search source
+   * @param {Function} options.sendWS - The function to send websocket messages to the main gateway
+   */
   constructor(options: VulkavaOptions) {
     super();
 
@@ -148,6 +154,7 @@ export class Vulkava extends EventEmitter {
    *
    * @param {String} query - The query to search for
    * @param {('youtube' | 'youtubemusic' | 'soundcloud' | 'odysee' | 'yandex')} [source=youtube] - The search source
+   * @returns {Promise<SearchResult>}
    */
   public async search(query: string, source: SEARCH_SOURCE = this.defaultSearchSource): Promise<SearchResult> {
     const node = this.nodes.find(n => n.state === NodeState.CONNECTED);
