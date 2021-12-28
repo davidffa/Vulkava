@@ -42,8 +42,16 @@ export default class Player {
 
   public moving: boolean;
 
+  static checkOptions(options: PlayerOptions) {
+    if (!options.guildId) throw new TypeError('You must provide a guildId.');
+    if (typeof options.guildId !== 'string') throw new TypeError('guildId must be a string.');
+    if (!options.voiceChannelId) throw new TypeError('You must provide a voiceChannelId.');
+    if (typeof options.voiceChannelId !== 'string') throw new TypeError('voiceChannelId must be a string.');
+  }
+
   constructor(vulkava: Vulkava, options: PlayerOptions) {
-    // TODO: verify input
+    Player.checkOptions(options);
+
     this.vulkava = vulkava;
     this.guildId = options.guildId;
 

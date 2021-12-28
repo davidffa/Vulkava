@@ -22,10 +22,52 @@ export class Vulkava extends EventEmitter {
   // guildId <-> Player
   public players: Map<string, Player>;
 
+  static checkOptions(options: VulkavaOptions) {
+    if (typeof options !== 'object') {
+      throw new TypeError('VulkavaOptions must be an object');
+    }
+
+    if (!options.nodes) {
+      throw new TypeError('VulkavaOptions must contain a nodes property');
+    }
+
+    if (!Array.isArray(options.nodes)) {
+      throw new TypeError('VulkavaOptions.nodes must be an array');
+    }
+
+    if (options.nodes.length === 0) {
+      throw new TypeError('VulkavaOptions.nodes must contain at least one node');
+    }
+
+    if (options.nodes.some(n => typeof n !== 'object')) {
+      throw new TypeError('VulkavaOptions.nodes must only contain objects');
+    }
+
+    if (options.nodes.some(n => !n.hostname)) {
+      throw new TypeError('VulkavaOptions.nodes must contain a hostname property');
+    }
+
+    if (options.nodes.some(n => typeof n.hostname !== 'string')) {
+      throw new TypeError('VulkavaOptions.nodes.hostname must be a string');
+    }
+
+    if (options.nodes.some(n => !n.port)) {
+      throw new TypeError('VulkavaOptions.nodes must contain a port property');
+    }
+
+    if (options.nodes.some(n => typeof n.port !== 'number')) {
+      throw new TypeError('VulkavaOptions.nodes.port must be a number');
+    }
+
+    if (!options.sendWS || typeof options.sendWS !== 'function') {
+      throw new TypeError('VulkavaOptions.sendWS must be a function');
+    }
+  }
+
   constructor(options: VulkavaOptions) {
     super();
 
-    // TODO: verify input
+    Vulkava.checkOptions(options);
 
     this.nodes = [];
     this.defaultSearchSource = options.defaultSearchSource ?? 'youtube';
