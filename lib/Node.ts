@@ -358,7 +358,8 @@ export default class Node {
     this.vulkava.emit('raw', this, payload);
   }
 
-  private error({ error }: ErrorEvent) {
+  private error({ error, message }: ErrorEvent) {
+    if (message.includes('connect ECONNREFUSED')) return;
     this.vulkava.emit('error', this, error);
   }
 
@@ -386,7 +387,7 @@ export default class Node {
     this.vulkava.emit('error', this, new Error(`WebSocket closed abnormally with code ${code}: ${reason}`));
 
     if (this.retryAttempts === 0) this.connect();
-    else setTimeout(() => this.connect, this.options.retryAttemptsInterval ?? 5000);
+    else setTimeout(() => this.connect(), this.options.retryAttemptsInterval ?? 5000);
   }
 
   private upgrade(msg: IncomingMessage) {
