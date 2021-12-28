@@ -266,6 +266,10 @@ export class Vulkava extends EventEmitter {
       if (packet.d.user_id !== this.clientId) return;
 
       player.voiceState.sessionId = packet.d.session_id;
+
+      if (packet.d.channel_id) {
+        player.voiceChannelId = packet.d.channel_id;
+      }
     } else if (payload.t === 'VOICE_SERVER_UPDATE') {
       const packet = payload as VoiceServerUpdatePayload;
 

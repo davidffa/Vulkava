@@ -295,6 +295,18 @@ export default class Player {
   }
 
   /**
+   * Sets the player voice channel
+   * @param {String} channelId - The voice channel id
+   */
+  public setVoiceChannel(channelId: string) {
+    if (!channelId || typeof channelId !== 'string') throw new TypeError('Voice channel id must be a string.');
+
+    this.voiceChannelId = channelId;
+    this.state = ConnectionState.DISCONNECTED;
+    this.connect();
+  }
+
+  /**
    * Shuffles the queue
    */
   public shuffleQueue() {

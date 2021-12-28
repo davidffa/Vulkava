@@ -20,6 +20,7 @@ export type VoiceStateUpdatePayload = IncomingDiscordPayload & {
   t: 'VOICE_STATE_UPDATE';
   d: {
     session_id: string;
+    channel_id: string | null;
     user_id: string;
     guild_id: string;
   };
