@@ -84,7 +84,7 @@ export default class Node {
     this.vulkava = vulkava;
     this.options = options;
 
-    this.retryAttempts = -1;
+    this.retryAttempts = 0;
     this.state = NodeState.DISCONNECTED;
 
     this.stats = {
