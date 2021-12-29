@@ -357,7 +357,7 @@ export default class Player {
    * @param {Number} position - The position to seek, in milliseconds
    */
   public seek(position: number) {
-    if (!this.playing || !this.current) return;
+    if (!this.playing || !this.current || !this.current.isSeekable) return;
     if (typeof position !== 'number') {
       throw new TypeError('Position must be a number');
     }
