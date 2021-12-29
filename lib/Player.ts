@@ -6,9 +6,9 @@ import Track from './Track';
 import UnresolvedTrack from './UnresolvedTrack';
 
 export enum ConnectionState {
-  DISCONNECTED,
   CONNECTING,
-  CONNECTED
+  CONNECTED,
+  DISCONNECTED
 }
 
 /**
