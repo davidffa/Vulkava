@@ -8,6 +8,7 @@ import type {
   NodeOptions,
   NodeStats,
   PlayerEventPayload,
+  RoutePlannerStatus,
   TrackEndEvent,
   TrackExceptionEvent,
   TrackStartEvent,
@@ -153,6 +154,29 @@ export default class Node {
     } catch {
       this.versions = null;
     }
+  }
+
+  /**
+   * Gets the route planner status
+   * @returns {Promise<Object>}
+   */
+  public getRoutePlannerStatus(): Promise<RoutePlannerStatus> {
+    return this.request<RoutePlannerStatus>('GET', 'routeplanner/status');
+  }
+
+  /**
+   * Unmarks a failed address
+   * @param {String} address - The address to unmark
+   */
+  public unmarkFailedAddress(address: string) {
+    return this.request('POST', 'routeplanner/free/address', { address });
+  }
+
+  /**
+   * Unmarks all failed address
+   */
+  public unmarkAllFailedAddress() {
+    return this.request('POST', 'routeplanner/free/all');
   }
 
   /**

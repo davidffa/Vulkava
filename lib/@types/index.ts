@@ -179,6 +179,26 @@ export type NodeStats = {
   };
 };
 
+/** Route planner API */
+export type RoutePlannerStatus = {
+  class: string | null;
+  details: RoutePlannerDetails | null;
+};
+
+type RoutePlannerDetails = {
+  ipBlock: {
+    type: string;
+    size: string;
+  };
+  failingAddresses: Array<{
+    address: string;
+    failingTimestamp: number;
+    failingTime: string;
+  }>;
+  blockIndex?: string;
+  currentAddressIndex?: string;
+};
+
 /** Versions struct */
 export type Versions = {
   /** Lavaplayer version */
