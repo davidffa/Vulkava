@@ -237,10 +237,11 @@ export default class Player {
   }
 
   /**
-   * Gets the latency between discord gateway & lavalink node.
+   * Gets the latency between discord voice gateway & lavalink node.
    * @returns {Promise<Number>}
    */
-  public ping(): Promise<number> {
+  public async ping(): Promise<number> {
+    if (this.state !== ConnectionState.CONNECTED) return Infinity;
     return this.node.ping(this.guildId);
   }
 
