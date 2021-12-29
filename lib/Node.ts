@@ -416,6 +416,8 @@ export default class Node {
 
     this.vulkava.emit('error', this, new Error(`WebSocket closed abnormally with code ${code}: ${reason}`));
 
+    if (this.retryAttempts > (this.options.maxRetryAttempts ?? 10)) return;
+
     if (this.retryAttempts === 0) this.connect();
     else setTimeout(() => this.connect(), this.options.retryAttemptsInterval ?? 5000);
   }
