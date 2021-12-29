@@ -11,13 +11,13 @@ export default class UnresolvedTrack {
   public readonly source: string;
   public requester: unknown;
 
-  constructor(vulkava: Vulkava, title: string, artist: string, duration: number, uri: string, source?: string) {
+  constructor(vulkava: Vulkava, title: string, artist: string, duration?: number, uri?: string, source?: string) {
     this.vulkava = vulkava;
 
     this.title = title;
     this.artist = artist;
-    this.duration = duration;
-    this.uri = uri;
+    this.duration = duration ?? 0;
+    this.uri = uri ?? '';
     this.source = source ?? 'Unknown';
 
     this.requester = null;
