@@ -301,6 +301,7 @@ export default class Player {
    */
   public setVoiceChannel(channelId: string) {
     if (!channelId || typeof channelId !== 'string') throw new TypeError('Voice channel id must be a string.');
+    if (this.voiceChannelId === channelId) return;
 
     this.voiceChannelId = channelId;
     this.state = ConnectionState.DISCONNECTED;
