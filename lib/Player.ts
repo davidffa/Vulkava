@@ -166,8 +166,6 @@ export default class Player {
    * Disconnects from the voice channel
    */
   public disconnect() {
-    if (this.state === ConnectionState.DISCONNECTED) return;
-
     this.vulkava.sendWS(this.guildId, {
       op: 4,
       d: {
