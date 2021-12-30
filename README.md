@@ -15,6 +15,7 @@ $ npm i vulkava
 Example music bot with discord.js
 ```js
 const { Client } = require('discord.js');
+const { Vulkava } = require('vulkava');
 
 const client = new Client({
   intents: [
@@ -47,12 +48,20 @@ client.vulkava = new Vulkava({
   channel.send(`Queue ended!`);
 
   player.destroy();
+}).on('error', (node, err) => {
+  console.error(`[Vulkava] Error on node ${node.identifier}`, err.message);
+});
+
+client.on('ready', () => {
+  console.log('Ready!');
+  client.vulkava.start(client.user.id);
 });
 
 // IMPORTANT
 client.on('raw', (packet) => client.vulkava.handleVoiceUpdate(packet));
 
-client.on('interactionCreate', interaction => {
+client.on('interactionCreate', async interaction => {
+  if (!interaction.isCommand()) return;
   if (!interaction.member.voice.channel) return interaction.reply({ content: `You need to join a voice channel first!`, ephemeral: true });
 
   const track = interaction.options.getString('track');
@@ -80,12 +89,13 @@ client.on('interactionCreate', interaction => {
       player.queue.push(track);
     }
 
-    interaction.reply(`Playlist ${res.playlistInfo.title}`);
+    interaction.reply(`Playlist \`${res.playlistInfo.title}\` loaded!`);
   } else {
     const track = res.tracks[0];
     track.setRequester(interaction.user);
 
     player.queue.push(track);
+    interacton.reply(`Queued \`${track.title}\``);
   }
 
   if (!player.playing) player.play();
