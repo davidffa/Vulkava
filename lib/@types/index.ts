@@ -91,8 +91,7 @@ export type TrackInfo = {
   author: string;
   length: number;
   isStream: boolean;
-  source?: string;
-  sourceName?: string;
+  sourceName: string | null;
   position: number;
   title: string;
   uri: string;
@@ -327,7 +326,7 @@ export type LowPassOptions = {
 }
 
 export type RotationOptions = {
-  speed?: number;
+  rotationHz?: number;
 }
 
 export type TimescaleOptions = {

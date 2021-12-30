@@ -23,7 +23,7 @@ export default class Track {
     this.author = data.info.author;
     this.duration = data.info.length;
     this.isStream = data.info.isStream;
-    this.source = data.info.source ?? data.info.sourceName ?? 'unknown';
+    this.source = data.info.sourceName ?? 'unknown';
     this.position = data.info.position;
     this.title = data.info.title;
     this.uri = data.info.uri;
