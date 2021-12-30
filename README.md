@@ -2,7 +2,7 @@
 A lavalink wrapper in Node.JS
 
 - [Documentation](https://docs.vulkava.tk)
-- [Common errors/Problems](https://docs.vulkava.tk/docs/common-problems)
+- [Common errors/Problems](https://docs.vulkava.tk/docs/common-issues)
 
 ## 🔌 Installation
 You will need NodeJS v14+ and a running lavalink server.
