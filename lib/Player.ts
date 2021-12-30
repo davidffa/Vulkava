@@ -390,11 +390,10 @@ export default class Player {
     if (state.position) this.position = state.position;
     if (state.time) this.positionTimestamp = state.time;
 
-    // Lavalink not sending this?
-    // if (state.connected) {
-    //   if (this.state !== State.CONNECTED) this.state = State.CONNECTED;
-    // } else if (this.state !== State.DISCONNECTED) {
-    //   this.state = State.DISCONNECTED;
-    // }
+    if (state.connected) {
+      if (this.state !== ConnectionState.CONNECTED) this.state = ConnectionState.CONNECTED;
+    } else if (this.state !== ConnectionState.DISCONNECTED) {
+      this.state = ConnectionState.DISCONNECTED;
+    }
   }
 }
