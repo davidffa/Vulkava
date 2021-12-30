@@ -390,6 +390,11 @@ export default class Node {
 
   private error({ error, message }: ErrorEvent) {
     if (message.includes('connect ECONNREFUSED')) return;
+    if (message.includes('401')) {
+      this.retryAttempts = Infinity;
+      this.vulkava.emit('error', this, new Error('Authentication failed!'));
+      return;
+    }
     this.vulkava.emit('error', this, error);
   }
 
