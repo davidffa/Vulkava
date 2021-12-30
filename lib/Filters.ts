@@ -35,7 +35,16 @@ export default class Filters {
     return Object.assign({}, this.options);
   }
 
-  /** Sets ChannelMix filter */
+  /**
+   * Sets ChannelMix filter
+   * @param options - The channel mix options
+   * @param options.leftToLeft - The left to left mix
+   * @param options.leftToRight - The left to right mix
+   * @param options.rightToLeft - The right to left mix
+   * @param options.rightToRight - The right to right mix
+   * @param apply - Whether to send filter payload to Lavalink or not
+   * @returns The filters instance, for chaining calls
+   */
   public setChannelMix(options: ChannelMixOptions, apply = true): this {
     if (!options) throw new TypeError('ChannelMixOptions must not be empty!');
     if (typeof options !== 'object' || Array.isArray(options)) throw new TypeError('ChannelMixOptions must be an object.');
@@ -45,7 +54,20 @@ export default class Filters {
     return this;
   }
 
-  /** Sets Distortion filter */
+  /**
+   * Sets Distortion filter
+   * @param options - The distortion options
+   * @param options.sinOffset - The sin offset
+   * @param options.sinScale - The sin scale
+   * @param options.cosOffset - The cos offset
+   * @param options.cosScale - The cos scale
+   * @param options.tanOffset - The tan offset
+   * @param options.tanScale - The tan scale
+   * @param options.offset - The offset
+   * @param options.scale - The scale
+   * @param apply - Whether to send filter payload to Lavalink or not
+   * @returns The filters instance, for chaining calls
+   */
   public setDistortion(options: DistortionOptions, apply = true): this {
     if (!options) throw new TypeError('DistortionOptions must not be empty!');
     if (typeof options !== 'object' || Array.isArray(options)) throw new TypeError('DistortionOptions must be an object.');
@@ -55,7 +77,12 @@ export default class Filters {
     return this;
   }
 
-  /** Sets the Equalizer */
+  /**
+   * Sets Equalizer filter
+   * @param options - The equalizer band array
+   * @param apply - Whether to send filter payload to Lavalink or not
+   * @returns The filters instance, for chaining calls
+   */
   public setEqualizer(options: number[], apply = true): this {
     if (!options) throw new TypeError('Equalizer must not be empty!');
     if (typeof options !== 'object' || !Array.isArray(options)) throw new TypeError('Equalizer must be an Array.');
@@ -66,7 +93,16 @@ export default class Filters {
     return this;
   }
 
-  /** Sets Karaoke filter */
+  /**
+   * Sets Karaoke filter
+   * @param options - The karaoke options
+   * @param options.level - The level
+   * @param options.monoLevel - The mono level
+   * @param options.filterBand - The band to filter
+   * @param options.filterWidth - The filter width
+   * @param apply - Whether to send filter payload to Lavalink or not
+   * @returns The filters instance, for chaining calls
+   */
   public setKaraoke(options: KaraokeOptions, apply = true): this {
     if (!options) throw new TypeError('KaraokeOptions must not be empty!');
     if (typeof options !== 'object' || Array.isArray(options)) throw new TypeError('KaraokeOptions must be an object.');
@@ -76,7 +112,13 @@ export default class Filters {
     return this;
   }
 
-  /** Sets LowPass filter */
+  /**
+   * Sets LowPass filter
+   * @param options - The lowpass options
+   * @param options.smoothing - The lowpass smoothing
+   * @param apply - Whether to send filter payload to Lavalink or not
+   * @returns The filters instance, for chaining calls
+   */
   public setLowPass(options: LowPassOptions, apply = true): this {
     if (!options) throw new TypeError('LowPassOptions must not be empty!');
     if (typeof options !== 'object' || Array.isArray(options)) throw new TypeError('LowPassOptions must be an object.');
@@ -86,7 +128,13 @@ export default class Filters {
     return this;
   }
 
-  /** Sets rotation filter */
+  /**
+   * Sets Rotation filter
+   * @param options - The rotation options
+   * @param options.rotationHz - The rotation speed, in Hertz
+   * @param apply - Whether to send filter payload to Lavalink or not
+   * @returns The filters instance, for chaining calls
+   */
   public setRotation(options: RotationOptions, apply = true): this {
     if (!options) throw new TypeError('RotationOptions must not be empty!');
     if (typeof options !== 'object' || Array.isArray(options)) throw new TypeError('RotationOptions must be an object.');
@@ -96,7 +144,15 @@ export default class Filters {
     return this;
   }
 
-  /** Sets timescale filter */
+  /**
+   * Sets Timescale filter
+   * @param options - The timescale options
+   * @param options.speed - The speed
+   * @param options.rate - The rate
+   * @param options.pitch - The pitch
+   * @param apply - Whether to send filter payload to Lavalink or not
+   * @returns The filters instance, for chaining calls
+   */
   public setTimescale(options: TimescaleOptions, apply = true): this {
     if (!options) throw new TypeError('TimescaleOptions must not be empty!');
     if (typeof options !== 'object' || Array.isArray(options)) throw new TypeError('TimescaleOptions must be an object.');
@@ -106,7 +162,14 @@ export default class Filters {
     return this;
   }
 
-  /** Sets Tremolo filter */
+  /**
+   * Sets Tremolo filter
+   * @param options - The tremolo options
+   * @param options.frequency - The frequency 0 < f ≤ 14
+   * @param options.depth - The depth 0 < d ≤ 1
+   * @param apply - Whether to send filter payload to Lavalink or not
+   * @returns The filters instance, for chaining calls
+   */
   public setTremolo(options: TremoloOptions, apply = true): this {
     if (!options) throw new TypeError('TremoloOptions must not be empty!');
     if (typeof options !== 'object' || Array.isArray(options)) throw new TypeError('TremoloOptions must be an object.');
@@ -116,7 +179,14 @@ export default class Filters {
     return this;
   }
 
-  /** Sets Vibrato filter */
+  /**
+   * Sets Vibrato filter
+   * @param options - The vibrato options
+   * @param options.frequency - The frequency 0 < f ≤ 14
+   * @param options.depth - The depth 0 < d ≤ 1
+   * @param apply - Whether to send filter payload to Lavalink or not
+   * @returns The filters instance, for chaining calls
+   */
   public setVibrato(options: VibratoOptions, apply = true): this {
     if (!options) throw new TypeError('VibratoOptions must not be empty!');
     if (typeof options !== 'object' || Array.isArray(options)) throw new TypeError('VibratoOptions must be an object.');
@@ -126,7 +196,12 @@ export default class Filters {
     return this;
   }
 
-  /** Sets the volume */
+  /**
+   * Sets the volume
+   * @param vol - The volume to set [0,500]
+   * @param apply - Whether to send filter payload to Lavalink or not
+   * @returns The filters instance, for chaining calls
+   */
   public setVolume(vol: number, apply = true): this {
     if (typeof vol !== 'number') throw new TypeError('Volume must be an number.');
     if (vol < 0 || vol > 500) throw new TypeError('Volume must be an number between 0 and 500.');
