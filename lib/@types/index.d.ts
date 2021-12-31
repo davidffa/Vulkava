@@ -69,7 +69,7 @@ export declare type EventListeners<T> = {
 export declare type SEARCH_SOURCE = 'youtube' | 'youtubemusic' | 'soundcloud' | 'odysee' | 'yandex';
 export declare type PlaylistInfo = {
     selectedTrack: number;
-    title: string;
+    name: string;
     duration: number;
 };
 export declare type TrackInfo = {
