@@ -5,13 +5,16 @@ import fetch from '../utils/Request';
 export default class Spotify {
   private readonly vulkava: Vulkava;
   private readonly auth: string;
+
+  private readonly market: string;
   private token: string | null;
 
   private renewDate: number;
 
-  constructor(vulkava: Vulkava, clientId: string, clientSecret: string) {
+  constructor(vulkava: Vulkava, clientId: string, clientSecret: string, market = 'US') {
     this.vulkava = vulkava;
     this.auth = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
+    this.market = market;
 
     this.token = null;
     this.renewDate = 0;
@@ -69,6 +72,15 @@ export default class Spotify {
     return { title, tracks: unresolvedTracks };
   }
 
+  public async getArtistTopTracks(id: string): Promise<{ title: string, tracks: UnresolvedTrack[] }> {
+    const res = await this.makeRequest<{ tracks: ISpotifyTrack[] }>(`artists/${id}/top-tracks?market=${this.market}`);
+
+    return {
+      title: `${res.tracks[0].artists.find(a => a.id === id)?.name ?? ''} Top Tracks`,
+      tracks: res.tracks.map(t => this.buildTrack(t))
+    };
+  }
+
   private buildTrack({ name, artists, external_urls: { spotify }, duration_ms }: ISpotifyTrack): UnresolvedTrack {
     const artistNames = artists.map(({ name }) => name).join(', ');
 
@@ -115,6 +127,7 @@ interface IRenewResponse {
 interface ISpotifyTrack {
   name: string;
   artists: Array<{
+    id: string;
     name: string;
   }>;
   external_urls: {

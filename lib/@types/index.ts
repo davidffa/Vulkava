@@ -40,6 +40,7 @@ export type VoiceServerUpdatePayload = IncomingDiscordPayload & {
 type SpotifyConfig = {
   clientId: string;
   clientSecret: string;
+  market?: string;
 }
 
 /** Main constructor options */

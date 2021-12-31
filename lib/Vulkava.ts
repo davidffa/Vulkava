@@ -82,7 +82,7 @@ export class Vulkava extends EventEmitter {
     this.unresolvedSearchSource = options.unresolvedSearchSource ?? 'youtubemusic';
 
     if (options.spotify) {
-      this.spotify = new Spotify(this, options.spotify.clientId, options.spotify.clientSecret);
+      this.spotify = new Spotify(this, options.spotify.clientId, options.spotify.clientSecret, options.spotify.market);
     }
 
     this.deezer = new Deezer(this);
@@ -167,7 +167,7 @@ export class Vulkava extends EventEmitter {
       throw new Error('No connected nodes found');
     }
 
-    const spotifyRegex = /^(?:https?:\/\/(?:open\.)?spotify\.com|spotify)[/:](track|album|playlist)[/:]([a-zA-Z0-9]+)/;
+    const spotifyRegex = /^(?:https?:\/\/(?:open\.)?spotify\.com|spotify)[/:](track|album|playlist|artist)[/:]([a-zA-Z0-9]+)/;
     const deezerRegex = /^(?:https?:\/\/|)?(?:www\.)?deezer\.com\/(?:\w{2}\/)?(track|album|playlist)\/(\d+)/;
 
     const deezerMatch = query.match(deezerRegex);
@@ -233,6 +233,18 @@ export class Vulkava extends EventEmitter {
             };
           case 'playlist':
             list = await this.spotify.getPlaylist(spotifyMatch[2]);
+
+            return {
+              loadType: 'PLAYLIST_LOADED',
+              playlistInfo: {
+                title: list.title,
+                duration: list.tracks.reduce((acc, curr) => acc + curr.duration, 0),
+                selectedTrack: 0
+              },
+              tracks: list.tracks
+            };
+          case 'artist':
+            list = await this.spotify.getArtistTopTracks(spotifyMatch[2]);
 
             return {
               loadType: 'PLAYLIST_LOADED',
