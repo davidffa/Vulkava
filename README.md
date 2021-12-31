@@ -10,6 +10,8 @@ You will need NodeJS v14+ and a running lavalink server.
 - [My custom version](https://github.com/davidffa/lavalink/releases)
 ```console
 $ npm i vulkava
+$ yarn add vulkava
+$ pnpm add vulkava
 ```
 
 ## Getting started
@@ -39,27 +41,41 @@ client.vulkava = new Vulkava({
     // With eris
     // client.guilds.get(guildId)?.shard.sendWS(payload.op, payload.d);
   }
-}).on('trackStart', (player, track) => {
+})
+
+// -- Vulkava events --
+// Fired when a track starts playing
+client.vulkava.on('trackStart', (player, track) => {
   const channel = client.channels.cache.get(player.textChannelId);
 
   channel.send(`Now playing \`${track.title}\``);
-}).on('queueEnd', (player) => {
+});
+
+// Fired when the queue ends
+client.vulkava.on('queueEnd', (player) => {
   const channel = client.channels.cache.get(player.textChannelId);
 
   channel.send(`Queue ended!`);
 
   player.destroy();
-}).on('error', (node, err) => {
+});
+
+// This event is needed to catch any errors that occur on Vulkava
+client.vulkava.on('error', (node, err) => {
   console.error(`[Vulkava] Error on node ${node.identifier}`, err.message);
 });
 
+// -- Client events --
 client.on('ready', () => {
   console.log('Ready!');
+  // Starts the vulkava & connects to all lavalink nodes
   client.vulkava.start(client.user.id);
 });
 
-// IMPORTANT
+// IMPORTANT!
 client.on('raw', (packet) => client.vulkava.handleVoiceUpdate(packet));
+// On eris:
+// client.on('rawWS', (packet) => client.vulkava.handleVoiceUpdate(packet));
 
 client.on('interactionCreate', async interaction => {
   if (!interaction.isCommand()) return;
@@ -75,6 +91,7 @@ client.on('interactionCreate', async interaction => {
     return interaction.reply(':x: No matches!');
   }
 
+  // Creates the audio player
   const player = client.vulkava.createPlayer({
     guildId: interaction.guild.id,
     voiceChannelId: interaction.member.voice.channelId,
@@ -90,7 +107,7 @@ client.on('interactionCreate', async interaction => {
       player.queue.push(track);
     }
 
-    interaction.reply(`Playlist \`${res.playlistInfo.title}\` loaded!`);
+    interaction.reply(`Playlist \`${res.playlistInfo.name}\` loaded!`);
   } else {
     const track = res.tracks[0];
     track.setRequester(interaction.user);
