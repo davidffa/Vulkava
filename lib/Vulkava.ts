@@ -1,11 +1,26 @@
 import { EventEmitter } from 'events';
-import Node, { NodeState } from './Node';
 
-import type { IncomingDiscordPayload, OutgoingDiscordPayload, EventListeners, LoadTracksResult, PlayerOptions, SearchResult, SEARCH_SOURCE, VoiceServerUpdatePayload, VoiceStateUpdatePayload, VulkavaOptions, TrackInfo, ITrack, PlaylistInfo } from './@types';
+import Node, { NodeState } from './Node';
 import Track from './Track';
 import { Player } from '..';
 import Spotify from './sources/Spotify';
 import Deezer from './sources/Deezer';
+
+import type {
+  IncomingDiscordPayload,
+  OutgoingDiscordPayload,
+  EventListeners,
+  LoadTracksResult,
+  PlayerOptions,
+  SearchResult,
+  SEARCH_SOURCE,
+  VoiceServerUpdatePayload,
+  VoiceStateUpdatePayload,
+  VulkavaOptions,
+  TrackInfo,
+  ITrack,
+  PlaylistInfo
+} from './@types';
 
 export interface Vulkava {
   once: EventListeners<this>;
@@ -70,6 +85,10 @@ export class Vulkava extends EventEmitter {
    * @param {Number} [options.nodes[].retryAttemptsInterval] - The interval between retry attempts
    * @param {String} [options.defaultSearchSource] - The default search source
    * @param {String} [options.unresolvedSearchSource] - The unresolved search source
+   * @param {Object} [options.spotify] - The spotify credential options
+   * @param {String} [options.spotify.clientId] - The spotify client id
+   * @param {String} [options.spotify.clientSecret] - The spotify client secret
+   * @param {String} [options.spotify.market] - The spotify market
    * @param {Function} options.sendWS - The function to send websocket messages to the main gateway
    */
   constructor(options: VulkavaOptions) {
