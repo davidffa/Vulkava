@@ -1,0 +1,43 @@
+{
+    "name": "vulkava",
+    "version": "1.0.0",
+    "description": "A lavalink wrapper in Node.JS",
+    "main": "./index.js",
+    "types": "./index.d.ts",
+    "author": "David Amorim",
+    "scripts": {
+        "build": "tsc",
+        "lint": "eslint lib *.ts"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/davidffa/Vulkava.git"
+    },
+    "license": "MIT",
+    "dependencies": {
+        "ws": "^8.4.0"
+    },
+    "devDependencies": {
+        "@types/node": "^17.0.4",
+        "@types/ws": "^8.2.2",
+        "@typescript-eslint/eslint-plugin": "^5.8.0",
+        "@typescript-eslint/parser": "^5.8.0",
+        "eslint": "^8.5.0",
+        "typescript": "^4.5.4"
+    },
+    "bugs": {
+        "url": "https://github.com/davidffa/Vulkava/issues"
+    },
+    "engines": {
+        "node": ">=14.x.x"
+    },
+    "keywords": [
+        "lavalink",
+        "lavalink-wrapper",
+        "discord-music",
+        "discord",
+        "discord-bot",
+        "bot",
+        "music-bot"
+    ]
+}
