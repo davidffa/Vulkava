@@ -187,7 +187,7 @@ export class Vulkava extends EventEmitter {
           return {
             loadType: 'PLAYLIST_LOADED',
             playlistInfo: {
-              title: list.title,
+              name: list.title,
               duration: list.tracks.reduce((acc, curr) => acc + curr.duration, 0),
               selectedTrack: 0
             },
@@ -199,7 +199,7 @@ export class Vulkava extends EventEmitter {
           return {
             loadType: 'PLAYLIST_LOADED',
             playlistInfo: {
-              title: list.title,
+              name: list.title,
               duration: list.tracks.reduce((acc, curr) => acc + curr.duration, 0),
               selectedTrack: 0
             },
@@ -225,7 +225,7 @@ export class Vulkava extends EventEmitter {
             return {
               loadType: 'PLAYLIST_LOADED',
               playlistInfo: {
-                title: list.title,
+                name: list.title,
                 duration: list.tracks.reduce((acc, curr) => acc + curr.duration, 0),
                 selectedTrack: 0
               },
@@ -237,7 +237,7 @@ export class Vulkava extends EventEmitter {
             return {
               loadType: 'PLAYLIST_LOADED',
               playlistInfo: {
-                title: list.title,
+                name: list.title,
                 duration: list.tracks.reduce((acc, curr) => acc + curr.duration, 0),
                 selectedTrack: 0
               },
@@ -249,7 +249,7 @@ export class Vulkava extends EventEmitter {
             return {
               loadType: 'PLAYLIST_LOADED',
               playlistInfo: {
-                title: list.title,
+                name: list.title,
                 duration: list.tracks.reduce((acc, curr) => acc + curr.duration, 0),
                 selectedTrack: 0
               },

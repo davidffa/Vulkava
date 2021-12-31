@@ -81,7 +81,7 @@ export type SEARCH_SOURCE = 'youtube' | 'youtubemusic' | 'soundcloud' | 'odysee'
 
 export type PlaylistInfo = {
   selectedTrack: number;
-  title: string;
+  name: string;
   duration: number;
 };
 
