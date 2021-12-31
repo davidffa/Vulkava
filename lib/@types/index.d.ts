@@ -33,6 +33,7 @@ export declare type VoiceServerUpdatePayload = IncomingDiscordPayload & {
 declare type SpotifyConfig = {
     clientId: string;
     clientSecret: string;
+    market?: string;
 };
 /** Main constructor options */
 export declare type VulkavaOptions = {
