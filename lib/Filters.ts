@@ -218,8 +218,10 @@ export default class Filters {
     this.options = {};
 
     for (const [filter, config] of Object.entries(filters)) {
-      if (!['channelMix', 'distortion', 'equalizer', 'karaoke', 'lowPass', 'rotation', 'timescale', 'tremolo', 'vibrato'].includes(filter)) continue;
-      this.options[filter] = config;
+      if (!['channelMix', 'distortion', 'equalizer', 'karaoke', 'lowPass', 'rotation', 'timescale', 'tremolo', 'volume', 'vibrato'].includes(filter)) continue;
+
+      if (filter === 'volume') this.options[filter] = (config as number) / 100;
+      else this.options[filter] = config;
     }
 
     this.apply();
