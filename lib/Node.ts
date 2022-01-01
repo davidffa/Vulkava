@@ -404,7 +404,7 @@ export default class Node {
     this.ws = null;
 
     if (wasClean) {
-      this.vulkava.emit('nodeDisconnect', this);
+      this.vulkava.emit('nodeDisconnect', this, code, reason);
       return;
     }
 
