@@ -149,11 +149,10 @@ export default class Node {
 
   /** Fetches versions from lavalink Node */
   private async fetchVersions(): Promise<void> {
-    try {
-      this.versions = await this.request('GET', 'versions');
-    } catch {
-      this.versions = null;
-    }
+    const versions = await this.request<Versions>('GET', 'versions');
+
+    if (versions.BUILD) this.versions = versions;
+    else this.versions = null;
   }
 
   /**
