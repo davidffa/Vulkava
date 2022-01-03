@@ -22,7 +22,7 @@ export default class Filters {
      * @param apply - Whether to send filter payload to Lavalink or not
      * @returns The filters instance, for chaining calls
      */
-    setChannelMix(options: ChannelMixOptions, apply?: boolean): this;
+    setChannelMix(options: ChannelMixOptions | null, apply?: boolean): this;
     /**
      * Sets Distortion filter
      * @param options - The distortion options
@@ -37,14 +37,14 @@ export default class Filters {
      * @param apply - Whether to send filter payload to Lavalink or not
      * @returns The filters instance, for chaining calls
      */
-    setDistortion(options: DistortionOptions, apply?: boolean): this;
+    setDistortion(options: DistortionOptions | null, apply?: boolean): this;
     /**
      * Sets Equalizer filter
      * @param options - The equalizer band array
      * @param apply - Whether to send filter payload to Lavalink or not
      * @returns The filters instance, for chaining calls
      */
-    setEqualizer(options: number[], apply?: boolean): this;
+    setEqualizer(options: number[] | null, apply?: boolean): this;
     /**
      * Sets Karaoke filter
      * @param options - The karaoke options
@@ -55,7 +55,7 @@ export default class Filters {
      * @param apply - Whether to send filter payload to Lavalink or not
      * @returns The filters instance, for chaining calls
      */
-    setKaraoke(options: KaraokeOptions, apply?: boolean): this;
+    setKaraoke(options: KaraokeOptions | null, apply?: boolean): this;
     /**
      * Sets LowPass filter
      * @param options - The lowpass options
@@ -63,7 +63,7 @@ export default class Filters {
      * @param apply - Whether to send filter payload to Lavalink or not
      * @returns The filters instance, for chaining calls
      */
-    setLowPass(options: LowPassOptions, apply?: boolean): this;
+    setLowPass(options: LowPassOptions | null, apply?: boolean): this;
     /**
      * Sets Rotation filter
      * @param options - The rotation options
@@ -71,7 +71,7 @@ export default class Filters {
      * @param apply - Whether to send filter payload to Lavalink or not
      * @returns The filters instance, for chaining calls
      */
-    setRotation(options: RotationOptions, apply?: boolean): this;
+    setRotation(options: RotationOptions | null, apply?: boolean): this;
     /**
      * Sets Timescale filter
      * @param options - The timescale options
@@ -81,7 +81,7 @@ export default class Filters {
      * @param apply - Whether to send filter payload to Lavalink or not
      * @returns The filters instance, for chaining calls
      */
-    setTimescale(options: TimescaleOptions, apply?: boolean): this;
+    setTimescale(options: TimescaleOptions | null, apply?: boolean): this;
     /**
      * Sets Tremolo filter
      * @param options - The tremolo options
@@ -90,7 +90,7 @@ export default class Filters {
      * @param apply - Whether to send filter payload to Lavalink or not
      * @returns The filters instance, for chaining calls
      */
-    setTremolo(options: TremoloOptions, apply?: boolean): this;
+    setTremolo(options: TremoloOptions | null, apply?: boolean): this;
     /**
      * Sets Vibrato filter
      * @param options - The vibrato options
@@ -99,7 +99,7 @@ export default class Filters {
      * @param apply - Whether to send filter payload to Lavalink or not
      * @returns The filters instance, for chaining calls
      */
-    setVibrato(options: VibratoOptions, apply?: boolean): this;
+    setVibrato(options: VibratoOptions | null, apply?: boolean): this;
     /**
      * Sets the volume
      * @param vol - The volume to set [0,500]
