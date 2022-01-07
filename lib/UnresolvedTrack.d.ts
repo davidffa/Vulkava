@@ -8,7 +8,9 @@ export default class UnresolvedTrack {
     readonly uri: string;
     readonly source: string;
     requester: unknown;
-    constructor(vulkava: Vulkava, title: string, author: string, duration?: number, uri?: string, source?: string);
+    private readonly isrc;
+    constructor(vulkava: Vulkava, title: string, author: string, duration?: number, uri?: string, source?: string, isrc?: string);
+    get query(): string;
     build(): Promise<Track>;
     setRequester(requester: unknown): void;
 }
