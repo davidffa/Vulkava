@@ -11,7 +11,9 @@ export default class UnresolvedTrack {
   public readonly source: string;
   public requester: unknown;
 
-  constructor(vulkava: Vulkava, title: string, author: string, duration?: number, uri?: string, source?: string) {
+  private readonly isrc: string;
+
+  constructor(vulkava: Vulkava, title: string, author: string, duration?: number, uri?: string, source?: string, isrc?: string) {
     this.vulkava = vulkava;
 
     this.title = title;
@@ -20,14 +22,24 @@ export default class UnresolvedTrack {
     this.uri = uri ?? '';
     this.source = source ?? 'Unknown';
 
+    if (isrc) this.isrc = isrc;
+
     this.requester = null;
   }
 
+  get query() {
+    return this.isrc ? `"${this.isrc}"` : `${this.author} - ${this.title}`;
+  }
+
   public async build(): Promise<Track> {
-    const res = await this.vulkava.search(`${this.author} - ${this.title}`, this.vulkava.unresolvedSearchSource);
+    let res = await this.vulkava.search(this.query, this.vulkava.unresolvedSearchSource);
 
     if (res.loadType !== 'SEARCH_RESULT') {
-      throw new Error(`Failed to resolve track ${this.uri}`);
+      if (!this.isrc) throw new Error(`Failed to resolve track ${this.uri}`);
+
+      res = await this.vulkava.search(`${this.author} - ${this.title}`, this.vulkava.unresolvedSearchSource);
+
+      if (res.loadType !== 'SEARCH_RESULT') throw new Error(`Failed to resolve track ${this.uri}`);
     }
 
     const track = res.tracks[0] as Track;

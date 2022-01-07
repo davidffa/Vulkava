@@ -33,7 +33,6 @@ export default class Deezer {
 
     const res = await this.makeRequest<IDeezerPlaylist>(`playlist/${id}`);
 
-
     for (const it of res.tracks.data) {
       unresolvedTracks.push(this.buildTrack(it));
     }
@@ -41,21 +40,21 @@ export default class Deezer {
     return { title: res.title, tracks: unresolvedTracks };
   }
 
-  private buildTrack({ title, artist: { name }, link, duration }: IDeezerTrack): UnresolvedTrack {
+  private buildTrack({ title, artist: { name }, link, duration, isrc }: IDeezerTrack): UnresolvedTrack {
     return new UnresolvedTrack(
       this.vulkava,
       title,
       name,
       duration * 1000,
       link,
-      'deezer'
+      'deezer',
+      isrc
     );
   }
 
   private async makeRequest<T>(endpoint: string): Promise<T> {
     return fetch<T>(`https://api.deezer.com/${endpoint}`);
   }
-
 }
 
 interface IDeezerTrack {
@@ -63,6 +62,7 @@ interface IDeezerTrack {
   artist: {
     name: string;
   };
+  isrc: string;
   link: string;
   duration: number;
 }
