@@ -81,7 +81,7 @@ export default class Spotify {
     };
   }
 
-  private buildTrack({ name, artists, external_urls: { spotify }, external_ids: { isrc }, duration_ms }: ISpotifyTrack): UnresolvedTrack {
+  private buildTrack({ name, artists, external_urls: { spotify }, external_ids, duration_ms }: ISpotifyTrack): UnresolvedTrack {
     const artistNames = artists.map(({ name }) => name).join(', ');
 
     return new UnresolvedTrack(
@@ -91,7 +91,7 @@ export default class Spotify {
       duration_ms,
       spotify,
       'spotify',
-      isrc
+      external_ids?.isrc
     );
   }
 
@@ -134,7 +134,7 @@ interface ISpotifyTrack {
   external_urls: {
     spotify: string;
   };
-  external_ids: {
+  external_ids?: {
     isrc: string;
   }
   duration_ms: number;
