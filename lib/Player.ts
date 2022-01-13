@@ -118,7 +118,7 @@ export default class Player {
    * Gets the exact track position based on the last voiceUpdate packet
    */
   get exactPosition(): number {
-    return this.position + (Date.now() - this.positionTimestamp);
+    return Math.min(this.current?.duration ?? 0, this.position + (Date.now() - this.positionTimestamp));
   }
 
   /**
