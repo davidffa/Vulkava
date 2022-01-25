@@ -100,11 +100,8 @@ export class Vulkava extends EventEmitter {
     this.defaultSearchSource = options.defaultSearchSource ?? 'youtube';
     this.unresolvedSearchSource = options.unresolvedSearchSource ?? 'youtubemusic';
 
-    if (options.spotify) {
-      this.spotify = new Spotify(this, options.spotify.clientId, options.spotify.clientSecret, options.spotify.market);
-    }
-
     this.deezer = new Deezer(this);
+    this.spotify = new Spotify(this, options.spotify?.clientId, options.spotify?.clientSecret, options.spotify?.market);
 
     this.sendWS = options.sendWS;
 

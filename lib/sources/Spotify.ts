@@ -4,16 +4,22 @@ import fetch from '../utils/Request';
 
 export default class Spotify {
   private readonly vulkava: Vulkava;
-  private readonly auth: string;
+  private readonly auth: string | null;
 
   private readonly market: string;
   private token: string | null;
 
   private renewDate: number;
 
-  constructor(vulkava: Vulkava, clientId: string, clientSecret: string, market = 'US') {
+  constructor(vulkava: Vulkava, clientId?: string, clientSecret?: string, market = 'US') {
     this.vulkava = vulkava;
-    this.auth = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
+
+    if (clientId && clientSecret) {
+      this.auth = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
+    } else {
+      this.auth = null;
+    }
+
     this.market = market;
 
     this.token = null;
@@ -106,7 +112,30 @@ export default class Spotify {
   }
 
   private async renewToken() {
-    const res = await fetch<IRenewResponse>('https://accounts.spotify.com/api/token?grant_type=client_credentials', {
+    if (this.auth) {
+      await this.getToken();
+    } else {
+      await this.getAnonymousToken();
+    }
+  }
+
+  private async getAnonymousToken() {
+    const { accessToken, accessTokenExpirationTimestampMs } = await fetch<IAnonymousTokenResponse>('https://accounts.spotify.com/api/token?grant_type=client_credentials', {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/97.0.4692.99 Safari/537.36'
+      }
+    });
+
+    this.token = `Bearer ${accessToken}`;
+    this.renewDate = accessTokenExpirationTimestampMs - 5000;
+  }
+
+  private async getToken() {
+    const {
+      token_type,
+      access_token,
+      expires_in
+    } = await fetch<IRenewResponse>('https://accounts.spotify.com/api/token?grant_type=client_credentials', {
       method: 'POST',
       headers: {
         Authorization: `Basic ${this.auth}`,
@@ -114,11 +143,17 @@ export default class Spotify {
       }
     });
 
-    this.token = `${res.token_type} ${res.access_token}`;
-    this.renewDate = Date.now() + res.expires_in * 1000 - 5000;
+    this.token = `${token_type} ${access_token}`;
+    this.renewDate = Date.now() + expires_in * 1000 - 5000;
   }
 }
 
+
+interface IAnonymousTokenResponse {
+  clientId: string;
+  accessToken: string;
+  accessTokenExpirationTimestampMs: number;
+}
 interface IRenewResponse {
   token_type: string;
   access_token: string;
