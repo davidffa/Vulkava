@@ -237,7 +237,7 @@ export default class Filters {
   public clear(): void {
     this.options = {};
 
-    this.player.node.send({
+    this.player.node?.send({
       op: 'filters',
       guildId: this.player.guildId
     });
@@ -254,6 +254,6 @@ export default class Filters {
 
     if (this.options.equalizer) { Object.assign(payload, { equalizer: this.options.equalizer.map((gain, band) => ({ band, gain })) }); }
 
-    this.player.node.send(payload);
+    this.player.node?.send(payload);
   }
 }

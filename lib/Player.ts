@@ -31,7 +31,7 @@ export enum ConnectionState {
  */
 export default class Player {
   private readonly vulkava: Vulkava;
-  public node: Node;
+  public node: Node | null;
 
   public readonly guildId: string;
 
@@ -108,14 +108,14 @@ export default class Player {
 
     this.moving = false;
 
-    this.node = this.vulkava.nodes.filter(n => n.state === NodeState.CONNECTED).sort((a, b) => a.stats.players - b.stats.players)[0];
-
     this.state = ConnectionState.DISCONNECTED;
     this.voiceState = {} as VoiceState;
+
+    this.assignNode();
   }
 
   /**
-   * Gets the exact track position based on the last voiceUpdate packet
+   * Gets the exact track position based on the last playerUpdate packet
    */
   get exactPosition(): number {
     return Math.min(this.current?.duration ?? 0, this.position + (Date.now() - this.positionTimestamp));
@@ -136,17 +136,29 @@ export default class Player {
   }
 
   /**
+   * Assigns a Node to this player
+   * @private
+   */
+  private assignNode() {
+    const node = this.vulkava.nodes.filter(n => n.state === NodeState.CONNECTED).sort((a, b) => a.stats.players - b.stats.players)[0];
+
+    if (!node) throw new Error('No available nodes!');
+
+    this.node = node;
+  }
+
+  /**
    * Connects to the voice channel
    */
   public connect() {
     if (this.state === ConnectionState.CONNECTED) return;
 
-    if (this.node === null) {
-      throw new Error('No available nodes!');
-    }
-
     if (!this.voiceChannelId) {
       throw new Error('No voice channel id provided');
+    }
+
+    if (this.node === null) {
+      this.assignNode();
     }
 
     this.state = ConnectionState.CONNECTING;
@@ -183,7 +195,7 @@ export default class Player {
   public destroy() {
     this.disconnect();
 
-    this.node.send({
+    this.node?.send({
       op: 'destroy',
       guildId: this.guildId
     });
@@ -192,7 +204,7 @@ export default class Player {
   }
 
   /**
-   * @param {Node} node - The node to move the player to
+   * @param {Node} node - The target node to move the player
    */
   public moveNode(node: Node) {
     if (!node) throw new TypeError('You must provide a Node instance.');
@@ -201,14 +213,14 @@ export default class Player {
 
     this.moving = true;
 
-    this.node.send({
+    this.node?.send({
       op: 'destroy',
       guildId: this.guildId,
     });
 
     this.node = node;
 
-    if (Object.keys(this.voiceState).length) {
+    if (Object.keys(this.voiceState).length === 2) {
       this.state = ConnectionState.CONNECTING;
 
       this.sendVoiceUpdate();
@@ -239,7 +251,7 @@ export default class Player {
    * @returns {Promise<Number>}
    */
   public async ping(): Promise<number> {
-    if (this.state !== ConnectionState.CONNECTED) return Infinity;
+    if (this.node === null || this.state !== ConnectionState.CONNECTED) return Infinity;
     return this.node.ping(this.guildId);
   }
 
@@ -252,7 +264,7 @@ export default class Player {
    */
   public async play(options?: PlayOptions) {
     if (this.node === null) {
-      throw new Error('No available nodes!');
+      this.assignNode();
     }
 
     if (!this.current) {
@@ -269,7 +281,7 @@ export default class Player {
       this.current = newTrack;
     }
 
-    this.node.send({
+    this.node?.send({
       op: 'play',
       guildId: this.guildId,
       track: this.current.encodedTrack,
@@ -333,7 +345,7 @@ export default class Player {
       this.queue.splice(0, amount - 1);
     }
 
-    this.node.send({
+    this.node?.send({
       op: 'stop',
       guildId: this.guildId
     });
@@ -347,6 +359,10 @@ export default class Player {
     if (typeof state !== 'boolean') {
       throw new TypeError('State must be a boolean');
     }
+
+    if (!this.playing) return;
+
+    if (this.node === null) throw new Error('Assertion failed. The player does not have a node.');
 
     this.paused = state;
 
@@ -372,7 +388,7 @@ export default class Player {
       return;
     }
 
-    this.node.send({
+    this.node?.send({
       op: 'seek',
       guildId: this.guildId,
       position
@@ -380,9 +396,13 @@ export default class Player {
   }
 
   public sendVoiceUpdate() {
+    if (this.node === null) {
+      this.assignNode();
+    }
+
     this.state = ConnectionState.CONNECTED;
 
-    this.node.send({
+    this.node?.send({
       op: 'voiceUpdate',
       guildId: this.guildId,
       ...this.voiceState

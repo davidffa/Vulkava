@@ -2,7 +2,7 @@ import { EventEmitter } from 'events';
 
 import Node, { NodeState } from './Node';
 import Track from './Track';
-import { Player } from '..';
+import { ConnectionState, Player } from '..';
 import Spotify from './sources/Spotify';
 import Deezer from './sources/Deezer';
 
@@ -350,6 +350,12 @@ export class Vulkava extends EventEmitter {
       player.voiceState.event = {
         ...packet.d
       };
+
+      // A node should be assigned to the player on Player#connect()
+      if (player.node === null) {
+        player.state = ConnectionState.DISCONNECTED;
+        throw new Error('Assertion failed. The Player does not have a node.');
+      }
 
       if (['us', 'brazil', 'buenos-aires'].some(loc => player.voiceState.event.endpoint.startsWith(loc))) {
         if (player.node.options.region && player.node.options.region !== 'USA') {
