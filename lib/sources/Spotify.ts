@@ -126,6 +126,8 @@ export default class Spotify {
       }
     });
 
+    if (!accessToken) throw new Error('Failed to get anonymous token on Spotify.');
+
     this.token = `Bearer ${accessToken}`;
     this.renewDate = accessTokenExpirationTimestampMs - 5000;
   }
