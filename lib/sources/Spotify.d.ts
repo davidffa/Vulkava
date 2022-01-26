@@ -6,7 +6,7 @@ export default class Spotify {
     private readonly market;
     private token;
     private renewDate;
-    constructor(vulkava: Vulkava, clientId: string, clientSecret: string, market?: string);
+    constructor(vulkava: Vulkava, clientId?: string, clientSecret?: string, market?: string);
     getTrack(id: string): Promise<UnresolvedTrack>;
     getAlbum(id: string): Promise<{
         title: string;
@@ -23,4 +23,6 @@ export default class Spotify {
     private buildTrack;
     private makeRequest;
     private renewToken;
+    private getAnonymousToken;
+    private getToken;
 }

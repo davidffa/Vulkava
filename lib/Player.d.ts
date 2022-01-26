@@ -28,7 +28,7 @@ export declare enum ConnectionState {
  */
 export default class Player {
     private readonly vulkava;
-    node: Node;
+    node: Node | null;
     readonly guildId: string;
     readonly filters: Filters;
     voiceChannelId: string;
@@ -59,7 +59,7 @@ export default class Player {
      */
     constructor(vulkava: Vulkava, options: PlayerOptions);
     /**
-     * Gets the exact track position based on the last voiceUpdate packet
+     * Gets the exact track position based on the last playerUpdate packet
      */
     get exactPosition(): number;
     /**
@@ -70,6 +70,11 @@ export default class Player {
      * Gets the volume of the player
      */
     get volume(): number;
+    /**
+     * Assigns a Node to this player
+     * @private
+     */
+    private assignNode;
     /**
      * Connects to the voice channel
      */
@@ -83,7 +88,7 @@ export default class Player {
      */
     destroy(): void;
     /**
-     * @param {Node} node - The node to move the player to
+     * @param {Node} node - The target node to move the player
      */
     moveNode(node: Node): void;
     /**
