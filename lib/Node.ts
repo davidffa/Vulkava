@@ -42,8 +42,8 @@ export default class Node {
   public state: NodeState;
   public stats: NodeStats;
 
-  /** Version object for the node (null if lavalink does not support) */
-  public versions: Versions | null;
+  /** Version object for the node (undefined if lavalink does not support) */
+  public versions?: Versions;
 
   static checkOptions(options: NodeOptions) {
     if (typeof options !== 'object') throw new TypeError('NodeOptions must be an object');
@@ -152,7 +152,7 @@ export default class Node {
     const versions = await this.request<Versions>('GET', 'versions');
 
     if (versions.BUILD) this.versions = versions;
-    else this.versions = null;
+    else delete this.versions;
   }
 
   /**
@@ -351,8 +351,6 @@ export default class Node {
     this.state = NodeState.CONNECTED;
     this.vulkava.emit('nodeConnect', this);
 
-    if (!this.versions) this.fetchVersions();
-
     this.retryAttempts = 0;
 
     if (!this.resumed) {
@@ -430,6 +428,12 @@ export default class Node {
     if (msg.headers['session-resumed'] === 'true') {
       this.resumed = true;
       this.vulkava.emit('nodeResume', this);
+    }
+
+    if (!this.versions && msg.headers['lavalink-version'] === 'davidffa/lavalink') {
+      this.fetchVersions();
+    } else {
+      delete this.versions;
     }
   }
 
