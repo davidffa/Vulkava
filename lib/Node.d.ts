@@ -20,8 +20,8 @@ export default class Node {
     retryAttempts: number;
     state: NodeState;
     stats: NodeStats;
-    /** Version object for the node (null if lavalink does not support) */
-    versions: Versions | null;
+    /** Version object for the node (undefined if lavalink does not support) */
+    versions?: Versions;
     static checkOptions(options: NodeOptions): void;
     /**
      * Create a new Vulkava instance
