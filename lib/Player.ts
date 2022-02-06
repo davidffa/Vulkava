@@ -118,7 +118,14 @@ export default class Player {
    * Gets the exact track position based on the last playerUpdate packet
    */
   get exactPosition(): number {
-    return Math.min(this.current?.duration ?? 0, this.position + (Date.now() - this.positionTimestamp));
+    if (this.paused) return this.position;
+
+    const filterConfig = this.filters.active.timescale;
+
+    const rate = filterConfig?.rate ?? 1;
+    const speed = filterConfig?.speed ?? 1;
+
+    return Math.min(this.current?.duration ?? 0, (this.position + (Date.now() - this.positionTimestamp)) * rate * speed);
   }
 
   /**
