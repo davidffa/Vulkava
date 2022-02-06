@@ -1,6 +1,6 @@
 {
     "name": "vulkava",
-    "version": "1.0.11",
+    "version": "1.0.12",
     "description": "A lavalink wrapper in Node.JS",
     "main": "./index.js",
     "types": "./index.d.ts",
