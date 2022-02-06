@@ -430,7 +430,9 @@ export default class Node {
       this.vulkava.emit('nodeResume', this);
     }
 
-    if (!this.versions && msg.headers['lavalink-version'] === 'davidffa/lavalink') {
+    if (this.versions) return;
+
+    if (msg.headers['lavalink-version'] === 'davidffa/lavalink') {
       this.fetchVersions();
     } else {
       delete this.versions;
