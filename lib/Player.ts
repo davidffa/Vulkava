@@ -244,7 +244,7 @@ export default class Player {
         op: 'play',
         guildId: this.guildId,
         track: this.current.encodedTrack,
-        startTime: this.position
+        startTime: this.current?.isStream ? 0 : this.position
       };
 
       this.node.send(payload);
