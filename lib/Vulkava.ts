@@ -344,6 +344,12 @@ export class Vulkava extends EventEmitter {
     } else if (payload.t === 'VOICE_SERVER_UPDATE') {
       const packet = payload as VoiceServerUpdatePayload;
 
+      // Sometimes discord sends a partial voice server update packet, with null endpoint
+      // Just wait for a new one I guess ?
+      if (!packet.d.endpoint) {
+        return;
+      }
+
       player.voiceState.event = {
         ...packet.d
       };
