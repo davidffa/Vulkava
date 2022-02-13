@@ -364,7 +364,7 @@ export class Vulkava extends EventEmitter {
         if (player.node.options.region && player.node.options.region !== 'USA') {
           const usaNodes = this.nodes.filter(node => node.options.region === 'USA' && node.state === NodeState.CONNECTED);
 
-          if (usaNodes) {
+          if (usaNodes.length) {
             player.moveNode(usaNodes.sort((a, b) => a.stats.players - b.stats.players)[0]);
             return;
           }
@@ -372,7 +372,7 @@ export class Vulkava extends EventEmitter {
       } else if (player.node.options.region && player.node.options.region !== 'EU') {
         const europeNodes = this.nodes.filter(node => node.options.region === 'EU' && node.state === NodeState.CONNECTED);
 
-        if (europeNodes) {
+        if (europeNodes.length) {
           player.moveNode(europeNodes.sort((a, b) => a.stats.players - b.stats.players)[0]);
           return;
         }
