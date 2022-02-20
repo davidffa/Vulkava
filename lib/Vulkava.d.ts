@@ -20,8 +20,9 @@ export declare class Vulkava extends EventEmitter {
     nodes: Node[];
     private readonly defaultSearchSource;
     readonly unresolvedSearchSource: SEARCH_SOURCE;
-    private readonly spotify;
+    private readonly appleMusic;
     private readonly deezer;
+    private readonly spotify;
     readonly sendWS: (guildId: string, payload: OutgoingDiscordPayload) => void;
     players: Map<string, Player>;
     static checkOptions(options: VulkavaOptions): void;
