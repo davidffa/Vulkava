@@ -21,6 +21,7 @@ import type {
   ITrack,
   PlaylistInfo
 } from './@types';
+import AppleMusic from './sources/AppleMusic';
 
 export interface Vulkava {
   once: EventListeners<this>;
@@ -39,8 +40,9 @@ export class Vulkava extends EventEmitter {
   public nodes: Node[];
   private readonly defaultSearchSource: SEARCH_SOURCE;
   public readonly unresolvedSearchSource: SEARCH_SOURCE;
-  private readonly spotify: Spotify | null;
+  private readonly appleMusic: AppleMusic;
   private readonly deezer: Deezer;
+  private readonly spotify: Spotify;
 
   public readonly sendWS: (guildId: string, payload: OutgoingDiscordPayload) => void;
 
@@ -100,6 +102,7 @@ export class Vulkava extends EventEmitter {
     this.defaultSearchSource = options.defaultSearchSource ?? 'youtube';
     this.unresolvedSearchSource = options.unresolvedSearchSource ?? 'youtubemusic';
 
+    this.appleMusic = new AppleMusic(this);
     this.deezer = new Deezer(this);
     this.spotify = new Spotify(this, options.spotify?.clientId, options.spotify?.clientSecret, options.spotify?.market);
 
@@ -183,8 +186,61 @@ export class Vulkava extends EventEmitter {
       throw new Error('No connected nodes found');
     }
 
+    const appleMusicRegex = /^(?:https?:\/\/|)?(?:music\.)?apple\.com\/(?:[a-z]{2}\/)(album|playlist|artist)\/[^/]+\/([^/?]+)(?:\?i=(\d+))?/;
     const spotifyRegex = /^(?:https?:\/\/(?:open\.)?spotify\.com|spotify)[/:](track|album|playlist|artist)[/:]([a-zA-Z0-9]+)/;
     const deezerRegex = /^(?:https?:\/\/|)?(?:www\.)?deezer\.com\/(?:\w{2}\/)?(track|album|playlist)\/(\d+)/;
+
+    const appleMusicMatch = query.match(appleMusicRegex);
+
+    if (appleMusicMatch) {
+      let list;
+
+      switch (appleMusicMatch[1]) {
+        case 'album':
+          if (appleMusicMatch[3]) {
+            return {
+              loadType: 'TRACK_LOADED',
+              playlistInfo: {} as PlaylistInfo,
+              tracks: [await this.appleMusic.getTrack(appleMusicMatch[3])],
+            };
+          } else {
+            list = await this.appleMusic.getAlbum(appleMusicMatch[2]);
+            return {
+              loadType: 'PLAYLIST_LOADED',
+              playlistInfo: {
+                name: list.title,
+                duration: list.tracks.reduce((acc, curr) => acc + curr.duration, 0),
+                selectedTrack: 0
+              },
+              tracks: list.tracks,
+            };
+          }
+        case 'playlist':
+          list = await this.appleMusic.getPlaylist(appleMusicMatch[2]);
+
+          return {
+            loadType: 'PLAYLIST_LOADED',
+            playlistInfo: {
+              name: list.title,
+              duration: list.tracks.reduce((acc, curr) => acc + curr.duration, 0),
+              selectedTrack: 0
+            },
+            tracks: list.tracks
+          };
+        case 'artist':
+          list = await this.appleMusic.getArtistTopTracks(appleMusicMatch[2]);
+
+          return {
+            loadType: 'PLAYLIST_LOADED',
+            playlistInfo: {
+              name: list.title,
+              duration: list.tracks.reduce((acc, curr) => acc + curr.duration, 0),
+              selectedTrack: 0
+            },
+            tracks: list.tracks
+          };
+      }
+    }
 
     const deezerMatch = query.match(deezerRegex);
 
@@ -224,54 +280,52 @@ export class Vulkava extends EventEmitter {
       }
     }
 
-    if (this.spotify) {
-      const spotifyMatch = query.match(spotifyRegex);
-      if (spotifyMatch) {
-        let list;
+    const spotifyMatch = query.match(spotifyRegex);
+    if (spotifyMatch) {
+      let list;
 
-        switch (spotifyMatch[1]) {
-          case 'track':
-            return {
-              loadType: 'TRACK_LOADED',
-              playlistInfo: {} as PlaylistInfo,
-              tracks: [await this.spotify.getTrack(spotifyMatch[2])],
-            };
-          case 'album':
-            list = await this.spotify.getAlbum(spotifyMatch[2]);
-            return {
-              loadType: 'PLAYLIST_LOADED',
-              playlistInfo: {
-                name: list.title,
-                duration: list.tracks.reduce((acc, curr) => acc + curr.duration, 0),
-                selectedTrack: 0
-              },
-              tracks: list.tracks,
-            };
-          case 'playlist':
-            list = await this.spotify.getPlaylist(spotifyMatch[2]);
+      switch (spotifyMatch[1]) {
+        case 'track':
+          return {
+            loadType: 'TRACK_LOADED',
+            playlistInfo: {} as PlaylistInfo,
+            tracks: [await this.spotify.getTrack(spotifyMatch[2])],
+          };
+        case 'album':
+          list = await this.spotify.getAlbum(spotifyMatch[2]);
+          return {
+            loadType: 'PLAYLIST_LOADED',
+            playlistInfo: {
+              name: list.title,
+              duration: list.tracks.reduce((acc, curr) => acc + curr.duration, 0),
+              selectedTrack: 0
+            },
+            tracks: list.tracks,
+          };
+        case 'playlist':
+          list = await this.spotify.getPlaylist(spotifyMatch[2]);
 
-            return {
-              loadType: 'PLAYLIST_LOADED',
-              playlistInfo: {
-                name: list.title,
-                duration: list.tracks.reduce((acc, curr) => acc + curr.duration, 0),
-                selectedTrack: 0
-              },
-              tracks: list.tracks
-            };
-          case 'artist':
-            list = await this.spotify.getArtistTopTracks(spotifyMatch[2]);
+          return {
+            loadType: 'PLAYLIST_LOADED',
+            playlistInfo: {
+              name: list.title,
+              duration: list.tracks.reduce((acc, curr) => acc + curr.duration, 0),
+              selectedTrack: 0
+            },
+            tracks: list.tracks
+          };
+        case 'artist':
+          list = await this.spotify.getArtistTopTracks(spotifyMatch[2]);
 
-            return {
-              loadType: 'PLAYLIST_LOADED',
-              playlistInfo: {
-                name: list.title,
-                duration: list.tracks.reduce((acc, curr) => acc + curr.duration, 0),
-                selectedTrack: 0
-              },
-              tracks: list.tracks
-            };
-        }
+          return {
+            loadType: 'PLAYLIST_LOADED',
+            playlistInfo: {
+              name: list.title,
+              duration: list.tracks.reduce((acc, curr) => acc + curr.duration, 0),
+              selectedTrack: 0
+            },
+            tracks: list.tracks
+          };
       }
     }
 

@@ -34,13 +34,16 @@ export default function fetch<T>(url: string, options?: ReqOptions): Promise<T> 
         .on('data', d => data.push(d))
         .on('error', err => reject(err))
         .once('end', () => {
-          resolve(JSON.parse(Buffer.concat(data).toString()));
+          if (res.headers['content-type']?.includes('application/json')) {
+            resolve(JSON.parse(Buffer.concat(data).toString()));
+          }
+
+          resolve(Buffer.concat(data) as unknown as T);
         });
     });
 
     req.on('error', err => reject(err));
     req.on('timeout', () => reject(new Error('Request timed out!')));
-    req.on('error', err => reject(err));
 
     if (options?.body) {
       const body = JSON.stringify(options.body);
