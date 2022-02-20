@@ -7,16 +7,16 @@ export default class AppleMusic {
     private token;
     private renewDate;
     constructor(vulkava: Vulkava);
-    getTrack(id: string): Promise<UnresolvedTrack>;
-    getAlbum(id: string): Promise<{
+    getTrack(id: string, storefront: string): Promise<UnresolvedTrack>;
+    getAlbum(id: string, storefront: string): Promise<{
         title: string;
         tracks: UnresolvedTrack[];
     }>;
-    getPlaylist(id: string): Promise<{
+    getPlaylist(id: string, storefront: string): Promise<{
         title: string;
         tracks: UnresolvedTrack[];
     }>;
-    getArtistTopTracks(id: string): Promise<{
+    getArtistTopTracks(id: string, storefront: string): Promise<{
         title: string;
         tracks: UnresolvedTrack[];
     }>;
