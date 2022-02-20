@@ -18,16 +18,16 @@ export default class AppleMusic {
     this.renewDate = 0;
   }
 
-  public async getTrack(id: string): Promise<UnresolvedTrack> {
-    const track = await this.makeRequest<ISongsResponse>(`songs/${id}`);
+  public async getTrack(id: string, storefront: string): Promise<UnresolvedTrack> {
+    const track = await this.makeRequest<ISongsResponse>(`songs/${id}`, storefront);
 
     return this.buildTrack(track.data[0].attributes);
   }
 
-  public async getAlbum(id: string): Promise<{ title: string, tracks: UnresolvedTrack[] }> {
+  public async getAlbum(id: string, storefront: string): Promise<{ title: string, tracks: UnresolvedTrack[] }> {
     const unresolvedTracks: UnresolvedTrack[] = [];
 
-    const res = await this.makeRequest<IAppleMusicAlbum>(`albums/${id}`);
+    const res = await this.makeRequest<IAppleMusicAlbum>(`albums/${id}`, storefront);
 
     const title = res.data[0].attributes.name;
 
@@ -38,7 +38,7 @@ export default class AppleMusic {
     }
 
     while (next && unresolvedTracks.length < 400) {
-      const nextRes = await this.makeRequest<ITrackList>(next.split('/').slice(4).join('/'));
+      const nextRes = await this.makeRequest<ITrackList>(next.split('/').slice(4).join('/'), storefront);
 
       next = nextRes.next;
 
@@ -50,10 +50,10 @@ export default class AppleMusic {
     return { title, tracks: unresolvedTracks };
   }
 
-  public async getPlaylist(id: string): Promise<{ title: string, tracks: UnresolvedTrack[] }> {
+  public async getPlaylist(id: string, storefront: string): Promise<{ title: string, tracks: UnresolvedTrack[] }> {
     const unresolvedTracks: UnresolvedTrack[] = [];
 
-    const res = await this.makeRequest<IAppleMusicPlaylist>(`playlists/${id}`);
+    const res = await this.makeRequest<IAppleMusicPlaylist>(`playlists/${id}`, storefront);
 
     const title = res.data[0].attributes.name;
 
@@ -64,7 +64,7 @@ export default class AppleMusic {
     }
 
     while (next && unresolvedTracks.length < 400) {
-      const nextRes = await this.makeRequest<ITrackList>(next.split('/').slice(4).join('/'));
+      const nextRes = await this.makeRequest<ITrackList>(next.split('/').slice(4).join('/'), storefront);
 
       next = nextRes.next;
 
@@ -76,12 +76,12 @@ export default class AppleMusic {
     return { title, tracks: unresolvedTracks };
   }
 
-  public async getArtistTopTracks(id: string): Promise<{ title: string, tracks: UnresolvedTrack[] }> {
-    const artistRes = await this.makeRequest<IAppleMusicArtist>(`artists/${id}`);
+  public async getArtistTopTracks(id: string, storefront: string): Promise<{ title: string, tracks: UnresolvedTrack[] }> {
+    const artistRes = await this.makeRequest<IAppleMusicArtist>(`artists/${id}`, storefront);
 
     const unresolvedTracks: UnresolvedTrack[] = [];
 
-    const res = await this.makeRequest<ISongsResponse>(`artists/${id}/view/top-songs`);
+    const res = await this.makeRequest<ISongsResponse>(`artists/${id}/view/top-songs`, storefront);
 
     for (const it of res.data) {
       unresolvedTracks.push(this.buildTrack(it.attributes));
@@ -105,10 +105,10 @@ export default class AppleMusic {
     );
   }
 
-  private async makeRequest<T>(endpoint: string): Promise<T> {
+  private async makeRequest<T>(endpoint: string, storefront: string): Promise<T> {
     if (!this.token || this.renewDate === 0 || Date.now() > this.renewDate) await this.renewToken();
 
-    return fetch<T>(`https://api.music.apple.com/v1/catalog/us/${endpoint}`, {
+    return fetch<T>(`https://api.music.apple.com/v1/catalog/${storefront}/${endpoint}`, {
       headers: {
         'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/97.0.4692.99 Safari/537.36',
         Authorization: `Bearer ${this.token}`

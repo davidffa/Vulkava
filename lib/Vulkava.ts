@@ -186,7 +186,7 @@ export class Vulkava extends EventEmitter {
       throw new Error('No connected nodes found');
     }
 
-    const appleMusicRegex = /^(?:https?:\/\/|)?(?:music\.)?apple\.com\/(?:[a-z]{2}\/)(album|playlist|artist)\/[^/]+\/([^/?]+)(?:\?i=(\d+))?/;
+    const appleMusicRegex = /^(?:https?:\/\/|)?(?:music\.)?apple\.com\/([a-z]{2})\/(album|playlist|artist)\/[^/]+\/([^/?]+)(?:\?i=(\d+))?/;
     const spotifyRegex = /^(?:https?:\/\/(?:open\.)?spotify\.com|spotify)[/:](track|album|playlist|artist)[/:]([a-zA-Z0-9]+)/;
     const deezerRegex = /^(?:https?:\/\/|)?(?:www\.)?deezer\.com\/(?:\w{2}\/)?(track|album|playlist)\/(\d+)/;
 
@@ -195,16 +195,18 @@ export class Vulkava extends EventEmitter {
     if (appleMusicMatch) {
       let list;
 
-      switch (appleMusicMatch[1]) {
+      const storefront = appleMusicMatch[1];
+
+      switch (appleMusicMatch[2]) {
         case 'album':
-          if (appleMusicMatch[3]) {
+          if (appleMusicMatch[4]) {
             return {
               loadType: 'TRACK_LOADED',
               playlistInfo: {} as PlaylistInfo,
-              tracks: [await this.appleMusic.getTrack(appleMusicMatch[3])],
+              tracks: [await this.appleMusic.getTrack(appleMusicMatch[4], storefront)],
             };
           } else {
-            list = await this.appleMusic.getAlbum(appleMusicMatch[2]);
+            list = await this.appleMusic.getAlbum(appleMusicMatch[3], storefront);
             return {
               loadType: 'PLAYLIST_LOADED',
               playlistInfo: {
@@ -216,7 +218,7 @@ export class Vulkava extends EventEmitter {
             };
           }
         case 'playlist':
-          list = await this.appleMusic.getPlaylist(appleMusicMatch[2]);
+          list = await this.appleMusic.getPlaylist(appleMusicMatch[3], storefront);
 
           return {
             loadType: 'PLAYLIST_LOADED',
@@ -228,7 +230,7 @@ export class Vulkava extends EventEmitter {
             tracks: list.tracks
           };
         case 'artist':
-          list = await this.appleMusic.getArtistTopTracks(appleMusicMatch[2]);
+          list = await this.appleMusic.getArtistTopTracks(appleMusicMatch[3], storefront);
 
           return {
             loadType: 'PLAYLIST_LOADED',
