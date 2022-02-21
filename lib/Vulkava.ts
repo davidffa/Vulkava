@@ -186,7 +186,7 @@ export class Vulkava extends EventEmitter {
       throw new Error('No connected nodes found');
     }
 
-    const appleMusicRegex = /^(?:https?:\/\/|)?(?:music\.)?apple\.com\/([a-z]{2})\/(album|playlist|artist)\/[^/]+\/([^/?]+)(?:\?i=(\d+))?/;
+    const appleMusicRegex = /^(?:https?:\/\/|)?(?:music\.)?apple\.com\/([a-z]{2})\/(album|playlist|artist|music-video)\/[^/]+\/([^/?]+)(?:\?i=(\d+))?/;
     const spotifyRegex = /^(?:https?:\/\/(?:open\.)?spotify\.com|spotify)[/:](track|album|playlist|artist)[/:]([a-zA-Z0-9]+)/;
     const deezerRegex = /^(?:https?:\/\/|)?(?:www\.)?deezer\.com\/(?:\w{2}\/)?(track|album|playlist)\/(\d+)/;
 
@@ -198,6 +198,12 @@ export class Vulkava extends EventEmitter {
       const storefront = appleMusicMatch[1];
 
       switch (appleMusicMatch[2]) {
+        case 'music-video':
+          return {
+            loadType: 'TRACK_LOADED',
+            playlistInfo: {} as PlaylistInfo,
+            tracks: [await this.appleMusic.getMusicVideo(appleMusicMatch[3], storefront)],
+          };
         case 'album':
           if (appleMusicMatch[4]) {
             return {

@@ -18,6 +18,12 @@ export default class AppleMusic {
     this.renewDate = 0;
   }
 
+  public async getMusicVideo(id: string, storefront: string): Promise<UnresolvedTrack> {
+    const track = await this.makeRequest<IMusicVideoResponse>(`music-videos/${id}`, storefront);
+
+    return this.buildTrack(track.data[0].attributes);
+  }
+
   public async getTrack(id: string, storefront: string): Promise<UnresolvedTrack> {
     const track = await this.makeRequest<ISongsResponse>(`songs/${id}`, storefront);
 
@@ -149,6 +155,14 @@ interface IAppleMusicTrack {
   isrc: string;
   url: string;
   durationInMillis: number;
+}
+
+interface IMusicVideoData {
+  attributes: IAppleMusicTrack;
+}
+
+interface IMusicVideoResponse {
+  data: IMusicVideoData[];
 }
 
 interface IAppleMusicArtist {
