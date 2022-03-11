@@ -113,6 +113,8 @@ export declare type NodeOptions = {
     port: number;
     /** Whether to use SSL/TLS or not */
     secure?: boolean;
+    /** Whether to follow redirects or not (default is false) */
+    followRedirects?: boolean;
     /** The node password */
     password?: string;
     /** The node region */
