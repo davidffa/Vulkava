@@ -35,21 +35,28 @@ export default class Spotify {
   public async getAlbum(id: string): Promise<{ title: string, tracks: UnresolvedTrack[] }> {
     const unresolvedTracks: UnresolvedTrack[] = [];
 
-    let offset = 0;
-    let next: boolean;
-    let title: string;
+    let res: ISpotifyAlbum | ISpotifyAlbumTracks = await this.makeRequest<ISpotifyAlbum>(`albums/${id}`);
+    const title = res.name;
 
-    do {
-      const res = await this.makeRequest<ISpotifyAlbum>(`albums/${id}/?limit=50&offset=${offset}`);
-      title = res.name;
-      next = res.tracks.next !== null;
+    for (const it of res.tracks.items) {
+      if (it === null) continue;
 
-      for (const it of res.tracks.items) {
+      unresolvedTracks.push(this.buildTrack(it));
+    }
+
+    let next = res.tracks.next !== null;
+    let offset = 50;
+
+    while (next && unresolvedTracks.length < 400) {
+      res = await this.makeRequest<ISpotifyAlbumTracks>(`albums/${id}/tracks?offset=${offset}`);
+      next = res.next !== null;
+
+      for (const it of res.items) {
         unresolvedTracks.push(this.buildTrack(it));
       }
 
       offset += 50;
-    } while (next && unresolvedTracks.length < 400);
+    }
 
     return { title, tracks: unresolvedTracks };
   }
@@ -57,23 +64,30 @@ export default class Spotify {
   public async getPlaylist(id: string): Promise<{ title: string, tracks: UnresolvedTrack[] }> {
     const unresolvedTracks: UnresolvedTrack[] = [];
 
-    let offset = 0;
-    let next: boolean;
-    let title: string;
+    let res: ISpotifyPlaylist | ISpotifyPlaylistTracks = await this.makeRequest<ISpotifyPlaylist>(`playlists/${id}`);
+    const title = res.name;
 
-    do {
-      const res = await this.makeRequest<ISpotifyPlaylist>(`playlists/${id}/?limit=100&offset=${offset}`);
-      title = res.name;
-      next = res.tracks.next !== null;
+    for (const it of res.tracks.items) {
+      if (it.track === null) continue;
 
-      for (const it of res.tracks.items) {
+      unresolvedTracks.push(this.buildTrack(it.track));
+    }
+
+    let next = res.tracks.next !== null;
+    let offset = 100;
+
+    while (next && unresolvedTracks.length < 400) {
+      res = await this.makeRequest<ISpotifyPlaylistTracks>(`playlists/${id}/tracks?offset=${offset}`);
+      next = res.next !== null;
+
+      for (const it of res.items) {
         if (it.track === null) continue;
 
         unresolvedTracks.push(this.buildTrack(it.track));
       }
 
       offset += 100;
-    } while (next && unresolvedTracks.length < 400);
+    }
 
     return { title, tracks: unresolvedTracks };
   }
@@ -177,20 +191,23 @@ interface ISpotifyTrack {
   duration_ms: number;
 }
 
-interface ISpotifyAlbum {
-  name: string;
-  tracks: {
-    items: ISpotifyTrack[];
-    next: null | string;
-  };
+interface ISpotifyAlbumTracks {
+  items: ISpotifyTrack[];
+  next: null | string;
 }
 
+interface ISpotifyAlbum {
+  name: string;
+  tracks: ISpotifyAlbumTracks;
+}
+
+interface ISpotifyPlaylistTracks {
+  items: Array<{
+    track: ISpotifyTrack | null;
+  }>;
+  next: null | string;
+}
 interface ISpotifyPlaylist {
   name: string;
-  tracks: {
-    items: Array<{
-      track: ISpotifyTrack | null;
-    }>;
-    next: null | string;
-  };
+  tracks: ISpotifyPlaylistTracks;
 }
