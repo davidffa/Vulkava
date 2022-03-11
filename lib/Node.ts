@@ -60,6 +60,7 @@ export default class Node {
     if (options.resumeKey && typeof options.resumeKey !== 'string') throw new TypeError('NodeOptions.resumeKey must be a string');
     if (options.resumeTimeout && typeof options.resumeTimeout !== 'number') throw new TypeError('NodeOptions.resumeTimeout must be a number');
     if (options.secure && typeof options.secure !== 'boolean') throw new TypeError('NodeOptions.secure must be a boolean');
+    if (options.followRedirects && typeof options.followRedirects !== 'boolean') throw new TypeError('NodeOptions.followRedirects must be a boolean');
     if (options.maxRetryAttempts && typeof options.maxRetryAttempts !== 'number') throw new TypeError('NodeOptions.maxRetryAttempts must be a number');
     if (options.retryAttemptsInterval && typeof options.retryAttemptsInterval !== 'number') throw new TypeError('NodeOptions.retryAttemptsInterval must be a number');
   }
@@ -132,7 +133,10 @@ export default class Node {
 
     if (this.options.resumeKey) Object.assign(headers, { 'Resume-Key': this.options.resumeKey });
 
-    this.ws = new WebSocket(`ws${this.options.secure ? 's' : ''}://${this.options.hostname}:${this.options.port}`, { headers });
+    this.ws = new WebSocket(`ws${this.options.secure ? 's' : ''}://${this.options.hostname}:${this.options.port}`, {
+      headers,
+      followRedirects: this.options.followRedirects
+    });
 
     this.ws.onopen = this.open.bind(this);
     this.ws.onmessage = this.message.bind(this);
