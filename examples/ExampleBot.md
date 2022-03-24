@@ -99,7 +99,7 @@ client.on('interactionCreate', async interaction => {
     track.setRequester(interaction.user);
 
     player.queue.push(track);
-    interacton.reply(`Queued \`${track.title}\``);
+    interaction.reply(`Queued \`${track.title}\``);
   }
 
   if (!player.playing) player.play();
