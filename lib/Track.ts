@@ -18,7 +18,7 @@ export default class Track {
 
   constructor(data: ITrack) {
     this.identifier = data.info.identifier;
-    if (data.info.thumbnail) this.thumbnailUrl = data.info.thumbnail;
+    this.thumbnailUrl = `https://img.youtube.com/vi/${data.info.identifier}/sddefault.jpg`;
     this.isSeekable = data.info.isSeekable;
     this.author = data.info.author;
     this.duration = data.info.length;
