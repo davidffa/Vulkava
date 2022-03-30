@@ -247,6 +247,7 @@ export default class Node {
       return;
     }
 
+    player.current = null;
     this.vulkava.emit('queueEnd', player);
   }
 
@@ -295,6 +296,7 @@ export default class Node {
   private async handleTrackEnd(ev: TrackEndEvent, player: Player) {
     // If a player is moving node
     if (player.node !== this) return;
+
     if (ev.reason === 'REPLACED') {
       if (player.queueRepeat && player.current) {
         player.queue.push(player.current);
