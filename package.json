@@ -13,6 +13,7 @@
     "type": "git",
     "url": "git+https://github.com/davidffa/Vulkava.git"
   },
+  "homepage": "https://vulkava.js.org",
   "license": "MIT",
   "dependencies": {
     "ws": "^8.5.0"
