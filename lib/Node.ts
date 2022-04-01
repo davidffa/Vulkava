@@ -211,7 +211,7 @@ export default class Node {
   }
 
   public send(payload: Record<string, unknown>) {
-    if (this.state !== NodeState.CONNECTED || !this.ws?.OPEN) {
+    if (this.state !== NodeState.CONNECTED || this.ws?.readyState !== WebSocket.OPEN) {
       this.vulkava.emit('warn', this, `Packet dropped: ${payload}`);
       return;
     }
