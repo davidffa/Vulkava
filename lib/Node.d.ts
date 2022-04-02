@@ -1,5 +1,5 @@
+import { Dispatcher } from 'undici';
 import { Vulkava } from './Vulkava';
-import { HTTPMethods } from './utils/Request';
 import type { NodeOptions, NodeStats, RoutePlannerStatus, Versions } from './@types';
 export declare enum NodeState {
     CONNECTING = 0,
@@ -17,6 +17,7 @@ export default class Node {
     private readonly vulkava;
     readonly options: NodeOptions;
     private ws;
+    private pool;
     retryAttempts: number;
     state: NodeState;
     stats: NodeStats;
@@ -78,5 +79,5 @@ export default class Node {
     private error;
     private close;
     private upgrade;
-    request<T>(method: HTTPMethods, endpoint: string, body?: Record<string, unknown> | Array<unknown>): Promise<T>;
+    request<T>(method: Dispatcher.HttpMethod, endpoint: string, body?: Record<string, unknown> | Array<unknown>): Promise<T>;
 }

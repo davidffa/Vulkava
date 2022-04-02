@@ -16,6 +16,7 @@
     "homepage": "https://vulkava.js.org",
     "license": "MIT",
     "dependencies": {
+        "undici": "^5.0.0",
         "ws": "^8.5.0"
     },
     "devDependencies": {
