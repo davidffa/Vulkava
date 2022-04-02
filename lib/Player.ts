@@ -37,7 +37,7 @@ export default class Player {
 
   public readonly filters: Filters;
 
-  declare public connectTimeout?: NodeJS.Timeout;
+  declare private connectTimeout?: NodeJS.Timeout;
 
   public voiceChannelId: string;
   public textChannelId?: string | null;
