@@ -37,6 +37,8 @@ export default class Player {
 
   public readonly filters: Filters;
 
+  declare public connectTimeout?: NodeJS.Timeout;
+
   public voiceChannelId: string;
   public textChannelId?: string | null;
 
@@ -179,6 +181,13 @@ export default class Player {
         self_deaf: this.selfDeaf
       }
     });
+
+    if (this.connectTimeout) clearTimeout(this.connectTimeout);
+
+    this.connectTimeout = setTimeout(() => {
+      this.state = ConnectionState.DISCONNECTED;
+      throw new Error('Voice connection timeout. See possible solutions here: https://vulkava.js.org/common-issues');
+    }, 10000);
   }
 
   /**
@@ -231,8 +240,6 @@ export default class Player {
       this.state = ConnectionState.CONNECTING;
 
       this.sendVoiceUpdate();
-
-      this.state = ConnectionState.CONNECTED;
     }
 
     if (this.filters.enabled) {
@@ -405,6 +412,11 @@ export default class Player {
   public sendVoiceUpdate() {
     if (this.node === null) {
       this.assignNode();
+    }
+
+    if (this.connectTimeout) {
+      clearTimeout(this.connectTimeout);
+      delete this.connectTimeout;
     }
 
     this.state = ConnectionState.CONNECTED;

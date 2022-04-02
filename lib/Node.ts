@@ -32,7 +32,7 @@ export enum NodeState {
  * @prop {Object | null} versions - The lavalink node versions
  */
 export default class Node {
-  private resumed?: boolean;
+  declare private resumed?: boolean;
   private readonly vulkava: Vulkava;
   public readonly options: NodeOptions;
   private ws: WebSocket | null;
@@ -43,7 +43,7 @@ export default class Node {
   public stats: NodeStats;
 
   /** Version object for the node (undefined if lavalink does not support) */
-  public versions?: Versions;
+  declare public versions?: Versions;
 
   static checkOptions(options: NodeOptions) {
     if (typeof options !== 'object') throw new TypeError('NodeOptions must be an object');
@@ -156,7 +156,6 @@ export default class Node {
     const versions = await this.request<Versions>('GET', 'versions');
 
     if (versions.BUILD) this.versions = versions;
-    else delete this.versions;
   }
 
   /**
@@ -443,8 +442,6 @@ export default class Node {
 
     if (msg.headers['lavalink-version'] === 'davidffa/lavalink') {
       this.fetchVersions();
-    } else {
-      delete this.versions;
     }
   }
 

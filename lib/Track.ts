@@ -2,7 +2,7 @@ import { ITrack } from './@types';
 
 export default class Track {
   public readonly identifier: string;
-  private readonly thumbnailUrl?: string;
+  declare private readonly thumbnailUrl?: string;
   public readonly isSeekable: boolean;
   public readonly author: string;
   public readonly duration: number;
@@ -14,7 +14,7 @@ export default class Track {
 
   public encodedTrack: string;
 
-  public requester: unknown;
+  declare public requester: unknown;
 
   constructor(data: ITrack) {
     this.identifier = data.info.identifier;
