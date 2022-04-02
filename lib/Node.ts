@@ -256,10 +256,7 @@ export default class Node {
   private handlePlayerEvent(e: PlayerEventPayload) {
     const player = this.vulkava.players.get(e.guildId);
 
-    if (!player) {
-      this.vulkava.emit('warn', this, `Unhandled player event. Player not found for guild ${e.guildId}`);
-      return;
-    }
+    if (!player) return;
 
     switch (e.type) {
       case 'TrackStartEvent':
