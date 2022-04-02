@@ -1,7 +1,7 @@
 import { IncomingMessage } from 'http';
+import { Pool, Dispatcher } from 'undici';
 import WebSocket, { CloseEvent, ErrorEvent, MessageEvent } from 'ws';
 import { Vulkava } from './Vulkava';
-import fetch, { HTTPMethods } from './utils/Request';
 import { Player, VERSION } from '..';
 
 import type {
@@ -36,6 +36,8 @@ export default class Node {
   private readonly vulkava: Vulkava;
   public readonly options: NodeOptions;
   private ws: WebSocket | null;
+
+  private pool: Pool;
 
   public retryAttempts: number;
 
@@ -110,6 +112,8 @@ export default class Node {
         deficit: 0,
       }
     };
+
+    this.pool = new Pool(`http${this.options.secure ? 's' : ''}://${this.options.hostname}:${this.options.port}`);
 
     this.ws = null;
   }
@@ -443,13 +447,15 @@ export default class Node {
   }
 
   // REST
-  public request<T>(method: HTTPMethods, endpoint: string, body?: Record<string, unknown> | Array<unknown>): Promise<T> {
-    return fetch<T>(`http${this.options.secure ? 's' : ''}://${this.options.hostname}:${this.options.port}/${endpoint}`, {
+  public request<T>(method: Dispatcher.HttpMethod, endpoint: string, body?: Record<string, unknown> | Array<unknown>): Promise<T> {
+    return this.pool.request({
+      path: `/${endpoint}`,
       method,
       headers: {
-        Authorization: this.options.password,
+        'authorization': this.options.password,
+        'content-type': 'application/json'
       },
-      body
-    });
+      body: JSON.stringify(body)
+    }).then(r => r.body.json());
   }
 }

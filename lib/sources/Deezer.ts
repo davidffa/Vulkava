@@ -1,6 +1,6 @@
 import UnresolvedTrack from '../UnresolvedTrack';
 import { Vulkava } from '../Vulkava';
-import fetch from '../utils/Request';
+import { request } from 'undici';
 
 export default class Deezer {
   private readonly vulkava: Vulkava;
@@ -53,7 +53,7 @@ export default class Deezer {
   }
 
   private async makeRequest<T>(endpoint: string): Promise<T> {
-    return fetch<T>(`https://api.deezer.com/${endpoint}`);
+    return request(`https://api.deezer.com/${endpoint}`).then(r => r.body.json());
   }
 }
 

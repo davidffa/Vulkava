@@ -1,6 +1,6 @@
 import UnresolvedTrack from '../UnresolvedTrack';
 import { Vulkava } from '../Vulkava';
-import fetch from '../utils/Request';
+import { request } from 'undici';
 
 export default class AppleMusic {
   private readonly vulkava: Vulkava;
@@ -114,22 +114,22 @@ export default class AppleMusic {
   private async makeRequest<T>(endpoint: string, storefront: string): Promise<T> {
     if (!this.token || this.renewDate === 0 || Date.now() > this.renewDate) await this.renewToken();
 
-    return fetch<T>(`https://api.music.apple.com/v1/catalog/${storefront}/${endpoint}`, {
+    return request(`https://api.music.apple.com/v1/catalog/${storefront}/${endpoint}`, {
       headers: {
         'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/97.0.4692.99 Safari/537.36',
         Authorization: `Bearer ${this.token}`
       }
-    });
+    }).then(r => r.body.json());
   }
 
   private async renewToken() {
-    const htmlBytes = await fetch<Buffer>(AppleMusic.RENEW_URL, {
+    const html = await request(AppleMusic.RENEW_URL, {
       headers: {
         'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/97.0.4692.99 Safari/537.36'
       }
-    });
+    }).then(r => r.body.text());
 
-    const tokenPayloadMatch = htmlBytes.toString().match(AppleMusic.TOKEN_PAYLOAD_REGEX);
+    const tokenPayloadMatch = html.match(AppleMusic.TOKEN_PAYLOAD_REGEX);
 
     if (!tokenPayloadMatch) {
       throw new Error('Could not get Apple Music token payload!');

@@ -1,6 +1,6 @@
 import UnresolvedTrack from '../UnresolvedTrack';
 import { Vulkava } from '../Vulkava';
-import fetch from '../utils/Request';
+import { request } from 'undici';
 
 export default class Spotify {
   private readonly vulkava: Vulkava;
@@ -118,11 +118,11 @@ export default class Spotify {
   private async makeRequest<T>(endpoint: string): Promise<T> {
     if (!this.token || this.renewDate === 0 || Date.now() > this.renewDate) await this.renewToken();
 
-    return fetch<T>(`https://api.spotify.com/v1/${endpoint}`, {
+    return request(`https://api.spotify.com/v1/${endpoint}`, {
       headers: {
         Authorization: this.token as string,
       }
-    });
+    }).then(r => r.body.json());
   }
 
   private async renewToken() {
@@ -134,11 +134,11 @@ export default class Spotify {
   }
 
   private async getAnonymousToken() {
-    const { accessToken, accessTokenExpirationTimestampMs } = await fetch<IAnonymousTokenResponse>('https://open.spotify.com/get_access_token?reason=transport&productType=embed', {
+    const { accessToken, accessTokenExpirationTimestampMs } = await request('https://open.spotify.com/get_access_token?reason=transport&productType=embed', {
       headers: {
         'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/97.0.4692.99 Safari/537.36'
       }
-    });
+    }).then(r => r.body.json() as Promise<IAnonymousTokenResponse>);
 
     if (!accessToken) throw new Error('Failed to get anonymous token on Spotify.');
 
@@ -151,13 +151,13 @@ export default class Spotify {
       token_type,
       access_token,
       expires_in
-    } = await fetch<IRenewResponse>('https://accounts.spotify.com/api/token?grant_type=client_credentials', {
+    } = await request('https://accounts.spotify.com/api/token?grant_type=client_credentials', {
       method: 'POST',
       headers: {
         Authorization: `Basic ${this.auth}`,
         'Content-Type': 'application/x-www-form-urlencoded'
       }
-    });
+    }).then(r => r.body.json() as Promise<IRenewResponse>);
 
     this.token = `${token_type} ${access_token}`;
     this.renewDate = Date.now() + expires_in * 1000 - 5000;
