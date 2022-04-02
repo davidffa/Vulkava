@@ -116,8 +116,9 @@ export default class AppleMusic {
 
     return request(`https://api.music.apple.com/v1/catalog/${storefront}/${endpoint}`, {
       headers: {
-        'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/97.0.4692.99 Safari/537.36',
-        Authorization: `Bearer ${this.token}`
+        'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.60 Safari/537.36',
+        Authorization: `Bearer ${this.token}`,
+        'Origin': 'https://music.apple.com'
       }
     }).then(r => r.body.json());
   }
@@ -125,7 +126,7 @@ export default class AppleMusic {
   private async renewToken() {
     const html = await request(AppleMusic.RENEW_URL, {
       headers: {
-        'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/97.0.4692.99 Safari/537.36'
+        'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.60 Safari/537.36'
       }
     }).then(r => r.body.text());
 
