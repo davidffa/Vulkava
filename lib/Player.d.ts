@@ -31,6 +31,7 @@ export default class Player {
     node: Node | null;
     readonly guildId: string;
     readonly filters: Filters;
+    private connectTimeout?;
     voiceChannelId: string;
     textChannelId?: string | null;
     selfDeaf?: boolean;
