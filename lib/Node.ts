@@ -32,10 +32,13 @@ export enum NodeState {
  * @prop {Object | null} versions - The lavalink node versions
  */
 export default class Node {
-  declare private resumed?: boolean;
   private readonly vulkava: Vulkava;
   public readonly options: NodeOptions;
-  private ws: WebSocket | null;
+
+  declare private resumed?: boolean;
+  declare private ws: WebSocket | null;
+
+  private packetQueue: string[];
 
   private pool: Pool;
 
@@ -112,6 +115,8 @@ export default class Node {
         deficit: 0,
       }
     };
+
+    this.packetQueue = [];
 
     this.pool = new Pool(`http${this.options.secure ? 's' : ''}://${this.options.hostname}:${this.options.port}`);
 
@@ -215,7 +220,7 @@ export default class Node {
 
   public send(payload: Record<string, unknown>) {
     if (this.state !== NodeState.CONNECTED || this.ws?.readyState !== WebSocket.OPEN) {
-      this.vulkava.emit('warn', this, `Packet dropped: ${payload}`);
+      this.packetQueue.push(JSON.stringify(payload));
       return;
     }
 
@@ -367,6 +372,11 @@ export default class Node {
     }
 
     delete this.resumed;
+
+    for (let i = 0; i < this.packetQueue.length; i++) {
+      if (this.state !== NodeState.CONNECTED) break;
+      this.ws?.send(this.packetQueue.splice(0, 1));
+    }
   }
 
   private message({ data }: MessageEvent) {
