@@ -25,6 +25,7 @@ export declare class Vulkava extends EventEmitter {
     private readonly spotify;
     readonly sendWS: (guildId: string, payload: OutgoingDiscordPayload) => void;
     players: Map<string, Player>;
+    private lastNodeSorting;
     static checkOptions(options: VulkavaOptions): void;
     /**
      * Create a new Vulkava instance
@@ -49,6 +50,7 @@ export declare class Vulkava extends EventEmitter {
      * @param {Function} options.sendWS - The function to send websocket messages to the main gateway
      */
     constructor(options: VulkavaOptions);
+    get bestNode(): Node;
     /**
      * Decodes a track by its base64 string
      * @param {String} encodedTrack - The base64 encoded track

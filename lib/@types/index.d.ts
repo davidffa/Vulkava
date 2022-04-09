@@ -150,7 +150,7 @@ export declare type NodeStats = {
         lavalinkLoad: number;
     };
     /** Audio frame stats */
-    frameStats: {
+    frameStats?: {
         sent: number;
         nulled: number;
         deficit: number;

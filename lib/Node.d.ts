@@ -13,10 +13,12 @@ export declare enum NodeState {
  * @prop {Object | null} versions - The lavalink node versions
  */
 export default class Node {
-    private resumed?;
     private readonly vulkava;
     readonly options: NodeOptions;
+    private resumed?;
+    private penalties?;
     private ws;
+    private packetQueue;
     private pool;
     retryAttempts: number;
     state: NodeState;
@@ -40,7 +42,9 @@ export default class Node {
      * @param {Number} [options.retryAttemptsInterval] - The interval between reconnect attempts, in milliseconds
      */
     constructor(vulkava: Vulkava, options: NodeOptions);
+    get totalPenalties(): number;
     get identifier(): string;
+    private calcPenalties;
     connect(): void;
     disconnect(): void;
     /** Fetches versions from lavalink Node */
