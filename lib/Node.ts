@@ -243,7 +243,11 @@ export default class Node {
 
   public send(payload: Record<string, unknown>) {
     if (this.state !== NodeState.CONNECTED || this.ws?.readyState !== WebSocket.OPEN) {
-      this.packetQueue.push(JSON.stringify(payload));
+      const stringifiedPacket = JSON.stringify(payload);
+
+      this.vulkava.emit('warn', `Node ${this.identifier} is not connected. Queueing packet: ${stringifiedPacket}`);
+
+      this.packetQueue.push(stringifiedPacket);
       return;
     }
 
@@ -288,7 +292,7 @@ export default class Node {
   private handlePlayerEvent(e: PlayerEventPayload) {
     const player = this.vulkava.players.get(e.guildId);
 
-    if (!player) return;
+    if (!player || player.node !== this) return;
 
     switch (e.type) {
       case 'TrackStartEvent':
@@ -325,9 +329,6 @@ export default class Node {
   }
 
   private async handleTrackEnd(ev: TrackEndEvent, player: Player) {
-    // If a player is moving node
-    if (player.node !== this) return;
-
     if (ev.reason === 'REPLACED') {
       if (player.queueRepeat && player.current) {
         player.queue.push(player.current);
@@ -371,6 +372,7 @@ export default class Node {
     this.vulkava.emit('wsDisconnect', player, ev.code, ev.reason);
 
     switch (ev.code) {
+      case 1001:
       case 1006:
       case 4015:
         player.sendVoiceUpdate();
