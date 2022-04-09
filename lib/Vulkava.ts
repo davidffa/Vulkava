@@ -49,6 +49,8 @@ export class Vulkava extends EventEmitter {
   // guildId <-> Player
   public players: Map<string, Player>;
 
+  private lastNodeSorting: number;
+
   static checkOptions(options: VulkavaOptions) {
     if (typeof options !== 'object') {
       throw new TypeError('VulkavaOptions must be an object');
@@ -114,6 +116,27 @@ export class Vulkava extends EventEmitter {
       const node = new Node(this, nodeOp);
       this.nodes.push(node);
     }
+
+    this.lastNodeSorting = 0;
+  }
+
+  public get bestNode(): Node {
+    if (Date.now() < this.lastNodeSorting + 30000) {
+      if (this.nodes[0].state === NodeState.CONNECTED) {
+        return this.nodes[0];
+      }
+
+      this.lastNodeSorting = 0;
+      return this.bestNode;
+    }
+
+    const node = this.nodes.sort((a, b) => a.totalPenalties - b.totalPenalties)[0];
+
+    if (!node || node.state !== NodeState.CONNECTED) {
+      throw new Error('No connected nodes!');
+    }
+
+    return node;
   }
 
   /**
@@ -122,11 +145,7 @@ export class Vulkava extends EventEmitter {
    * @returns {Promise<Track>}
    */
   public async decodeTrack(encodedTrack: string): Promise<Track> {
-    const node = this.nodes.find(n => n.state === NodeState.CONNECTED);
-
-    if (!node) {
-      throw new Error('No connected nodes found');
-    }
+    const node = this.bestNode;
 
     const trackInfo = await node.request<TrackInfo>('GET', `decodetrack?track=${encodedTrack}`);
 
@@ -139,11 +158,7 @@ export class Vulkava extends EventEmitter {
    * @returns {Promise<Track[]>}
    */
   public async decodeTracks(encodedTracks: string[]): Promise<Track[]> {
-    const node = this.nodes.find(n => n.state === NodeState.CONNECTED);
-
-    if (!node) {
-      throw new Error('No connected nodes found');
-    }
+    const node = this.bestNode;
 
     const res = await node.request<ITrack[]>('POST', 'decodetracks', encodedTracks);
 
@@ -180,11 +195,7 @@ export class Vulkava extends EventEmitter {
    * @returns {Promise<SearchResult>}
    */
   public async search(query: string, source: SEARCH_SOURCE = this.defaultSearchSource): Promise<SearchResult> {
-    const node = this.nodes.find(n => n.state === NodeState.CONNECTED);
-
-    if (!node) {
-      throw new Error('No connected nodes found');
-    }
+    const node = this.bestNode;
 
     const appleMusicRegex = /^(?:https?:\/\/|)?(?:music\.)?apple\.com\/([a-z]{2})\/(album|playlist|artist|music-video)\/[^/]+\/([^/?]+)(?:\?i=(\d+))?/;
     const spotifyRegex = /^(?:https?:\/\/(?:open\.)?spotify\.com|spotify)[/:](track|album|playlist|artist)[/:]([a-zA-Z0-9]+)/;
@@ -427,7 +438,8 @@ export class Vulkava extends EventEmitter {
           const usaNodes = this.nodes.filter(node => node.options.region === 'USA' && node.state === NodeState.CONNECTED);
 
           if (usaNodes.length) {
-            player.moveNode(usaNodes.sort((a, b) => a.stats.players - b.stats.players)[0]);
+            // Nodes are already sorted by penalties
+            player.moveNode(usaNodes[0]);
             return;
           }
         }
@@ -435,7 +447,8 @@ export class Vulkava extends EventEmitter {
         const europeNodes = this.nodes.filter(node => node.options.region === 'EU' && node.state === NodeState.CONNECTED);
 
         if (europeNodes.length) {
-          player.moveNode(europeNodes.sort((a, b) => a.stats.players - b.stats.players)[0]);
+          // Nodes are already sorted by penalties
+          player.moveNode(europeNodes[0]);
           return;
         }
       }

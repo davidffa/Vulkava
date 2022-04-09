@@ -149,9 +149,7 @@ export default class Player {
    * @private
    */
   private assignNode() {
-    const node = this.vulkava.nodes.filter(n => n.state === NodeState.CONNECTED).sort((a, b) => a.stats.players - b.stats.players)[0];
-
-    if (!node) throw new Error('No available nodes!');
+    const node = this.vulkava.bestNode;
 
     this.node = node;
   }

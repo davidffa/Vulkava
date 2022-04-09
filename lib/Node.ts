@@ -36,6 +36,7 @@ export default class Node {
   public readonly options: NodeOptions;
 
   declare private resumed?: boolean;
+  declare private penalties?: number;
   declare private ws: WebSocket | null;
 
   private packetQueue: string[];
@@ -123,8 +124,30 @@ export default class Node {
     this.ws = null;
   }
 
+  get totalPenalties() {
+    if (this.state !== NodeState.CONNECTED || !this.ws) return Infinity;
+
+    return this.penalties ?? Infinity;
+  }
+
   get identifier() {
     return this.options.id ?? this.options.hostname;
+  }
+
+  private calcPenalties() {
+    // Taken from https://github.com/freyacodes/Lavalink-Client/blob/master/src/main/java/lavalink/client/io/LavalinkLoadBalancer.java#L135-L146
+
+    const cpuPenalty = Math.pow(1.05, 100 * this.stats.cpu.systemLoad) * 10 - 10;
+
+    let deficitFramePenalty = 0, nullFramePenalty = 0;
+
+    if (this.stats.frameStats) {
+      deficitFramePenalty = Math.pow(1.03, 500 * this.stats.frameStats.deficit / 3000) * 600 - 600;
+      nullFramePenalty = Math.pow(1.03, 500 * this.stats.frameStats.nulled / 3000) * 300 - 300;
+      nullFramePenalty *= 2;
+    }
+
+    this.penalties = ~~(cpuPenalty + deficitFramePenalty + nullFramePenalty + this.stats.playingPlayers);
   }
 
   public connect() {
@@ -386,6 +409,7 @@ export default class Node {
       case 'stats':
         delete payload.op;
         this.stats = payload as NodeStats;
+        this.calcPenalties();
         break;
       case 'pong':
         this.vulkava.emit('pong', this, payload.ping);
