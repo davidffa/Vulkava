@@ -245,7 +245,7 @@ export default class Node {
     if (this.state !== NodeState.CONNECTED || this.ws?.readyState !== WebSocket.OPEN) {
       const stringifiedPacket = JSON.stringify(payload);
 
-      this.vulkava.emit('warn', `Node ${this.identifier} is not connected. Queueing packet: ${stringifiedPacket}`);
+      this.vulkava.emit('warn', this, `Node is not connected. Queueing packet: ${stringifiedPacket}`);
 
       this.packetQueue.push(stringifiedPacket);
       return;
@@ -400,7 +400,7 @@ export default class Node {
 
     for (let i = 0; i < this.packetQueue.length; i++) {
       if (this.state !== NodeState.CONNECTED) break;
-      this.ws?.send(this.packetQueue.splice(0, 1));
+      this.ws?.send(this.packetQueue.splice(0, 1)[0]);
     }
   }
 
