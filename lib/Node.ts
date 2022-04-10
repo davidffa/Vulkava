@@ -400,7 +400,7 @@ export default class Node {
 
     for (let i = 0; i < this.packetQueue.length; i++) {
       if (this.state !== NodeState.CONNECTED) break;
-      this.ws?.send(this.packetQueue.splice(0, 1)[0]);
+      this.ws?.send(this.packetQueue.shift());
     }
   }
 
