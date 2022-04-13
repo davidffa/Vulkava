@@ -451,7 +451,7 @@ export default class Node {
       return;
     }
 
-    const newNode = this.vulkava.nodes.filter(n => n.state === NodeState.CONNECTED).sort((a, b) => a.stats.players - b.stats.players)[0];
+    const newNode = this.vulkava.bestNode;
 
     if (newNode) {
       for (const player of this.vulkava.players.values()) {
