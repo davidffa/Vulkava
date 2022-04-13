@@ -451,17 +451,21 @@ export default class Node {
       return;
     }
 
-    const newNode = this.vulkava.bestNode;
+    try {
+      const newNode = this.vulkava.bestNode;
 
-    if (newNode) {
-      for (const player of this.vulkava.players.values()) {
-        if (player.node === this) {
-          player.moveNode(newNode);
+      if (newNode) {
+        for (const player of this.vulkava.players.values()) {
+          if (player.node === this) {
+            player.moveNode(newNode);
+          }
         }
       }
+    } catch (_) {
+      // no available nodes, so we can't move the players
     }
 
-    this.vulkava.emit('error', this, new Error(`WebSocket closed abnormally with code ${code}: ${reason}`));
+    this.vulkava.emit('error', this, new Error(`WebSocket closed abnormally with code ${code}.`));
 
     if (this.retryAttempts > (this.options.maxRetryAttempts ?? 10)) return;
 
