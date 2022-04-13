@@ -40,11 +40,15 @@ export class Vulkava extends EventEmitter {
   public nodes: Node[];
   private readonly defaultSearchSource: SEARCH_SOURCE;
   public readonly unresolvedSearchSource: SEARCH_SOURCE;
-  private readonly appleMusic: AppleMusic;
-  private readonly deezer: Deezer;
-  private readonly spotify: Spotify;
+  declare private readonly appleMusic?: AppleMusic;
+  declare private readonly deezer?: Deezer;
+  declare private readonly spotify?: Spotify;
 
   public readonly sendWS: (guildId: string, payload: OutgoingDiscordPayload) => void;
+
+  static readonly APPLE_MUSIC_REGEX = /^(?:https?:\/\/|)?(?:music\.)?apple\.com\/([a-z]{2})\/(album|playlist|artist|music-video)\/[^/]+\/([^/?]+)(?:\?i=(\d+))?/;
+  static readonly SPOTIFY_REGEX = /^(?:https?:\/\/(?:open\.)?spotify\.com|spotify)[/:](track|album|playlist|artist)[/:]([a-zA-Z0-9]+)/;
+  static readonly DEEZER_REGEX = /^(?:https?:\/\/|)?(?:www\.)?deezer\.com\/(?:\w{2}\/)?(track|album|playlist)\/(\d+)/;
 
   // guildId <-> Player
   public players: Map<string, Player>;
@@ -71,6 +75,10 @@ export class Vulkava extends EventEmitter {
     if (!options.sendWS || typeof options.sendWS !== 'function') {
       throw new TypeError('VulkavaOptions.sendWS must be a function');
     }
+
+    if (options.disabledSources && typeof options.disabledSources !== 'object' && !Array.isArray(options.disabledSources)) {
+      throw new TypeError('VulkavaOptions.disabledSources must be an array');
+    }
   }
 
   /**
@@ -82,6 +90,7 @@ export class Vulkava extends EventEmitter {
    * @param {Number} options.nodes[].port - The lavalink node port
    * @param {String} [options.nodes[].password] - The lavalink node password
    * @param {Boolean} [options.nodes[].secure] - Whether the lavalink node uses TLS/SSL or not
+   * @param {Boolean} [options.nodes[].followRedirects] - Whether to follow redirects or not (default is false)
    * @param {String} [options.nodes[].region] - The lavalink node region
    * @param {String} [options.nodes[].resumeKey] - The resume key
    * @param {Number} [options.nodes[].resumeTimeout] - The resume timeout, in seconds
@@ -93,6 +102,7 @@ export class Vulkava extends EventEmitter {
    * @param {String} [options.spotify.clientId] - The spotify client id
    * @param {String} [options.spotify.clientSecret] - The spotify client secret
    * @param {String} [options.spotify.market] - The spotify market
+   * @param {Array<String>} options.disabledSources - Disables, apple music, deezer or spotify
    * @param {Function} options.sendWS - The function to send websocket messages to the main gateway
    */
   constructor(options: VulkavaOptions) {
@@ -104,9 +114,15 @@ export class Vulkava extends EventEmitter {
     this.defaultSearchSource = options.defaultSearchSource ?? 'youtube';
     this.unresolvedSearchSource = options.unresolvedSearchSource ?? 'youtubemusic';
 
-    this.appleMusic = new AppleMusic(this);
-    this.deezer = new Deezer(this);
-    this.spotify = new Spotify(this, options.spotify?.clientId, options.spotify?.clientSecret, options.spotify?.market);
+    if (options.disabledSources) {
+      if (!options.disabledSources.includes('APPLE_MUSIC')) this.appleMusic = new AppleMusic(this);
+      if (!options.disabledSources.includes('DEEZER')) this.deezer = new Deezer(this);
+      if (!options.disabledSources.includes('SPOTIFY')) this.spotify = new Spotify(this, options.spotify?.clientId, options.spotify?.clientSecret, options.spotify?.market);
+    } else {
+      this.appleMusic = new AppleMusic(this);
+      this.deezer = new Deezer(this);
+      this.spotify = new Spotify(this, options.spotify?.clientId, options.spotify?.clientSecret, options.spotify?.market);
+    }
 
     this.sendWS = options.sendWS;
 
@@ -188,6 +204,168 @@ export class Vulkava extends EventEmitter {
     return player;
   }
 
+  private async loadFromAppleMusic(query: string): Promise<SearchResult | null> {
+    if (!this.appleMusic) return null;
+
+    const appleMusicMatch = query.match(Vulkava.APPLE_MUSIC_REGEX);
+    if (!appleMusicMatch) return null;
+
+    let list;
+    const storefront = appleMusicMatch[1];
+
+    switch (appleMusicMatch[2]) {
+      case 'music-video':
+        return {
+          loadType: 'TRACK_LOADED',
+          playlistInfo: {} as PlaylistInfo,
+          tracks: [await this.appleMusic.getMusicVideo(appleMusicMatch[3], storefront)],
+        };
+      case 'album':
+        if (appleMusicMatch[4]) {
+          return {
+            loadType: 'TRACK_LOADED',
+            playlistInfo: {} as PlaylistInfo,
+            tracks: [await this.appleMusic.getTrack(appleMusicMatch[4], storefront)],
+          };
+        } else {
+          list = await this.appleMusic.getAlbum(appleMusicMatch[3], storefront);
+          return {
+            loadType: 'PLAYLIST_LOADED',
+            playlistInfo: {
+              name: list.title,
+              duration: list.tracks.reduce((acc, curr) => acc + curr.duration, 0),
+              selectedTrack: 0
+            },
+            tracks: list.tracks,
+          };
+        }
+      case 'playlist':
+        list = await this.appleMusic.getPlaylist(appleMusicMatch[3], storefront);
+
+        return {
+          loadType: 'PLAYLIST_LOADED',
+          playlistInfo: {
+            name: list.title,
+            duration: list.tracks.reduce((acc, curr) => acc + curr.duration, 0),
+            selectedTrack: 0
+          },
+          tracks: list.tracks
+        };
+      case 'artist':
+        list = await this.appleMusic.getArtistTopTracks(appleMusicMatch[3], storefront);
+
+        return {
+          loadType: 'PLAYLIST_LOADED',
+          playlistInfo: {
+            name: list.title,
+            duration: list.tracks.reduce((acc, curr) => acc + curr.duration, 0),
+            selectedTrack: 0
+          },
+          tracks: list.tracks
+        };
+    }
+
+    return null;
+  }
+
+  private async loadFromDeezer(query: string): Promise<SearchResult | null> {
+    if (!this.deezer) return null;
+
+    const deezerMatch = query.match(Vulkava.DEEZER_REGEX);
+    if (!deezerMatch) return null;
+
+    let list;
+
+    switch (deezerMatch[1]) {
+      case 'track':
+        return {
+          loadType: 'TRACK_LOADED',
+          playlistInfo: {} as PlaylistInfo,
+          tracks: [await this.deezer.getTrack(deezerMatch[2])],
+        };
+      case 'album':
+        list = await this.deezer.getAlbum(deezerMatch[2]);
+        return {
+          loadType: 'PLAYLIST_LOADED',
+          playlistInfo: {
+            name: list.title,
+            duration: list.tracks.reduce((acc, curr) => acc + curr.duration, 0),
+            selectedTrack: 0
+          },
+          tracks: list.tracks,
+        };
+      case 'playlist':
+        list = await this.deezer.getPlaylist(deezerMatch[2]);
+
+        return {
+          loadType: 'PLAYLIST_LOADED',
+          playlistInfo: {
+            name: list.title,
+            duration: list.tracks.reduce((acc, curr) => acc + curr.duration, 0),
+            selectedTrack: 0
+          },
+          tracks: list.tracks
+        };
+    }
+
+    return null;
+  }
+
+  private async loadFromSpotify(query: string): Promise<SearchResult | null> {
+    if (!this.spotify) return null;
+
+    const spotifyMatch = query.match(Vulkava.SPOTIFY_REGEX);
+    if (!spotifyMatch) return null;
+
+    let list;
+
+    switch (spotifyMatch[1]) {
+      case 'track':
+        return {
+          loadType: 'TRACK_LOADED',
+          playlistInfo: {} as PlaylistInfo,
+          tracks: [await this.spotify.getTrack(spotifyMatch[2])],
+        };
+      case 'album':
+        list = await this.spotify.getAlbum(spotifyMatch[2]);
+        return {
+          loadType: 'PLAYLIST_LOADED',
+          playlistInfo: {
+            name: list.title,
+            duration: list.tracks.reduce((acc, curr) => acc + curr.duration, 0),
+            selectedTrack: 0
+          },
+          tracks: list.tracks,
+        };
+      case 'playlist':
+        list = await this.spotify.getPlaylist(spotifyMatch[2]);
+
+        return {
+          loadType: 'PLAYLIST_LOADED',
+          playlistInfo: {
+            name: list.title,
+            duration: list.tracks.reduce((acc, curr) => acc + curr.duration, 0),
+            selectedTrack: 0
+          },
+          tracks: list.tracks
+        };
+      case 'artist':
+        list = await this.spotify.getArtistTopTracks(spotifyMatch[2]);
+
+        return {
+          loadType: 'PLAYLIST_LOADED',
+          playlistInfo: {
+            name: list.title,
+            duration: list.tracks.reduce((acc, curr) => acc + curr.duration, 0),
+            selectedTrack: 0
+          },
+          tracks: list.tracks
+        };
+    }
+
+    return null;
+  }
+
   /**
    *
    * @param {String} query - The query to search for
@@ -197,156 +375,9 @@ export class Vulkava extends EventEmitter {
   public async search(query: string, source: SEARCH_SOURCE = this.defaultSearchSource): Promise<SearchResult> {
     const node = this.bestNode;
 
-    const appleMusicRegex = /^(?:https?:\/\/|)?(?:music\.)?apple\.com\/([a-z]{2})\/(album|playlist|artist|music-video)\/[^/]+\/([^/?]+)(?:\?i=(\d+))?/;
-    const spotifyRegex = /^(?:https?:\/\/(?:open\.)?spotify\.com|spotify)[/:](track|album|playlist|artist)[/:]([a-zA-Z0-9]+)/;
-    const deezerRegex = /^(?:https?:\/\/|)?(?:www\.)?deezer\.com\/(?:\w{2}\/)?(track|album|playlist)\/(\d+)/;
+    const extSourceResult = await this.loadFromAppleMusic(query) ?? await this.loadFromDeezer(query) ?? await this.loadFromSpotify(query);
 
-    const appleMusicMatch = query.match(appleMusicRegex);
-
-    if (appleMusicMatch) {
-      let list;
-
-      const storefront = appleMusicMatch[1];
-
-      switch (appleMusicMatch[2]) {
-        case 'music-video':
-          return {
-            loadType: 'TRACK_LOADED',
-            playlistInfo: {} as PlaylistInfo,
-            tracks: [await this.appleMusic.getMusicVideo(appleMusicMatch[3], storefront)],
-          };
-        case 'album':
-          if (appleMusicMatch[4]) {
-            return {
-              loadType: 'TRACK_LOADED',
-              playlistInfo: {} as PlaylistInfo,
-              tracks: [await this.appleMusic.getTrack(appleMusicMatch[4], storefront)],
-            };
-          } else {
-            list = await this.appleMusic.getAlbum(appleMusicMatch[3], storefront);
-            return {
-              loadType: 'PLAYLIST_LOADED',
-              playlistInfo: {
-                name: list.title,
-                duration: list.tracks.reduce((acc, curr) => acc + curr.duration, 0),
-                selectedTrack: 0
-              },
-              tracks: list.tracks,
-            };
-          }
-        case 'playlist':
-          list = await this.appleMusic.getPlaylist(appleMusicMatch[3], storefront);
-
-          return {
-            loadType: 'PLAYLIST_LOADED',
-            playlistInfo: {
-              name: list.title,
-              duration: list.tracks.reduce((acc, curr) => acc + curr.duration, 0),
-              selectedTrack: 0
-            },
-            tracks: list.tracks
-          };
-        case 'artist':
-          list = await this.appleMusic.getArtistTopTracks(appleMusicMatch[3], storefront);
-
-          return {
-            loadType: 'PLAYLIST_LOADED',
-            playlistInfo: {
-              name: list.title,
-              duration: list.tracks.reduce((acc, curr) => acc + curr.duration, 0),
-              selectedTrack: 0
-            },
-            tracks: list.tracks
-          };
-      }
-    }
-
-    const deezerMatch = query.match(deezerRegex);
-
-    if (deezerMatch) {
-      let list;
-
-      switch (deezerMatch[1]) {
-        case 'track':
-          return {
-            loadType: 'TRACK_LOADED',
-            playlistInfo: {} as PlaylistInfo,
-            tracks: [await this.deezer.getTrack(deezerMatch[2])],
-          };
-        case 'album':
-          list = await this.deezer.getAlbum(deezerMatch[2]);
-          return {
-            loadType: 'PLAYLIST_LOADED',
-            playlistInfo: {
-              name: list.title,
-              duration: list.tracks.reduce((acc, curr) => acc + curr.duration, 0),
-              selectedTrack: 0
-            },
-            tracks: list.tracks,
-          };
-        case 'playlist':
-          list = await this.deezer.getPlaylist(deezerMatch[2]);
-
-          return {
-            loadType: 'PLAYLIST_LOADED',
-            playlistInfo: {
-              name: list.title,
-              duration: list.tracks.reduce((acc, curr) => acc + curr.duration, 0),
-              selectedTrack: 0
-            },
-            tracks: list.tracks
-          };
-      }
-    }
-
-    const spotifyMatch = query.match(spotifyRegex);
-    if (spotifyMatch) {
-      let list;
-
-      switch (spotifyMatch[1]) {
-        case 'track':
-          return {
-            loadType: 'TRACK_LOADED',
-            playlistInfo: {} as PlaylistInfo,
-            tracks: [await this.spotify.getTrack(spotifyMatch[2])],
-          };
-        case 'album':
-          list = await this.spotify.getAlbum(spotifyMatch[2]);
-          return {
-            loadType: 'PLAYLIST_LOADED',
-            playlistInfo: {
-              name: list.title,
-              duration: list.tracks.reduce((acc, curr) => acc + curr.duration, 0),
-              selectedTrack: 0
-            },
-            tracks: list.tracks,
-          };
-        case 'playlist':
-          list = await this.spotify.getPlaylist(spotifyMatch[2]);
-
-          return {
-            loadType: 'PLAYLIST_LOADED',
-            playlistInfo: {
-              name: list.title,
-              duration: list.tracks.reduce((acc, curr) => acc + curr.duration, 0),
-              selectedTrack: 0
-            },
-            tracks: list.tracks
-          };
-        case 'artist':
-          list = await this.spotify.getArtistTopTracks(spotifyMatch[2]);
-
-          return {
-            loadType: 'PLAYLIST_LOADED',
-            playlistInfo: {
-              name: list.title,
-              duration: list.tracks.reduce((acc, curr) => acc + curr.duration, 0),
-              selectedTrack: 0
-            },
-            tracks: list.tracks
-          };
-      }
-    }
+    if (extSourceResult) return extSourceResult;
 
     const sourceMap = {
       youtube: 'ytsearch:',
