@@ -35,6 +35,7 @@ declare type SpotifyConfig = {
     clientSecret: string;
     market?: string;
 };
+declare type UNRESOLVED_SOURCES = 'APPLE_MUSIC' | 'DEEZER' | 'SPOTIFY';
 /** Main constructor options */
 export declare type VulkavaOptions = {
     /** The array of lavalink nodes */
@@ -47,6 +48,8 @@ export declare type VulkavaOptions = {
     unresolvedSearchSource?: SEARCH_SOURCE;
     /** The spotify credentials */
     spotify?: SpotifyConfig;
+    /** Disables spotify, apple music or deezer */
+    disabledSources?: UNRESOLVED_SOURCES[];
 };
 /** Vulkava events */
 export declare type EventListeners<T> = {

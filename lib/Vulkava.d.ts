@@ -20,10 +20,13 @@ export declare class Vulkava extends EventEmitter {
     nodes: Node[];
     private readonly defaultSearchSource;
     readonly unresolvedSearchSource: SEARCH_SOURCE;
-    private readonly appleMusic;
-    private readonly deezer;
-    private readonly spotify;
+    private readonly appleMusic?;
+    private readonly deezer?;
+    private readonly spotify?;
     readonly sendWS: (guildId: string, payload: OutgoingDiscordPayload) => void;
+    static readonly APPLE_MUSIC_REGEX: RegExp;
+    static readonly SPOTIFY_REGEX: RegExp;
+    static readonly DEEZER_REGEX: RegExp;
     players: Map<string, Player>;
     private lastNodeSorting;
     static checkOptions(options: VulkavaOptions): void;
@@ -36,6 +39,7 @@ export declare class Vulkava extends EventEmitter {
      * @param {Number} options.nodes[].port - The lavalink node port
      * @param {String} [options.nodes[].password] - The lavalink node password
      * @param {Boolean} [options.nodes[].secure] - Whether the lavalink node uses TLS/SSL or not
+     * @param {Boolean} [options.nodes[].followRedirects] - Whether to follow redirects or not (default is false)
      * @param {String} [options.nodes[].region] - The lavalink node region
      * @param {String} [options.nodes[].resumeKey] - The resume key
      * @param {Number} [options.nodes[].resumeTimeout] - The resume timeout, in seconds
@@ -47,6 +51,7 @@ export declare class Vulkava extends EventEmitter {
      * @param {String} [options.spotify.clientId] - The spotify client id
      * @param {String} [options.spotify.clientSecret] - The spotify client secret
      * @param {String} [options.spotify.market] - The spotify market
+     * @param {Array<String>} options.disabledSources - Disables, apple music, deezer or spotify
      * @param {Function} options.sendWS - The function to send websocket messages to the main gateway
      */
     constructor(options: VulkavaOptions);
@@ -74,6 +79,9 @@ export declare class Vulkava extends EventEmitter {
      * @returns {Player}
      */
     createPlayer(options: PlayerOptions): Player;
+    private loadFromAppleMusic;
+    private loadFromDeezer;
+    private loadFromSpotify;
     /**
      *
      * @param {String} query - The query to search for
