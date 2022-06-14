@@ -4,6 +4,7 @@ import Player, { ConnectionState } from './lib/Player';
 import Track from './lib/Track';
 import UnresolvedTrack from './lib/UnresolvedTrack';
 import { Vulkava } from './lib/Vulkava';
+import { AbstractExternalSource } from './lib/sources/AbstractExternalSource';
 
 import type {
   NodeOptions,
@@ -22,6 +23,8 @@ export {
   Track,
   UnresolvedTrack,
   Vulkava,
+
+  AbstractExternalSource,
 
   NodeState,
   ConnectionState,
