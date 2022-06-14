@@ -1,9 +1,14 @@
-import UnresolvedTrack from '../UnresolvedTrack';
-import { Vulkava } from '../Vulkava';
 import { request } from 'undici';
 
-export default class Spotify {
-  private readonly vulkava: Vulkava;
+import { AbstractExternalSource } from './AbstractExternalSource';
+import { Vulkava } from '../Vulkava';
+import UnresolvedTrack from '../UnresolvedTrack';
+
+import type { PlaylistInfo, SearchResult } from '../@types';
+
+export default class Spotify extends AbstractExternalSource {
+  public static readonly SPOTIFY_REGEX = /^(?:https?:\/\/(?:open\.)?spotify\.com|spotify)[/:](?<type>track|album|playlist|artist)[/:](?<id>[a-zA-Z0-9]+)/;
+
   private readonly auth: string | null;
 
   private readonly market: string;
@@ -12,7 +17,7 @@ export default class Spotify {
   private renewDate: number;
 
   constructor(vulkava: Vulkava, clientId?: string, clientSecret?: string, market = 'US') {
-    this.vulkava = vulkava;
+    super(vulkava);
 
     if (clientId && clientSecret) {
       this.auth = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
@@ -26,16 +31,47 @@ export default class Spotify {
     this.renewDate = 0;
   }
 
-  public async getTrack(id: string): Promise<UnresolvedTrack> {
-    const track = await this.makeRequest<ISpotifyTrack>(`tracks/${id}`);
+  public async loadItem(query: string): Promise<SearchResult | null> {
+    const spotifyMatch = query.match(Spotify.SPOTIFY_REGEX);
+    if (!spotifyMatch || !spotifyMatch.groups) return null;
 
-    return this.buildTrack(track);
+    switch (spotifyMatch.groups['type']) {
+      case 'track':
+        return this.getTrack(spotifyMatch.groups['id']);
+      case 'album':
+        return this.getAlbum(spotifyMatch.groups['id']);
+      case 'playlist':
+        return this.getPlaylist(spotifyMatch.groups['id']);
+      case 'artist':
+        return this.getArtistTopTracks(spotifyMatch.groups['id']);
+    }
+
+    return null;
   }
 
-  public async getAlbum(id: string): Promise<{ title: string, tracks: UnresolvedTrack[] }> {
+  public async getTrack(id: string): Promise<SearchResult> {
+    const res = await this.makeRequest<ISpotifyTrack>(`tracks/${id}`);
+
+    if (res instanceof SpotifyError) {
+      return this.handleErrorResult(res);
+    }
+
+    return {
+      loadType: 'TRACK_LOADED',
+      playlistInfo: {} as PlaylistInfo,
+      tracks: [this.buildTrack(res)],
+    };
+  }
+
+  public async getAlbum(id: string): Promise<SearchResult> {
     const unresolvedTracks: UnresolvedTrack[] = [];
 
-    let res: ISpotifyAlbum | ISpotifyAlbumTracks = await this.makeRequest<ISpotifyAlbum>(`albums/${id}`);
+    let res: ISpotifyAlbum | ISpotifyAlbumTracks | SpotifyError = await this.makeRequest<ISpotifyAlbum>(`albums/${id}`);
+
+    if (res instanceof SpotifyError) {
+      return this.handleErrorResult(res);
+    }
+
     const title = res.name;
 
     for (const it of res.tracks.items) {
@@ -49,6 +85,11 @@ export default class Spotify {
 
     while (next && unresolvedTracks.length < 400) {
       res = await this.makeRequest<ISpotifyAlbumTracks>(`albums/${id}/tracks?offset=${offset}`);
+
+      if (res instanceof SpotifyError) {
+        return this.handleErrorResult(res);
+      }
+
       next = res.next !== null;
 
       for (const it of res.items) {
@@ -58,13 +99,26 @@ export default class Spotify {
       offset += 50;
     }
 
-    return { title, tracks: unresolvedTracks };
+    return {
+      loadType: 'PLAYLIST_LOADED',
+      playlistInfo: {
+        name: title,
+        duration: unresolvedTracks.reduce((acc, curr) => acc + curr.duration, 0),
+        selectedTrack: 0
+      },
+      tracks: unresolvedTracks,
+    };
   }
 
-  public async getPlaylist(id: string): Promise<{ title: string, tracks: UnresolvedTrack[] }> {
+  public async getPlaylist(id: string): Promise<SearchResult> {
     const unresolvedTracks: UnresolvedTrack[] = [];
 
-    let res: ISpotifyPlaylist | ISpotifyPlaylistTracks = await this.makeRequest<ISpotifyPlaylist>(`playlists/${id}`);
+    let res: ISpotifyPlaylist | ISpotifyPlaylistTracks | SpotifyError = await this.makeRequest<ISpotifyPlaylist>(`playlists/${id}`);
+
+    if (res instanceof SpotifyError) {
+      return this.handleErrorResult(res);
+    }
+
     const title = res.name;
 
     for (const it of res.tracks.items) {
@@ -78,6 +132,11 @@ export default class Spotify {
 
     while (next && unresolvedTracks.length < 400) {
       res = await this.makeRequest<ISpotifyPlaylistTracks>(`playlists/${id}/tracks?offset=${offset}`);
+
+      if (res instanceof SpotifyError) {
+        return this.handleErrorResult(res);
+      }
+
       next = res.next !== null;
 
       for (const it of res.items) {
@@ -89,15 +148,46 @@ export default class Spotify {
       offset += 100;
     }
 
-    return { title, tracks: unresolvedTracks };
+    return {
+      loadType: 'PLAYLIST_LOADED',
+      playlistInfo: {
+        name: title,
+        duration: unresolvedTracks.reduce((acc, curr) => acc + curr.duration, 0),
+        selectedTrack: 0
+      },
+      tracks: unresolvedTracks,
+    };
   }
 
-  public async getArtistTopTracks(id: string): Promise<{ title: string, tracks: UnresolvedTrack[] }> {
+  public async getArtistTopTracks(id: string): Promise<SearchResult> {
     const res = await this.makeRequest<{ tracks: ISpotifyTrack[] }>(`artists/${id}/top-tracks?market=${this.market}`);
 
+    if (res instanceof SpotifyError) {
+      return this.handleErrorResult(res);
+    }
+
+    const tracks = res.tracks.map(t => this.buildTrack(t));
+
     return {
-      title: `${res.tracks[0].artists.find(a => a.id === id)?.name ?? ''} Top Tracks`,
-      tracks: res.tracks.map(t => this.buildTrack(t))
+      loadType: 'PLAYLIST_LOADED',
+      playlistInfo: {
+        name: `${res.tracks[0].artists.find(a => a.id === id)?.name ?? ''} Top Tracks`,
+        duration: tracks.reduce((acc, curr) => acc + curr.duration, 0),
+        selectedTrack: 0
+      },
+      tracks: tracks
+    };
+  }
+
+  private handleErrorResult(error: SpotifyError): SearchResult {
+    return {
+      loadType: 'LOAD_FAILED',
+      playlistInfo: {} as PlaylistInfo,
+      tracks: [],
+      exception: {
+        message: error.toString(),
+        severity: 'SUSPIOUS'
+      }
     };
   }
 
@@ -115,14 +205,20 @@ export default class Spotify {
     );
   }
 
-  private async makeRequest<T>(endpoint: string): Promise<T> {
+  private async makeRequest<T>(endpoint: string): Promise<T | SpotifyError> {
     if (!this.token || this.renewDate === 0 || Date.now() > this.renewDate) await this.renewToken();
 
-    return request(`https://api.spotify.com/v1/${endpoint}`, {
+    const res = await request(`https://api.spotify.com/v1/${endpoint}`, {
       headers: {
         Authorization: this.token as string,
       }
     }).then(r => r.body.json());
+
+    if (res.error) {
+      return new SpotifyError(res.error.message);
+    }
+
+    return res;
   }
 
   private async renewToken() {
@@ -164,6 +260,21 @@ export default class Spotify {
   }
 }
 
+class SpotifyError implements ISpotifyError {
+  readonly message: string;
+
+  constructor(error: string) {
+    this.message = error;
+  }
+
+  toString(): string {
+    return `SpotifyError: ${this.message}`;
+  }
+}
+
+interface ISpotifyError {
+  message: string;
+}
 
 interface IAnonymousTokenResponse {
   clientId: string;
