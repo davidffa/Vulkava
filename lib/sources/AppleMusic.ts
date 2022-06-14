@@ -7,7 +7,7 @@ import UnresolvedTrack from '../UnresolvedTrack';
 import type { PlaylistInfo, SearchResult } from '../@types';
 
 export default class AppleMusic extends AbstractExternalSource {
-  public static readonly APPLE_MUSIC_REGEX = /^(?:https?:\/\/|)?(?:music\.)?apple\.com\/(?<storefront>[a-z]{2})\/(?<type>album|playlist|artist|music-video)\/[^/]+\/(?<id>[^/?]+)(?:\?i=(?<albumtrackid>\d+))?/;
+  public static readonly APPLE_MUSIC_REGEX = /^(?:https?:\/\/|)?(?:music\.)?apple\.com\/(?<storefront>[a-z]{2})\/(?<type>album|playlist|artist|music-video)(?:\/[^/]+)?\/(?<id>[^/?]+)(?:\?i=(?<albumtrackid>\d+))?/;
   private static readonly RENEW_URL = 'https://music.apple.com/us/album/%C3%ADgneo/1604813268';
   private static readonly TOKEN_PAYLOAD_REGEX = /"desktop-music-app\/config\/environment" content="([^"]+)"/;
 

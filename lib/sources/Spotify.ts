@@ -81,10 +81,9 @@ export default class Spotify extends AbstractExternalSource {
     }
 
     let next = res.tracks.next !== null;
-    let offset = 50;
 
     while (next && unresolvedTracks.length < 400) {
-      res = await this.makeRequest<ISpotifyAlbumTracks>(`albums/${id}/tracks?offset=${offset}`);
+      res = await this.makeRequest<ISpotifyAlbumTracks>(`albums/${id}/tracks?offset=${unresolvedTracks.length}&limit=50`);
 
       if (res instanceof SpotifyError) {
         return this.handleErrorResult(res);
@@ -95,8 +94,6 @@ export default class Spotify extends AbstractExternalSource {
       for (const it of res.items) {
         unresolvedTracks.push(this.buildTrack(it));
       }
-
-      offset += 50;
     }
 
     return {
@@ -128,10 +125,9 @@ export default class Spotify extends AbstractExternalSource {
     }
 
     let next = res.tracks.next !== null;
-    let offset = 100;
 
     while (next && unresolvedTracks.length < 400) {
-      res = await this.makeRequest<ISpotifyPlaylistTracks>(`playlists/${id}/tracks?offset=${offset}`);
+      res = await this.makeRequest<ISpotifyPlaylistTracks>(`playlists/${id}/tracks?offset=${unresolvedTracks.length}`);
 
       if (res instanceof SpotifyError) {
         return this.handleErrorResult(res);
@@ -144,8 +140,6 @@ export default class Spotify extends AbstractExternalSource {
 
         unresolvedTracks.push(this.buildTrack(it.track));
       }
-
-      offset += 100;
     }
 
     return {

@@ -224,8 +224,6 @@ export class Vulkava extends EventEmitter {
    * @returns {Promise<SearchResult>}
    */
   public async search(query: string, source: SEARCH_SOURCE = this.defaultSearchSource): Promise<SearchResult> {
-    const node = this.bestNode;
-
     for (const source of this.externalSources) {
       const loadRes = await source.loadItem(query);
 
@@ -243,6 +241,8 @@ export class Vulkava extends EventEmitter {
     if (!query.startsWith('https://') && !query.startsWith('http://')) {
       query = `${sourceMap[source] || 'ytsearch:'}${query}`;
     }
+
+    const node = this.bestNode;
 
     const res = await node.request<LoadTracksResult>('GET', `loadtracks?identifier=${encodeURIComponent(query)}`);
 
