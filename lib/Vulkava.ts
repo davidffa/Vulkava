@@ -146,7 +146,9 @@ export class Vulkava extends EventEmitter {
       return this.bestNode;
     }
 
-    const node = this.nodes.sort((a, b) => a.totalPenalties - b.totalPenalties)[0];
+    this.nodes = this.nodes.sort((a, b) => a.totalPenalties - b.totalPenalties);
+    const node = this.nodes[0];
+    this.lastNodeSorting = Date.now();
 
     if (!node || node.state !== NodeState.CONNECTED) {
       throw new Error('No connected nodes!');
