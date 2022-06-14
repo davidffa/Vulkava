@@ -4,6 +4,7 @@ import Player, { ConnectionState } from './lib/Player';
 import Track from './lib/Track';
 import UnresolvedTrack from './lib/UnresolvedTrack';
 import { Vulkava } from './lib/Vulkava';
+import { AbstractExternalSource } from './lib/sources/AbstractExternalSource';
 import type { NodeOptions, SearchResult, SEARCH_SOURCE } from './lib/@types';
 declare const VERSION: string;
-export { Filters, Node, Player, Track, UnresolvedTrack, Vulkava, NodeState, ConnectionState, SearchResult, SEARCH_SOURCE, NodeOptions, VERSION };
+export { Filters, Node, Player, Track, UnresolvedTrack, Vulkava, AbstractExternalSource, NodeState, ConnectionState, SearchResult, SEARCH_SOURCE, NodeOptions, VERSION };

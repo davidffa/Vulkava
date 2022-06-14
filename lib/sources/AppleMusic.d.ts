@@ -1,26 +1,20 @@
-import UnresolvedTrack from '../UnresolvedTrack';
+import { AbstractExternalSource } from './AbstractExternalSource';
 import { Vulkava } from '../Vulkava';
-export default class AppleMusic {
-    private readonly vulkava;
+import type { SearchResult } from '../@types';
+export default class AppleMusic extends AbstractExternalSource {
+    static readonly APPLE_MUSIC_REGEX: RegExp;
     private static readonly RENEW_URL;
     private static readonly TOKEN_PAYLOAD_REGEX;
+    private static readonly USER_AGENT;
     private token;
     private renewDate;
     constructor(vulkava: Vulkava);
-    getMusicVideo(id: string, storefront: string): Promise<UnresolvedTrack>;
-    getTrack(id: string, storefront: string): Promise<UnresolvedTrack>;
-    getAlbum(id: string, storefront: string): Promise<{
-        title: string;
-        tracks: UnresolvedTrack[];
-    }>;
-    getPlaylist(id: string, storefront: string): Promise<{
-        title: string;
-        tracks: UnresolvedTrack[];
-    }>;
-    getArtistTopTracks(id: string, storefront: string): Promise<{
-        title: string;
-        tracks: UnresolvedTrack[];
-    }>;
+    loadItem(query: string): Promise<SearchResult | null>;
+    getMusicVideo(id: string, storefront: string): Promise<SearchResult>;
+    getTrack(id: string, storefront: string): Promise<SearchResult>;
+    getList(type: 'ALBUM' | 'PLAYLIST', id: string, storefront: string): Promise<SearchResult>;
+    getArtistTopTracks(id: string, storefront: string): Promise<SearchResult>;
+    private handleErrorResult;
     private buildTrack;
     private makeRequest;
     private renewToken;

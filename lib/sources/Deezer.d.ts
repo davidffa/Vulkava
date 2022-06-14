@@ -1,17 +1,13 @@
-import UnresolvedTrack from '../UnresolvedTrack';
+import { AbstractExternalSource } from './AbstractExternalSource';
 import { Vulkava } from '../Vulkava';
-export default class Deezer {
-    private readonly vulkava;
+import type { SearchResult } from '../@types';
+export default class Deezer extends AbstractExternalSource {
+    static readonly DEEZER_REGEX: RegExp;
     constructor(vulkava: Vulkava);
-    getTrack(id: string): Promise<UnresolvedTrack>;
-    getAlbum(id: string): Promise<{
-        title: string;
-        tracks: UnresolvedTrack[];
-    }>;
-    getPlaylist(id: string): Promise<{
-        title: string;
-        tracks: UnresolvedTrack[];
-    }>;
+    loadItem(query: string): Promise<SearchResult | null>;
+    getTrack(id: string): Promise<SearchResult>;
+    getList(type: 'ALBUM' | 'PLAYLIST', id: string): Promise<SearchResult>;
+    private handleErrorResult;
     private buildTrack;
     private makeRequest;
 }

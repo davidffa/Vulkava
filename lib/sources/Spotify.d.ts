@@ -1,25 +1,19 @@
-import UnresolvedTrack from '../UnresolvedTrack';
+import { AbstractExternalSource } from './AbstractExternalSource';
 import { Vulkava } from '../Vulkava';
-export default class Spotify {
-    private readonly vulkava;
+import type { SearchResult } from '../@types';
+export default class Spotify extends AbstractExternalSource {
+    static readonly SPOTIFY_REGEX: RegExp;
     private readonly auth;
     private readonly market;
     private token;
     private renewDate;
     constructor(vulkava: Vulkava, clientId?: string, clientSecret?: string, market?: string);
-    getTrack(id: string): Promise<UnresolvedTrack>;
-    getAlbum(id: string): Promise<{
-        title: string;
-        tracks: UnresolvedTrack[];
-    }>;
-    getPlaylist(id: string): Promise<{
-        title: string;
-        tracks: UnresolvedTrack[];
-    }>;
-    getArtistTopTracks(id: string): Promise<{
-        title: string;
-        tracks: UnresolvedTrack[];
-    }>;
+    loadItem(query: string): Promise<SearchResult | null>;
+    getTrack(id: string): Promise<SearchResult>;
+    getAlbum(id: string): Promise<SearchResult>;
+    getPlaylist(id: string): Promise<SearchResult>;
+    getArtistTopTracks(id: string): Promise<SearchResult>;
+    private handleErrorResult;
     private buildTrack;
     private makeRequest;
     private renewToken;

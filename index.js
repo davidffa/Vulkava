@@ -26,7 +26,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.VERSION = exports.ConnectionState = exports.NodeState = exports.Vulkava = exports.UnresolvedTrack = exports.Track = exports.Player = exports.Node = exports.Filters = void 0;
+exports.VERSION = exports.ConnectionState = exports.NodeState = exports.AbstractExternalSource = exports.Vulkava = exports.UnresolvedTrack = exports.Track = exports.Player = exports.Node = exports.Filters = void 0;
 const Filters_1 = __importDefault(require("./lib/Filters"));
 exports.Filters = Filters_1.default;
 const Node_1 = __importStar(require("./lib/Node"));
@@ -41,6 +41,8 @@ const UnresolvedTrack_1 = __importDefault(require("./lib/UnresolvedTrack"));
 exports.UnresolvedTrack = UnresolvedTrack_1.default;
 const Vulkava_1 = require("./lib/Vulkava");
 Object.defineProperty(exports, "Vulkava", { enumerable: true, get: function () { return Vulkava_1.Vulkava; } });
+const AbstractExternalSource_1 = require("./lib/sources/AbstractExternalSource");
+Object.defineProperty(exports, "AbstractExternalSource", { enumerable: true, get: function () { return AbstractExternalSource_1.AbstractExternalSource; } });
 const package_json_1 = require("./package.json");
 const VERSION = package_json_1.version;
 exports.VERSION = VERSION;

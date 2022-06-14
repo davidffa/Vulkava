@@ -4,6 +4,7 @@ import Node from './Node';
 import Track from './Track';
 import { Player } from '..';
 import type { IncomingDiscordPayload, OutgoingDiscordPayload, EventListeners, PlayerOptions, SearchResult, SEARCH_SOURCE, VulkavaOptions } from './@types';
+import { AbstractExternalSource } from './sources/AbstractExternalSource';
 export interface Vulkava {
     once: EventListeners<this>;
     on: EventListeners<this>;
@@ -20,13 +21,8 @@ export declare class Vulkava extends EventEmitter {
     nodes: Node[];
     private readonly defaultSearchSource;
     readonly unresolvedSearchSource: SEARCH_SOURCE;
-    private readonly appleMusic?;
-    private readonly deezer?;
-    private readonly spotify?;
+    private externalSources;
     readonly sendWS: (guildId: string, payload: OutgoingDiscordPayload) => void;
-    static readonly APPLE_MUSIC_REGEX: RegExp;
-    static readonly SPOTIFY_REGEX: RegExp;
-    static readonly DEEZER_REGEX: RegExp;
     players: Map<string, Player>;
     private lastNodeSorting;
     static checkOptions(options: VulkavaOptions): void;
@@ -57,6 +53,11 @@ export declare class Vulkava extends EventEmitter {
     constructor(options: VulkavaOptions);
     get bestNode(): Node;
     /**
+     * Adds an external source that produces a SearchResult with UnresolvedTracks
+     * @param {AbstractExternalSource} extSource - The external source
+     */
+    addExternalSource(extSource: AbstractExternalSource): void;
+    /**
      * Decodes a track by its base64 string
      * @param {String} encodedTrack - The base64 encoded track
      * @returns {Promise<Track>}
@@ -79,9 +80,6 @@ export declare class Vulkava extends EventEmitter {
      * @returns {Player}
      */
     createPlayer(options: PlayerOptions): Player;
-    private loadFromAppleMusic;
-    private loadFromDeezer;
-    private loadFromSpotify;
     /**
      *
      * @param {String} query - The query to search for
