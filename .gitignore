@@ -5,3 +5,5 @@ typings
 
 yarn.lock
 package-lock.json
+
+coverage
