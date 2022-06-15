@@ -293,6 +293,8 @@ export default class Player {
       this.current = newTrack;
     }
 
+    this.playing = true;
+
     this.node?.send({
       op: 'play',
       guildId: this.guildId,
