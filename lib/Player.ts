@@ -1,7 +1,8 @@
-import { Node, Vulkava } from '..';
+import { Node, Vulkava, AbstractQueue } from '..';
 import { PlayerOptions, PlayerState, PlayOptions, VoiceState } from './@types';
 import Filters from './Filters';
 import { NodeState } from './Node';
+import { DefaultQueue } from './queue/DefaultQueue';
 import Track from './Track';
 import UnresolvedTrack from './UnresolvedTrack';
 
@@ -46,7 +47,7 @@ export default class Player {
   public selfMute?: boolean;
 
   public current: Track | null;
-  public queue: Array<Track | UnresolvedTrack>;
+  public queue: AbstractQueue;
 
   public queueRepeat: boolean;
   public trackRepeat: boolean;
@@ -70,6 +71,7 @@ export default class Player {
     if (options.textChannelId && typeof options.textChannelId !== 'string') throw new TypeError('textChannelId must be a string.');
     if (options.selfDeaf && typeof options.selfDeaf !== 'boolean') throw new TypeError('selfDeaf must be a boolean.');
     if (options.selfMute && typeof options.selfMute !== 'boolean') throw new TypeError('selfMute must be a boolean.');
+    if (options.queue && !(options instanceof AbstractQueue)) throw new TypeError('Queue must extend AbstractQueue.');
   }
 
   /**
@@ -81,6 +83,7 @@ export default class Player {
    * @param {String} [options.textChannelId] - The text channel id of this player
    * @param {Boolean} [options.selfMute] - Whether or not this player is muted
    * @param {Boolean} [options.selfDeaf] - Whether or not this player is deafened
+   * @param {AbstractQueue} [options.queue] - The queue for this player
    */
   constructor(vulkava: Vulkava, options: PlayerOptions) {
     Player.checkOptions(options);
@@ -97,7 +100,7 @@ export default class Player {
     this.selfMute = options.selfMute ?? false;
 
     this.current = null;
-    this.queue = [];
+    this.queue = options.queue ?? new DefaultQueue();
 
     this.queueRepeat = false;
     this.trackRepeat = false;
@@ -132,9 +135,10 @@ export default class Player {
 
   /**
    * Gets the queue duration in milliseconds
+   * @deprecated - Use `queue.duration` instead
    */
   get queueDuration(): number {
-    return this.queue.reduce((acc, curr) => acc + curr.duration, 0);
+    return this.queue.duration;
   }
 
   /**
@@ -280,7 +284,7 @@ export default class Player {
     }
 
     if (!this.current) {
-      let newTrack = this.queue.shift() ?? null;
+      let newTrack = this.queue.poll();
 
       if (newTrack) {
         if (newTrack instanceof UnresolvedTrack) {
@@ -334,15 +338,11 @@ export default class Player {
 
   /**
    * Shuffles the queue
+   * @deprecated Use `queue.shuffle()` instead
    */
   public shuffleQueue() {
-    if (this.queue.length) {
-      let j;
-      for (let i = this.queue.length - 1; i; i--) {
-        j = Math.floor(Math.random() * (i + 1));
-
-        [this.queue[i], this.queue[j]] = [this.queue[j], this.queue[i]];
-      }
+    if (this.queue instanceof DefaultQueue) {
+      (this.queue as DefaultQueue).shuffle();
     }
   }
 
@@ -353,10 +353,10 @@ export default class Player {
   public skip(amount = 1) {
     if (!this.playing) return;
 
-    if (amount > this.queue.length) {
-      this.queue = [];
+    if (amount > this.queue.size) {
+      this.queue.clear();
     } else {
-      this.queue.splice(0, amount - 1);
+      this.queue.skipNTracks(amount);
     }
 
     this.node?.send({
