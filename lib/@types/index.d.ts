@@ -1,5 +1,6 @@
 import { Node } from '../..';
 import Player from '../Player';
+import { AbstractQueue } from '../queue/AbstractQueue';
 import Track from '../Track';
 import UnresolvedTrack from '../UnresolvedTrack';
 export declare type OutgoingDiscordPayload = {
@@ -244,6 +245,8 @@ export declare type PlayerOptions = {
     selfDeaf?: boolean;
     /** Whether the bot joins the voice channel muted or not */
     selfMute?: boolean;
+    /** The queue object that player will use */
+    queue?: AbstractQueue;
 };
 export declare type VoiceState = {
     sessionId: string;

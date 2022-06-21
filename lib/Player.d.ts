@@ -1,8 +1,7 @@
-import { Node, Vulkava } from '..';
+import { Node, Vulkava, AbstractQueue } from '..';
 import { PlayerOptions, PlayerState, PlayOptions, VoiceState } from './@types';
 import Filters from './Filters';
 import Track from './Track';
-import UnresolvedTrack from './UnresolvedTrack';
 export declare enum ConnectionState {
     CONNECTING = 0,
     CONNECTED = 1,
@@ -37,7 +36,7 @@ export default class Player {
     selfDeaf?: boolean;
     selfMute?: boolean;
     current: Track | null;
-    queue: Array<Track | UnresolvedTrack>;
+    queue: AbstractQueue;
     queueRepeat: boolean;
     trackRepeat: boolean;
     position: number;
@@ -57,6 +56,7 @@ export default class Player {
      * @param {String} [options.textChannelId] - The text channel id of this player
      * @param {Boolean} [options.selfMute] - Whether or not this player is muted
      * @param {Boolean} [options.selfDeaf] - Whether or not this player is deafened
+     * @param {AbstractQueue} [options.queue] - The queue for this player
      */
     constructor(vulkava: Vulkava, options: PlayerOptions);
     /**
@@ -65,6 +65,7 @@ export default class Player {
     get exactPosition(): number;
     /**
      * Gets the queue duration in milliseconds
+     * @deprecated - Use `queue.duration` instead
      */
     get queueDuration(): number;
     /**
@@ -122,6 +123,7 @@ export default class Player {
     setVoiceChannel(channelId: string): void;
     /**
      * Shuffles the queue
+     * @deprecated Use `queue.shuffle()` instead
      */
     shuffleQueue(): void;
     /**

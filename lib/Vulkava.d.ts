@@ -77,6 +77,7 @@ export declare class Vulkava extends EventEmitter {
      * @param {String} [options.textChannelId] - The text channel id
      * @param {Boolean} [options.selfDeaf=false] - Whether the bot joins the voice channel deafened or not
      * @param {Boolean} [options.selfMute=false] - Whether the bot joins the voice channel muted or not
+     * @param {AbstractQueue} [options.queue] - The queue for this player
      * @returns {Player}
      */
     createPlayer(options: PlayerOptions): Player;
