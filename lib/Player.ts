@@ -101,6 +101,7 @@ export default class Player {
 
     this.current = null;
     this.queue = options.queue ?? new DefaultQueue();
+    this.queue.player = this;
 
     this.queueRepeat = false;
     this.trackRepeat = false;

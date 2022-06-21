@@ -1,45 +1,53 @@
+import Player from '../Player';
 import Track from '../Track';
 import UnresolvedTrack from '../UnresolvedTrack';
 
 export abstract class AbstractQueue {
-  /**
-   * Gets the queue duration
-   * @abstract
-   * @type {number}
-   */
-  abstract get duration(): number;
+	/**
+	 * Player instance that will use the play queue.
+	 */
+	public set player(player: Player) {
+		this.player = player;
+	}
 
-  /**
-   * Gets the queue size
-   * @abstract
-   * @type {number}
-   */
-  abstract get size(): number;
+	/**
+	 * Gets the queue duration
+	 * @abstract
+	 * @type {number}
+	 */
+	abstract get duration(): number;
 
-  /**
-   * Adds a track to the queue
-   * @abstract
-   * @param {Track | UnresolvedTrack} track - The track to add to the queue
-   */
-  abstract add(track: Track | UnresolvedTrack): void;
+	/**
+	 * Gets the queue size
+	 * @abstract
+	 * @type {number}
+	 */
+	abstract get size(): number;
 
-  /**
-   * Polls the queue for the next track.
-   * @abstract
-   * @return {Track | UnresolvedTrack | null} The next track in the queue or null if the queue is empty.
-   */
-  abstract poll(): Track | UnresolvedTrack | null;
+	/**
+	 * Adds a track to the queue
+	 * @abstract
+	 * @param {Track | UnresolvedTrack} track - The track to add to the queue
+	 */
+	abstract add(track: Track | UnresolvedTrack): void;
 
-  /**
-   * Remove the next n tracks from the queue
-   * @abstract
-   * @param {number} n - The number of tracks to skip
-   */
-  abstract skipNTracks(n: number): void;
+	/**
+	 * Polls the queue for the next track.
+	 * @abstract
+	 * @return {Track | UnresolvedTrack | null} The next track in the queue or null if the queue is empty.
+	 */
+	abstract poll(): Track | UnresolvedTrack | null;
 
-  /**
-   * Clears the queue.
-   * @abstract
-   */
-  abstract clear(): void;
+	/**
+	 * Remove the next n tracks from the queue
+	 * @abstract
+	 * @param {number} n - The number of tracks to skip
+	 */
+	abstract skipNTracks(n: number): void;
+
+	/**
+	 * Clears the queue.
+	 * @abstract
+	 */
+	abstract clear(): void;
 }
