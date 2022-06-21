@@ -3,7 +3,7 @@ import UnresolvedTrack from '../UnresolvedTrack';
 import { AbstractQueue } from './AbstractQueue';
 
 export class DefaultQueue extends AbstractQueue {
-  private tracks: Array<Track | UnresolvedTrack>;
+  protected tracks: Array<Track | UnresolvedTrack>;
 
   constructor() {
     super();

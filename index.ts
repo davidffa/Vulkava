@@ -6,6 +6,7 @@ import UnresolvedTrack from './lib/UnresolvedTrack';
 import { Vulkava } from './lib/Vulkava';
 import { AbstractExternalSource } from './lib/sources/AbstractExternalSource';
 import { AbstractQueue } from './lib/queue/AbstractQueue';
+import { DefaultQueue } from './lib/queue/DefaultQueue';
 
 import type {
   NodeOptions,
@@ -27,6 +28,8 @@ export {
 
   AbstractQueue,
   AbstractExternalSource,
+
+  DefaultQueue,
 
   NodeState,
   ConnectionState,
