@@ -71,7 +71,7 @@ export default class Player {
     if (options.textChannelId && typeof options.textChannelId !== 'string') throw new TypeError('textChannelId must be a string.');
     if (options.selfDeaf && typeof options.selfDeaf !== 'boolean') throw new TypeError('selfDeaf must be a boolean.');
     if (options.selfMute && typeof options.selfMute !== 'boolean') throw new TypeError('selfMute must be a boolean.');
-    if (options.queue && !(options instanceof AbstractQueue)) throw new TypeError('Queue must extend AbstractQueue.');
+    if (options.queue && !(options.queue instanceof AbstractQueue)) throw new TypeError('Queue must extend AbstractQueue.');
   }
 
   /**
