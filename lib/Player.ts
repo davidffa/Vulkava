@@ -137,7 +137,7 @@ export default class Player {
    * Gets the queue duration in milliseconds
    * @deprecated - Use `queue.duration` instead
    */
-  get queueDuration() {
+  get queueDuration(): PromiseLike<number> | number {
     return this.queue.duration;
   }
 
