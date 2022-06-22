@@ -267,7 +267,7 @@ export default class Node {
   }
 
   private async pollTrack(player: Player) {
-    let newTrack = player.queue.poll();
+    let newTrack = await player.queue.poll();
 
     if (newTrack) {
       if (newTrack instanceof UnresolvedTrack) {
@@ -331,7 +331,7 @@ export default class Node {
   private async handleTrackEnd(ev: TrackEndEvent, player: Player) {
     if (ev.reason === 'REPLACED') {
       if (player.queueRepeat && player.current) {
-        player.queue.add(player.current);
+        await player.queue.add(player.current);
       }
       return;
     }
@@ -353,7 +353,7 @@ export default class Node {
     }
 
     if (player.queueRepeat && player.current) {
-      player.queue.add(player.current);
+      await player.queue.add(player.current);
     }
 
     this.pollTrack(player);
