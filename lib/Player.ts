@@ -137,7 +137,7 @@ export default class Player {
    * Gets the queue duration in milliseconds
    * @deprecated - Use `queue.duration` instead
    */
-  get queueDuration(): PromiseLike<number> | number {
+  get queueDuration(): number {
     return this.queue.duration;
   }
 
@@ -353,7 +353,7 @@ export default class Player {
   public async skip(amount = 1) {
     if (!this.playing) return;
 
-    if (amount > await this.queue.size) {
+    if (amount > this.queue.size) {
       await this.queue.clear();
     } else {
       await this.queue.skipNTracks(amount);

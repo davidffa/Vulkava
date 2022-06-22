@@ -7,14 +7,14 @@ export abstract class AbstractQueue {
 	 * @abstract
 	 * @type {number}
 	 */
-	abstract get duration(): PromiseLike<number> | number;
+	abstract get duration(): number;
 
 	/**
 	 * Gets the queue size
 	 * @abstract
 	 * @type {number}
 	 */
-	abstract get size(): PromiseLike<number> | number;
+	abstract get size(): number;
 
 	/**
 	 * Adds a track to the queue
