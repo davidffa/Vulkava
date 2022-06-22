@@ -137,7 +137,7 @@ export default class Player {
    * Gets the queue duration in milliseconds
    * @deprecated - Use `queue.duration` instead
    */
-  get queueDuration(): number {
+  get queueDuration() {
     return this.queue.duration;
   }
 
@@ -284,7 +284,7 @@ export default class Player {
     }
 
     if (!this.current) {
-      let newTrack = this.queue.poll();
+      let newTrack = await this.queue.poll();
 
       if (newTrack) {
         if (newTrack instanceof UnresolvedTrack) {
@@ -350,13 +350,13 @@ export default class Player {
    * Skips the current playing track
    * @param {Number} [amount=1] - The amount of tracks to skip
    */
-  public skip(amount = 1) {
+  public async skip(amount = 1) {
     if (!this.playing) return;
 
-    if (amount > this.queue.size) {
-      this.queue.clear();
+    if (amount > await this.queue.size) {
+      await this.queue.clear();
     } else {
-      this.queue.skipNTracks(amount);
+      await this.queue.skipNTracks(amount);
     }
 
     this.node?.send({
