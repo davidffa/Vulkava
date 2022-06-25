@@ -77,6 +77,7 @@ export type EventListeners<T> = {
   (event: 'wsDisconnect', listener: (player: Player, code: number, reason: string) => void): T;
   (event: 'queueEnd', listener: (player: Player) => void): T;
   (event: 'pong', listener: (node: Node, ping?: number) => void): T;
+  (event: 'recordFinished', listener: (node: Node, guildId: string, id: string) => void): T;
 }
 
 // Search sources (the last two only works on my lavalink (https://github.com/davidffa/lavalink/releases) )
@@ -303,6 +304,19 @@ export type PlayOptions = {
 };
 
 // ---------- End of Player typings ----------
+
+// ---------- Recorder typings ----------
+
+export type RecordOptions = {
+  /** The record id */
+  id: string;
+  /** The bitrate value */
+  bitrate: number;
+  /** Whether to rec the bot's audio or not */
+  selfAudio?: boolean;
+}
+
+// ---------- End of Recorder typings ----------
 
 // ---------- Filter typings ----------
 

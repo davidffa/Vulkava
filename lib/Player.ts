@@ -3,6 +3,7 @@ import { PlayerOptions, PlayerState, PlayOptions, VoiceState } from './@types';
 import Filters from './Filters';
 import { NodeState } from './Node';
 import { DefaultQueue } from './queue/DefaultQueue';
+import Recorder from './Recorder';
 import Track from './Track';
 import UnresolvedTrack from './UnresolvedTrack';
 
@@ -39,6 +40,7 @@ export default class Player {
   public readonly filters: Filters;
 
   declare private connectTimeout?: NodeJS.Timeout;
+  declare private recorderObj?: Recorder;
 
   public voiceChannelId: string;
   public textChannelId?: string | null;
@@ -119,6 +121,13 @@ export default class Player {
     this.assignNode();
   }
 
+  get recorder(): Recorder {
+    if (this.recorderObj) return this.recorderObj;
+
+    this.recorderObj = new Recorder(this.vulkava, this);
+    return this.recorderObj;
+  }
+
   /**
    * Gets the exact track position based on the last playerUpdate packet
    */
@@ -174,15 +183,7 @@ export default class Player {
 
     this.state = ConnectionState.CONNECTING;
 
-    this.vulkava.sendWS(this.guildId, {
-      op: 4,
-      d: {
-        guild_id: this.guildId,
-        channel_id: this.voiceChannelId,
-        self_mute: this.selfMute,
-        self_deaf: this.selfDeaf
-      }
-    });
+    this.sendVoiceState();
 
     if (this.connectTimeout) clearTimeout(this.connectTimeout);
 
@@ -230,6 +231,8 @@ export default class Player {
     if (this.node === node) return;
 
     this.moving = true;
+    const wasRecording = !!this.recorderObj?.started;
+    if (wasRecording) this.recorderObj?.stop();
 
     this.node?.send({
       op: 'destroy',
@@ -248,6 +251,7 @@ export default class Player {
       this.filters.apply();
     }
 
+    if (wasRecording) this.recorderObj?.resume();
     if (this.playing && this.current) {
       const payload = {
         op: 'play',
@@ -305,6 +309,48 @@ export default class Player {
       track: this.current.encodedTrack,
       ...options
     });
+  }
+
+  /**
+   * Sends a voice state update payload to the discord gateway
+   * @private
+   */
+  private sendVoiceState() {
+    this.vulkava.sendWS(this.guildId, {
+      op: 4,
+      d: {
+        guild_id: this.guildId,
+        channel_id: this.voiceChannelId,
+        self_mute: this.selfMute,
+        self_deaf: this.selfDeaf
+      }
+    });
+  }
+
+  /**
+   * Sets the bot's self deaf state
+   * @param state - Whether to self deaf or not
+   */
+  public setSelfDeaf(state: boolean) {
+    if (typeof state !== 'boolean') throw new TypeError('state must be a boolean');
+
+    if (this.selfDeaf !== state && this.state !== ConnectionState.DISCONNECTED) {
+      this.selfDeaf = state;
+      this.sendVoiceState();
+    }
+  }
+
+  /**
+   * Sets the bot's self mute state
+   * @param state - Whether to self mute or not
+   */
+  public setSelfMute(state: boolean) {
+    if (typeof state !== 'boolean') throw new TypeError('state must be a boolean');
+
+    if (this.selfMute !== state && this.state !== ConnectionState.DISCONNECTED) {
+      this.selfMute = state;
+      this.sendVoiceState();
+    }
   }
 
   /**
