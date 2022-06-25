@@ -127,7 +127,7 @@ export default class Node {
   get totalPenalties() {
     if (this.state !== NodeState.CONNECTED || !this.ws) return Infinity;
 
-    return this.penalties ?? Infinity;
+    return this.penalties ?? 0;
   }
 
   get identifier() {
