@@ -1,6 +1,7 @@
 import { Node, Vulkava, AbstractQueue } from '..';
 import { PlayerOptions, PlayerState, PlayOptions, VoiceState } from './@types';
 import Filters from './Filters';
+import Recorder from './Recorder';
 import Track from './Track';
 export declare enum ConnectionState {
     CONNECTING = 0,
@@ -31,6 +32,7 @@ export default class Player {
     readonly guildId: string;
     readonly filters: Filters;
     private connectTimeout?;
+    private recorderObj?;
     voiceChannelId: string;
     textChannelId?: string | null;
     selfDeaf?: boolean;
@@ -59,6 +61,7 @@ export default class Player {
      * @param {AbstractQueue} [options.queue] - The queue for this player
      */
     constructor(vulkava: Vulkava, options: PlayerOptions);
+    get recorder(): Recorder;
     /**
      * Gets the exact track position based on the last playerUpdate packet
      */
@@ -106,6 +109,21 @@ export default class Player {
      * @param {Boolean} [options.noReplace] - Whether to ignore operation if a track is already playing or paused
      */
     play(options?: PlayOptions): Promise<void>;
+    /**
+     * Sends a voice state update payload to the discord gateway
+     * @private
+     */
+    private sendVoiceState;
+    /**
+     * Sets the bot's self deaf state
+     * @param state - Whether to self deaf or not
+     */
+    setSelfDeaf(state: boolean): void;
+    /**
+     * Sets the bot's self mute state
+     * @param state - Whether to self mute or not
+     */
+    setSelfMute(state: boolean): void;
     /**
      * Sets the track looping
      * @param {Boolean} state - Whether to enable track looping or not

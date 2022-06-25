@@ -69,6 +69,7 @@ export declare type EventListeners<T> = {
     (event: 'wsDisconnect', listener: (player: Player, code: number, reason: string) => void): T;
     (event: 'queueEnd', listener: (player: Player) => void): T;
     (event: 'pong', listener: (node: Node, ping?: number) => void): T;
+    (event: 'recordFinished', listener: (node: Node, guildId: string, id: string) => void): T;
 };
 export declare type SEARCH_SOURCE = 'youtube' | 'youtubemusic' | 'soundcloud' | 'odysee' | 'yandex';
 export declare type PlaylistInfo = {
@@ -257,6 +258,14 @@ export declare type PlayOptions = {
     endTime?: number;
     pause?: boolean;
     noReplace?: boolean;
+};
+export declare type RecordOptions = {
+    /** The record id */
+    id: string;
+    /** The bitrate value */
+    bitrate: number;
+    /** Whether to rec the bot's audio or not */
+    selfAudio?: boolean;
 };
 export declare type ChannelMixOptions = {
     leftToLeft?: number;

@@ -1,3 +1,4 @@
+/// <reference types="node" />
 import { Dispatcher } from 'undici';
 import { Vulkava } from './Vulkava';
 import type { NodeOptions, NodeStats, RoutePlannerStatus, Versions } from './@types';
@@ -78,10 +79,37 @@ export default class Node {
     private handleTrackStuck;
     private handleTrackExeption;
     private handleWSClose;
+    /**
+     * Gets a list with the ids of all recordings from the guild.
+     * @param guildId - The guild id to get the recordings
+     * @param id - The record id
+     * @returns {Promise<Buffer>}
+     */
+    getRecord(guildId: string, id: string): Promise<Buffer>;
+    /**
+     * Gets a list with the ids of all recordings from the guild.
+     * @param guildId - The guild id to get the recordings
+     * @returns {Promise<Object>}
+     */
+    getAllRecords(guildId: string): Promise<string[]>;
+    /**
+     * Deletes all records from the guild.
+     * @param guildId - The guild id to get the recordings
+     * @returns {Promise<Object>}
+     */
+    deleteAllRecords(guildId: string): Promise<void>;
+    /**
+     * Deletes one specific recorded audio file.
+     * @param guildId - The guild id to get the recordings
+     * @param id - The record id
+     * @returns {Promise<Object>}
+     */
+    deleteRecord(guildId: string, id: string): Promise<void>;
     private open;
     private message;
     private error;
     private close;
     private upgrade;
     request<T>(method: Dispatcher.HttpMethod, endpoint: string, body?: Record<string, unknown> | Array<unknown>): Promise<T>;
+    requestBinary(method: Dispatcher.HttpMethod, endpoint: string): Promise<Buffer>;
 }
