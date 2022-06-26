@@ -266,6 +266,8 @@ export declare type RecordOptions = {
     bitrate: number;
     /** Whether to rec the bot's audio or not */
     selfAudio?: boolean;
+    /** An array of user ids to record audio, if not passed, all users' audio will be recorded */
+    users?: string[];
 };
 export declare type ChannelMixOptions = {
     leftToLeft?: number;
