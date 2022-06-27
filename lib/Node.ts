@@ -127,7 +127,7 @@ export default class Node {
   get totalPenalties() {
     if (this.state !== NodeState.CONNECTED || !this.ws) return Infinity;
 
-    return this.penalties ?? Infinity;
+    return this.penalties ?? 0;
   }
 
   get identifier() {
@@ -385,6 +385,60 @@ export default class Node {
     }
   }
 
+  // Recorder stuff
+  // NOTE: This system only works when using my custom lavalink that supports audio receiving.
+  // (https://github.com/davidffa/lavalink/releases)
+  /**
+   * Gets a list with the ids of all recordings from the guild.
+   * @param guildId - The guild id to get the recordings
+   * @param id - The record id
+   * @returns {Promise<Buffer>}
+   */
+  public async getRecord(guildId: string, id: string): Promise<Buffer> {
+    if (!guildId || typeof guildId !== 'string') throw new TypeError('guildId must be a non-empty string');
+    if (!id || typeof id !== 'string') throw new TypeError('id must be a non-empty string');
+
+    const rec = await this.requestBinary('GET', `records/${guildId}/${id}`);
+    if (!rec.length) throw new Error('Record not found');
+
+    return rec;
+  }
+
+  /**
+   * Gets a list with the ids of all recordings from the guild.
+   * @param guildId - The guild id to get the recordings
+   * @returns {Promise<Object>}
+   */
+  public getAllRecords(guildId: string): Promise<string[]> {
+    if (!guildId || typeof guildId !== 'string') throw new TypeError('guildId must be a non-empty string');
+
+    return this.request<string[]>('GET', `records/${guildId}`);
+  }
+
+  /**
+   * Deletes all records from the guild.
+   * @param guildId - The guild id to get the recordings
+   * @returns {Promise<Object>}
+   */
+  public async deleteAllRecords(guildId: string): Promise<void> {
+    if (!guildId || typeof guildId !== 'string') throw new TypeError('guildId must be a non-empty string');
+
+    await this.requestBinary('DELETE', `records/${guildId}`);
+  }
+
+  /**
+   * Deletes one specific recorded audio file.
+   * @param guildId - The guild id to get the recordings
+   * @param id - The record id
+   * @returns {Promise<Object>}
+   */
+  public async deleteRecord(guildId: string, id: string): Promise<void> {
+    if (!guildId || typeof guildId !== 'string') throw new TypeError('guildId must be a non-empty string');
+    if (!id || typeof id !== 'string') throw new TypeError('id must be a non-empty string');
+
+    await this.requestBinary('DELETE', `records/${guildId}/${id}`);
+  }
+
   // ---------- WebSocket event handlers ----------
   private open() {
     this.state = NodeState.CONNECTED;
@@ -421,6 +475,9 @@ export default class Node {
         break;
       case 'event':
         this.handlePlayerEvent(payload);
+        break;
+      case 'recordFinished':
+        this.vulkava.emit('recordFinished', this, payload.guildId, payload.id);
         break;
       default:
         this.vulkava.emit('warn', this, 'Unknown payload op: ' + payload.op);
@@ -497,5 +554,15 @@ export default class Node {
       },
       body: JSON.stringify(body)
     }).then(r => r.body.json());
+  }
+
+  public requestBinary(method: Dispatcher.HttpMethod, endpoint: string): Promise<Buffer> {
+    return this.pool.request({
+      path: `/${endpoint}`,
+      method,
+      headers: {
+        'authorization': this.options.password,
+      },
+    }).then(async r => Buffer.from(await r.body.arrayBuffer()));
   }
 }
