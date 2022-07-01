@@ -118,6 +118,8 @@ export default class Player {
     this.state = ConnectionState.DISCONNECTED;
     this.voiceState = {} as VoiceState;
 
+    this.vulkava.emit('playerCreate', this);
+
     this.assignNode();
   }
 
@@ -213,6 +215,8 @@ export default class Player {
    */
   public destroy() {
     this.disconnect();
+
+    this.vulkava.emit('playerDestroy', this);
 
     this.node?.send({
       op: 'destroy',
