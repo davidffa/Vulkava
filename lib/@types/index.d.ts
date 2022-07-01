@@ -66,7 +66,9 @@ export declare type EventListeners<T> = {
     (event: 'trackException', listener: (player: Player, track: Track, exception: LoadException & {
         cause: string;
     }) => void): T;
-    (event: 'wsDisconnect', listener: (player: Player, code: number, reason: string) => void): T;
+    (event: 'playerCreate', listener: (player: Player) => void): T;
+    (event: 'playerDestroy', listener: (player: Player) => void): T;
+    (event: 'playerDisconnect', listener: (player: Player, code: number, reason: string) => void): T;
     (event: 'queueEnd', listener: (player: Player) => void): T;
     (event: 'pong', listener: (node: Node, ping?: number) => void): T;
     (event: 'recordFinished', listener: (node: Node, guildId: string, id: string) => void): T;
