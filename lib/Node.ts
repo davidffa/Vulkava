@@ -369,7 +369,7 @@ export default class Node {
   }
 
   private handleWSClose(ev: WebSocketClosedEvent, player: Player) {
-    this.vulkava.emit('wsDisconnect', player, ev.code, ev.reason);
+    this.vulkava.emit('playerDisconnect', player, ev.code, ev.reason);
 
     switch (ev.code) {
       case 1001:
