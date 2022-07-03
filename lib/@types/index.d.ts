@@ -285,6 +285,10 @@ export declare type RecordOptions = {
     selfAudio?: boolean;
     /** An array of user ids to record audio, if not passed, all users' audio will be recorded */
     users?: string[];
+    /** The number of channels (mono or stereo) default=2 */
+    channels?: number;
+    /** Whether to encode the output to mp3 or not, if not, the output will be in .pcm default=true */
+    encodeToMp3?: boolean;
 };
 export declare type ChannelMixOptions = {
     leftToLeft?: number;
