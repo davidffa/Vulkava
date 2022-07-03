@@ -80,6 +80,11 @@ export type EventListeners<T> = {
   (event: 'queueEnd', listener: (player: Player) => void): T;
   (event: 'pong', listener: (node: Node, ping?: number) => void): T;
   (event: 'recordFinished', listener: (node: Node, guildId: string, id: string) => void): T;
+
+  // Speaking Events (only works on my lavalink (https://github.com/davidffa/lavalink/releases) )
+  (event: 'speakingStart', listener: (player: Player, userId: string) => void): T;
+  (event: 'speakingStop', listener: (player: Player, userId: string) => void): T;
+  (event: 'userDisconnect', listener: (player: Player, userId: string) => void): T;
 }
 
 // Search sources (the last two only works on my lavalink (https://github.com/davidffa/lavalink/releases) )
@@ -158,6 +163,12 @@ export type NodeOptions = {
   maxRetryAttempts?: number;
   /** The interval between retry attempts */
   retryAttemptsInterval?: number;
+  /**
+   * Tells to the lavalink server to send speaking events eg. speaking start, speaking stop
+   * default is false
+   * Only supported by my custom lavalink (https://github.com/davidffa/lavalink/releases)
+  */
+  sendSpeakingEvents?: boolean;
 };
 
 /** Lavalink node stats */
@@ -226,6 +237,12 @@ export type Versions = {
 }
 
 /** Lavalink node incoming payloads */
+export interface SpeakingEventPayload {
+  op: 'speakingEvent';
+  type: 'start' | 'stop' | 'disconnect';
+  guildId: string;
+  userId: string;
+}
 export interface PlayerEventPayload {
   op: 'event';
   type: 'TrackStartEvent' | 'TrackEndEvent' | 'TrackExceptionEvent' | 'TrackStuckEvent' | 'WebSocketClosedEvent';

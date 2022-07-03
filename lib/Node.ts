@@ -9,6 +9,7 @@ import type {
   NodeStats,
   PlayerEventPayload,
   RoutePlannerStatus,
+  SpeakingEventPayload,
   TrackEndEvent,
   TrackExceptionEvent,
   TrackStartEvent,
@@ -69,6 +70,7 @@ export default class Node {
     if (options.followRedirects && typeof options.followRedirects !== 'boolean') throw new TypeError('NodeOptions.followRedirects must be a boolean');
     if (options.maxRetryAttempts && typeof options.maxRetryAttempts !== 'number') throw new TypeError('NodeOptions.maxRetryAttempts must be a number');
     if (options.retryAttemptsInterval && typeof options.retryAttemptsInterval !== 'number') throw new TypeError('NodeOptions.retryAttemptsInterval must be a number');
+    if (options.sendSpeakingEvents && typeof options.sendSpeakingEvents !== 'boolean') throw new TypeError('NodeOptions.sendSpeakingEvents must be a boolean');
   }
 
   /**
@@ -85,6 +87,8 @@ export default class Node {
    * @param {Number} [options.resumeTimeout] - The resume timeout, in seconds
    * @param {Number} [options.maxRetryAttempts] - The max number of reconnect attempts
    * @param {Number} [options.retryAttemptsInterval] - The interval between reconnect attempts, in milliseconds
+   * @param {Boolean} [options.followRedirects] - Whether to follow redirects (3xx status codes)
+   * @param {Boolean} [options.sendSpeakingEvents=false] - Tells the lavalink node to send speaking events (Supported in my custom lavalink fork)
    */
   constructor(vulkava: Vulkava, options: NodeOptions) {
     Node.checkOptions(options);
@@ -160,7 +164,8 @@ export default class Node {
     const headers = {
       Authorization: this.options.password,
       'User-Id': this.vulkava.clientId,
-      'Client-Name': `Vulkava/${VERSION}`
+      'Client-Name': `Vulkava/${VERSION}`,
+      'Speaking-Events': this.options.sendSpeakingEvents ? 'true' : 'false',
     };
 
     if (this.options.resumeKey) Object.assign(headers, { 'Resume-Key': this.options.resumeKey });
@@ -287,6 +292,26 @@ export default class Node {
 
     player.current = null;
     this.vulkava.emit('queueEnd', player);
+  }
+
+  private handleSpeakingEvent({ type, guildId, userId }: SpeakingEventPayload) {
+    const player = this.vulkava.players.get(guildId);
+    if (!player || player.node !== this) return;
+
+    switch (type) {
+      case 'start':
+        this.vulkava.emit('speakingStart', player, userId);
+        break;
+      case 'stop':
+        this.vulkava.emit('speakingStop', player, userId);
+        break;
+      case 'disconnect':
+        this.vulkava.emit('userDisconnect', player, userId);
+        break;
+      default:
+        this.vulkava.emit('warn', this, `Unhandled speaking event. Unknown event type: ${type}`);
+        break;
+    }
   }
 
   private handlePlayerEvent(e: PlayerEventPayload) {
@@ -475,6 +500,9 @@ export default class Node {
         break;
       case 'event':
         this.handlePlayerEvent(payload);
+        break;
+      case 'speakingEvent':
+        this.handleSpeakingEvent(payload);
         break;
       case 'recordFinished':
         this.vulkava.emit('recordFinished', this, payload.guildId, payload.id);
