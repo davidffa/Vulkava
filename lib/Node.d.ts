@@ -41,6 +41,8 @@ export default class Node {
      * @param {Number} [options.resumeTimeout] - The resume timeout, in seconds
      * @param {Number} [options.maxRetryAttempts] - The max number of reconnect attempts
      * @param {Number} [options.retryAttemptsInterval] - The interval between reconnect attempts, in milliseconds
+     * @param {Boolean} [options.followRedirects] - Whether to follow redirects (3xx status codes)
+     * @param {Boolean} [options.sendSpeakingEvents=false] - Tells the lavalink node to send speaking events (Supported in my custom lavalink fork)
      */
     constructor(vulkava: Vulkava, options: NodeOptions);
     get totalPenalties(): number;
@@ -73,6 +75,7 @@ export default class Node {
     send(payload: Record<string, unknown>): void;
     private setupResuming;
     private pollTrack;
+    private handleSpeakingEvent;
     private handlePlayerEvent;
     private handleTrackStart;
     private handleTrackEnd;
