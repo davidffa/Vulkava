@@ -414,7 +414,7 @@ export default class Node {
   // NOTE: This system only works when using my custom lavalink that supports audio receiving.
   // (https://github.com/davidffa/lavalink/releases)
   /**
-   * Gets a list with the ids of all recordings from the guild.
+   * Gets the recorded audio file bytes.
    * @param guildId - The guild id to get the recordings
    * @param id - The record id
    * @returns {Promise<Buffer>}
