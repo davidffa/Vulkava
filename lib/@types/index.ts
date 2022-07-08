@@ -81,7 +81,7 @@ export type EventListeners<T> = {
   (event: 'pong', listener: (node: Node, ping?: number) => void): T;
   (event: 'recordFinished', listener: (node: Node, guildId: string, id: string) => void): T;
 
-  // Speaking Events (only works on my lavalink (https://github.com/davidffa/lavalink/releases) )
+  // Speaking Events (only work on my lavalink (https://github.com/davidffa/lavalink/releases) and while recording audio )
   (event: 'speakingStart', listener: (player: Player, userId: string) => void): T;
   (event: 'speakingStop', listener: (player: Player, userId: string) => void): T;
   (event: 'userDisconnect', listener: (player: Player, userId: string) => void): T;
@@ -166,7 +166,7 @@ export type NodeOptions = {
   /**
    * Tells to the lavalink server to send speaking events eg. speaking start, speaking stop
    * default is false
-   * Only supported by my custom lavalink (https://github.com/davidffa/lavalink/releases)
+   * Only supported by my custom lavalink (https://github.com/davidffa/lavalink/releases) and if recording audio
   */
   sendSpeakingEvents?: boolean;
 };
