@@ -83,7 +83,7 @@ export default class Node {
     private handleTrackExeption;
     private handleWSClose;
     /**
-     * Gets a list with the ids of all recordings from the guild.
+     * Gets the recorded audio file bytes.
      * @param guildId - The guild id to get the recordings
      * @param id - The record id
      * @returns {Promise<Buffer>}

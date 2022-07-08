@@ -140,7 +140,7 @@ export declare type NodeOptions = {
     /**
      * Tells to the lavalink server to send speaking events eg. speaking start, speaking stop
      * default is false
-     * Only supported by my custom lavalink (https://github.com/davidffa/lavalink/releases)
+     * Only supported by my custom lavalink (https://github.com/davidffa/lavalink/releases) and if recording audio
     */
     sendSpeakingEvents?: boolean;
 };
