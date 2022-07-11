@@ -296,7 +296,13 @@ export default class Player {
 
       if (newTrack) {
         if (newTrack instanceof UnresolvedTrack) {
-          newTrack = await newTrack.build();
+          try {
+            newTrack = await newTrack.build();
+          } catch (e) {
+            this.vulkava.emit('error', this.node, e);
+            if (this.queue.size > 0) this.play();
+            return;
+          }
         }
       } else {
         throw new Error('The queue is empty!');
