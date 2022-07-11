@@ -299,7 +299,7 @@ export default class Player {
           try {
             newTrack = await newTrack.build();
           } catch (e) {
-            this.vulkava.emit('error', this.node, e);
+            this.vulkava.emit('trackException', this, newTrack, e);
             if (this.queue.size > 0) this.play();
             return;
           }

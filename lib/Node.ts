@@ -279,7 +279,7 @@ export default class Node {
         try {
           newTrack = await newTrack.build();
         } catch (err) {
-          this.vulkava.emit('error', this, err);
+          this.vulkava.emit('trackException', player, newTrack, err);
           this.pollTrack(player);
           return;
         }
