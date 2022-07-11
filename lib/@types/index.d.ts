@@ -63,7 +63,7 @@ export declare type EventListeners<T> = {
     (event: 'trackStart', listener: (player: Player, track: Track) => void): T;
     (event: 'trackEnd', listener: (player: Player, track: Track, reason: TrackEndReason) => void): T;
     (event: 'trackStuck', listener: (player: Player, track: Track, thresholdMs: number) => void): T;
-    (event: 'trackException', listener: (player: Player, track: Track, exception: LoadException & {
+    (event: 'trackException', listener: (player: Player, track: Track | UnresolvedTrack, exception: LoadException & {
         cause: string;
     }) => void): T;
     (event: 'playerCreate', listener: (player: Player) => void): T;
