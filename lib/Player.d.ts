@@ -148,7 +148,7 @@ export default class Player {
      * Skips the current playing track
      * @param {Number} [amount=1] - The amount of tracks to skip
      */
-    skip(amount?: number): void;
+    skip(amount?: number): Promise<void>;
     /**
      * Pause or unpause the player
      * @param {Boolean} [state=true] - Whether to pause or unpause the player
