@@ -21,25 +21,29 @@ export abstract class AbstractQueue {
    * @abstract
    * @param {Track | UnresolvedTrack} track - The track to add to the queue
    */
-  abstract add(track: Track | UnresolvedTrack): void;
+  abstract add(track: Track | UnresolvedTrack): Promise<void> | void;
 
   /**
    * Polls the queue for the next track.
    * @abstract
    * @return {Track | UnresolvedTrack | null} The next track in the queue or null if the queue is empty.
    */
-  abstract poll(): Track | UnresolvedTrack | null;
+  abstract poll():
+    | Promise<Track | UnresolvedTrack | null>
+    | Track
+    | UnresolvedTrack
+    | null;
 
   /**
    * Remove the next n tracks from the queue
    * @abstract
    * @param {number} n - The number of tracks to skip
    */
-  abstract skipNTracks(n: number): void;
+  abstract skipNTracks(n: number): Promise<void> | void;
 
   /**
    * Clears the queue.
    * @abstract
    */
-  abstract clear(): void;
+  abstract clear(): Promise<void> | void;
 }

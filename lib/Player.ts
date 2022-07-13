@@ -292,7 +292,7 @@ export default class Player {
     }
 
     if (!this.current) {
-      let newTrack = this.queue.poll();
+      let newTrack = await this.queue.poll();
 
       if (newTrack) {
         if (newTrack instanceof UnresolvedTrack) {
@@ -406,13 +406,13 @@ export default class Player {
    * Skips the current playing track
    * @param {Number} [amount=1] - The amount of tracks to skip
    */
-  public skip(amount = 1) {
+  public async skip(amount = 1) {
     if (!this.playing) return;
 
     if (amount > this.queue.size) {
-      this.queue.clear();
+      await this.queue.clear();
     } else {
-      this.queue.skipNTracks(amount);
+      await this.queue.skipNTracks(amount);
     }
 
     this.node?.send({
