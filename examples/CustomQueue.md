@@ -8,19 +8,19 @@ module.exports = class Queue extends DefaultQueue {
     super();
   }
 
-  public peek() {
+  peek() {
     return this.tracks[0];
   }
 
-  public removeTrackAt(index: number) {
+  removeTrackAt(index) {
     this.tracks.splice(index, 1);
   }
 
-  public getTrackAt(index: number) {
+  getTrackAt(index) {
     return this.tracks[index];
   }
 
-  public getQueueDetails(pos: number, pos2: number) {
+  getQueueDetails(pos, pos2) {
     const data = [];
 
     for (; pos < pos2 && this.tracks[pos]; pos++) {
