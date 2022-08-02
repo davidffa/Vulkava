@@ -90,7 +90,7 @@ client.on('interactionCreate', async interaction => {
   if (res.loadType === 'PLAYLIST_LOADED') {
     for (const track of res.tracks) {
       track.setRequester(interaction.user);
-      player.queue.push(track);
+      player.queue.add(track);
     }
 
     interaction.reply(`Playlist \`${res.playlistInfo.name}\` loaded!`);
@@ -98,7 +98,7 @@ client.on('interactionCreate', async interaction => {
     const track = res.tracks[0];
     track.setRequester(interaction.user);
 
-    player.queue.push(track);
+    player.queue.add(track);
     interaction.reply(`Queued \`${track.title}\``);
   }
 
