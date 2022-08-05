@@ -33,7 +33,7 @@ describe('AppleMusic track loading', () => {
   });
 
   it('should be able to load a playlist with > 100 tracks', async () => {
-    await expect(vulkava.search('https://music.apple.com/gb/playlist/200-most-streamed-songs-of-the-2000s/pl.0eb1559b2a614029aa9efe486d8ff293').then(r => r.tracks.length)).resolves.toBe(199);
+    await expect(vulkava.search('https://music.apple.com/gb/playlist/200-most-streamed-songs-of-the-2000s/pl.0eb1559b2a614029aa9efe486d8ff293').then(r => r.tracks.length)).resolves.toBe(200);
   });
 
   it('should be able to load a list of the artist\'s top tracks', async () => {
