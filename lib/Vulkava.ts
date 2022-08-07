@@ -107,7 +107,7 @@ export class Vulkava extends EventEmitter {
 
     this.nodes = [];
     this.defaultSearchSource = options.defaultSearchSource ?? 'youtube';
-    this.unresolvedSearchSource = options.unresolvedSearchSource ?? 'youtubemusic';
+    this.unresolvedSearchSource = options.unresolvedSearchSource ?? 'youtube';
 
     this.externalSources = [];
 
