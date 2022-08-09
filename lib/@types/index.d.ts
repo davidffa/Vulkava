@@ -287,8 +287,8 @@ export declare type RecordOptions = {
     users?: string[];
     /** The number of channels (mono or stereo) default=2 */
     channels?: number;
-    /** Whether to encode the output to mp3 or not, if not, the output will be in .pcm default=true */
-    encodeToMp3?: boolean;
+    /** The output audio file format (currently the available formats are PCM and MP3), default is MP3 */
+    format?: 'PCM' | 'MP3';
 };
 export declare type ChannelMixOptions = {
     leftToLeft?: number;
