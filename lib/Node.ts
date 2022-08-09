@@ -330,7 +330,7 @@ export default class Node {
         this.handleTrackStuck(e as TrackStuckEvent, player);
         break;
       case 'TrackExceptionEvent':
-        this.handleTrackExeption(e as TrackExceptionEvent, player);
+        this.handleTrackException(e as TrackExceptionEvent, player);
         break;
       case 'WebSocketClosedEvent':
         this.handleWSClose(e as WebSocketClosedEvent, player);
@@ -388,8 +388,8 @@ export default class Node {
     this.vulkava.emit('trackStuck', player, player.current, ev.thresholdMs);
   }
 
-  private handleTrackExeption(ev: TrackExceptionEvent, player: Player) {
-    this.vulkava.emit('trackExeption', player, player.current, ev.exception);
+  private handleTrackException(ev: TrackExceptionEvent, player: Player) {
+    this.vulkava.emit('trackException', player, player.current, ev.exception);
     player.skip();
   }
 

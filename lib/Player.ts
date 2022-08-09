@@ -23,7 +23,7 @@ export enum ConnectionState {
  * @prop {Boolean} [selfMute] - Whether or not this player is muted
  * @prop {Boolean} [selfDeaf] - Whether or not this player is deafened
  * @prop {Track | null} current - The current track of this player
- * @prop {Array<Track | UnresolvedTrack>} queue - The queue of this player
+ * @prop {AbstractQueue} queue - The queue of this player
  * @prop {Boolean} trackRepeat - Whether to repeat the current track
  * @prop {Boolean} queueRepeat - Whether to repeat the queue
  * @prop {Boolean} playing - Whether this player is playing or not
