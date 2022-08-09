@@ -30,7 +30,7 @@ export default class Recorder {
    * @param {Boolean} [options.selfAudio] - Whether to record the bot's audio or not
    * @param {Array<String>} [options.users] - An array of user ids to record audio, if not passed, all users will be recorded
    * @param {Number} [options.channels] - The number of channels to record (mono or stereo), default is 2
-   * @param {Boolean} [options.encodeToMp3] - Whether to encode the output to mp3 or not
+   * @param {String} [options.format=MP3] - The output file format (currently MP3 or PCM), default is MP3
    */
   public start(options: RecordOptions) {
     if (this.started) throw new Error('Already recording!');
