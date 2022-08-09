@@ -80,7 +80,7 @@ export default class Node {
     private handleTrackStart;
     private handleTrackEnd;
     private handleTrackStuck;
-    private handleTrackExeption;
+    private handleTrackException;
     private handleWSClose;
     /**
      * Gets the recorded audio file bytes.
