@@ -34,12 +34,12 @@ export default class UnresolvedTrack {
   public async build(): Promise<Track> {
     let res = await this.vulkava.search(this.query, this.vulkava.unresolvedSearchSource);
 
-    if (res.loadType !== 'SEARCH_RESULT') {
+    if (res.loadType !== 'SEARCH_RESULT' || !res.tracks.length) {
       if (!this.isrc) throw new Error(`Failed to resolve track ${this.uri}`);
 
       res = await this.vulkava.search(`${this.author} - ${this.title}`, this.vulkava.unresolvedSearchSource);
 
-      if (res.loadType !== 'SEARCH_RESULT') throw new Error(`Failed to resolve track ${this.uri}`);
+      if (res.loadType !== 'SEARCH_RESULT' || !res.tracks.length) throw new Error(`Failed to resolve track ${this.uri}`);
     }
 
     const track = res.tracks[0] as Track;
