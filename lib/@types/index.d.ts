@@ -208,7 +208,7 @@ export declare type Versions = {
 /** Lavalink node incoming payloads */
 export interface SpeakingEventPayload {
     op: 'speakingEvent';
-    type: 'start' | 'stop' | 'disconnect';
+    type: 'start' | 'stop' | 'disconnected';
     guildId: string;
     userId: string;
 }
