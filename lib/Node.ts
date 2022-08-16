@@ -305,7 +305,7 @@ export default class Node {
       case 'stop':
         this.vulkava.emit('speakingStop', player, userId);
         break;
-      case 'disconnect':
+      case 'disconnected':
         this.vulkava.emit('userDisconnect', player, userId);
         break;
       default:
