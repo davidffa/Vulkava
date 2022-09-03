@@ -1,0 +1,17 @@
+# Node
+node_modules
+package-lock.json
+yarn.lock
+
+# Jest
+coverage
+jest.config.ts
+test
+
+# Eslint
+.eslintrc.json
+.eslintignore
+
+# IDEs
+.vscode
+.idea
