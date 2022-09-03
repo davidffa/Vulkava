@@ -2,7 +2,7 @@ import Track from '../Track';
 import UnresolvedTrack from '../UnresolvedTrack';
 import { AbstractQueue } from './AbstractQueue';
 export declare class DefaultQueue extends AbstractQueue {
-    protected tracks: Array<Track | UnresolvedTrack>;
+    tracks: Array<Track | UnresolvedTrack>;
     constructor();
     /**
      * Gets the queue size.
