@@ -160,5 +160,5 @@ export default class Player {
      */
     seek(position: number): void;
     sendVoiceUpdate(): void;
-    updatePlayer(state: PlayerState): void;
+    update(state: PlayerState): void;
 }

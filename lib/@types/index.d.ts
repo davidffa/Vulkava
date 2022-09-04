@@ -267,8 +267,8 @@ export declare type PlayerOptions = {
     queue?: AbstractQueue;
 };
 export declare type VoiceState = {
-    sessionId: string;
-    event: VoiceServerUpdateData;
+    sessionId?: string;
+    event?: VoiceServerUpdateData;
 };
 export declare type PlayOptions = {
     startTime?: number;
