@@ -173,7 +173,7 @@ export default class Player {
    * Connects to the voice channel
    */
   public connect() {
-    if (this.state === ConnectionState.CONNECTED) return;
+    if (this.state !== ConnectionState.DISCONNECTED) return;
 
     if (!this.voiceChannelId) {
       throw new Error('No voice channel id provided');
@@ -486,13 +486,13 @@ export default class Player {
     });
   }
 
-  public updatePlayer(state: PlayerState): void {
+  public update(state: PlayerState): void {
     if (state.position) this.position = state.position;
     if (state.time) this.positionTimestamp = state.time;
 
     if (state.connected) {
-      if (this.state !== ConnectionState.CONNECTED) this.state = ConnectionState.CONNECTED;
-    } else if (this.state !== ConnectionState.DISCONNECTED) {
+      this.state = ConnectionState.CONNECTED;
+    } else if (this.state === ConnectionState.CONNECTED) {
       this.state = ConnectionState.DISCONNECTED;
     }
   }

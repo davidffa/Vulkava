@@ -496,7 +496,7 @@ export default class Node {
         this.vulkava.emit('pong', this, payload.ping);
         break;
       case 'playerUpdate':
-        this.vulkava.players.get(payload.guildId)?.updatePlayer(payload.state);
+        this.vulkava.players.get(payload.guildId)?.update(payload.state);
         break;
       case 'event':
         this.handlePlayerEvent(payload);
