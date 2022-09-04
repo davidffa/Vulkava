@@ -311,8 +311,8 @@ export type PlayerOptions = {
 };
 
 export type VoiceState = {
-  sessionId: string;
-  event: VoiceServerUpdateData;
+  sessionId?: string;
+  event?: VoiceServerUpdateData;
 };
 
 export type PlayOptions = {

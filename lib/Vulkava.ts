@@ -294,7 +294,7 @@ export class Vulkava extends EventEmitter {
     if (payload.t === 'VOICE_STATE_UPDATE') {
       const packet = payload as VoiceStateUpdatePayload;
 
-      if (packet.d.user_id !== this.clientId) return;
+      if (packet.d.user_id !== this.clientId || player.voiceState?.sessionId === packet.d.session_id) return;
 
       player.voiceState.sessionId = packet.d.session_id;
 
@@ -324,7 +324,7 @@ export class Vulkava extends EventEmitter {
         throw new Error('Assertion failed. The Player does not have a node.');
       }
 
-      if (['us', 'brazil', 'buenos-aires'].some(loc => player.voiceState.event.endpoint.startsWith(loc))) {
+      if (['us', 'brazil', 'buenos-aires'].some(loc => packet.d.endpoint.startsWith(loc))) {
         if (player.node.options.region && player.node.options.region !== 'USA') {
           const usaNodes = this.nodes.filter(node => node.options.region === 'USA' && node.state === NodeState.CONNECTED);
 
