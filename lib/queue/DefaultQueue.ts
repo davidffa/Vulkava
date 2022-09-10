@@ -25,6 +25,13 @@ export class DefaultQueue extends AbstractQueue {
   }
 
   /**
+   * Gets all tracks in the queue
+   */
+  get tracks(): Track[] {
+    return this.tracks
+  }
+
+  /**
    * Adds a track to the queue.
    * @param {Track | UnresolvedTrack} track - The track to add to the queue
    * @deprecated - Use `add()` instead
