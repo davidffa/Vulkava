@@ -118,9 +118,9 @@ export default class Player {
     this.state = ConnectionState.DISCONNECTED;
     this.voiceState = {};
 
-    this.vulkava.emit('playerCreate', this);
-
     this.assignNode();
+
+    this.vulkava.emit('playerCreate', this);
   }
 
   get recorder(): Recorder {
