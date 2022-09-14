@@ -118,6 +118,7 @@ export default class Player {
     this.state = ConnectionState.DISCONNECTED;
     this.voiceState = {};
 
+    this.vulkava.emit('debug', `Player created for guild ${this.guildId}`);
     this.assignNode();
 
     this.vulkava.emit('playerCreate', this);
@@ -167,6 +168,7 @@ export default class Player {
     const node = this.vulkava.bestNode;
 
     this.node = node;
+    this.vulkava.emit('debug', `Assigned node ${node.identifier} to player ${this.guildId}`);
   }
 
   /**
@@ -178,6 +180,8 @@ export default class Player {
     if (!this.voiceChannelId) {
       throw new Error('No voice channel id provided');
     }
+
+    this.vulkava.emit('debug', `Connecting player ${this.guildId} to voice channel ${this.voiceChannelId}`);
 
     if (this.node === null) {
       this.assignNode();
@@ -212,6 +216,8 @@ export default class Player {
     this.voiceState = {};
 
     this.state = ConnectionState.DISCONNECTED;
+
+    this.vulkava.emit('debug', `Player ${this.guildId} disconnected from voice channel`);
   }
 
   /**
@@ -220,14 +226,15 @@ export default class Player {
   public destroy() {
     this.disconnect();
 
-    this.vulkava.emit('playerDestroy', this);
-
     this.node?.send({
       op: 'destroy',
       guildId: this.guildId
     });
 
     this.vulkava.players.delete(this.guildId);
+
+    this.vulkava.emit('playerDestroy', this);
+    this.vulkava.emit('debug', `Player ${this.guildId} destroyed`);
   }
 
   /**
@@ -237,6 +244,8 @@ export default class Player {
     if (!node) throw new TypeError('You must provide a Node instance.');
     if (node.state !== NodeState.CONNECTED) throw new Error('The provided node is not connected.');
     if (this.node === node) return;
+
+    this.vulkava.emit('debug', `Moving player ${this.guildId} from node ${this.node?.identifier ?? 'None'} to node ${node.identifier}`);
 
     this.moving = true;
     const wasRecording = !!this.recorderObj?.started;
@@ -339,6 +348,8 @@ export default class Player {
         self_deaf: this.selfDeaf
       }
     });
+
+    this.vulkava.emit('debug', `Sent voiceStateUpdate to discord gateway for player ${this.guildId}. Channel: ${this.voiceChannelId}. Self mute: ${this.selfMute}. Self deaf: ${this.selfDeaf}`);
   }
 
   /**
@@ -486,6 +497,8 @@ export default class Player {
       guildId: this.guildId,
       ...this.voiceState
     });
+
+    this.vulkava.emit('debug', `Sent voiceUpdate to lavalink node for player ${this.guildId}.`);
   }
 
   public update(state: PlayerState): void {

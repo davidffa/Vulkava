@@ -301,6 +301,8 @@ export class Vulkava extends EventEmitter {
       if (player.voiceState.sessionId === packet.d.session_id) return;
       player.voiceState.sessionId = packet.d.session_id;
 
+      this.emit('debug', `Received voiceStateUpdate from discord gateway for player ${player.guildId}. Voice channel id: ${player.voiceChannelId}. SessionID: ${player.voiceState.sessionId}`);
+
       if (player.voiceState.event) {
         player.sendVoiceUpdate();
       }
@@ -322,6 +324,8 @@ export class Vulkava extends EventEmitter {
         player.state = ConnectionState.DISCONNECTED;
         throw new Error('Assertion failed. The Player does not have a node.');
       }
+
+      this.emit('debug', `Received voiceServerUpdate from discord gateway for player ${player.guildId}. Endpoint: ${player.voiceState.event.endpoint}. Token: ${player.voiceState.event.token}`);
 
       if (['us', 'brazil', 'buenos-aires'].some(loc => packet.d.endpoint.startsWith(loc))) {
         if (player.node.options.region && player.node.options.region !== 'USA') {
