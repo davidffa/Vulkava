@@ -54,6 +54,7 @@ export declare type VulkavaOptions = {
 };
 /** Vulkava events */
 export declare type EventListeners<T> = {
+    (event: 'debug', listener: (message: string) => void): T;
     (event: 'raw', listener: (node: Node, payload: unknown) => void): T;
     (event: 'nodeConnect', listener: (node: Node) => void): T;
     (event: 'nodeResume', listener: (node: Node) => void): T;
