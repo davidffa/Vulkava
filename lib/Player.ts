@@ -209,6 +209,8 @@ export default class Player {
       }
     });
 
+    this.voiceState = {};
+
     this.state = ConnectionState.DISCONNECTED;
   }
 
@@ -263,7 +265,7 @@ export default class Player {
         op: 'play',
         guildId: this.guildId,
         track: this.current.encodedTrack,
-        startTime: this.current?.isStream ? 0 : this.position
+        startTime: this.current.isStream ? 0 : this.position
       };
 
       this.node.send(payload);
