@@ -11,7 +11,7 @@ export default class UnresolvedTrack {
   public readonly source: string;
   public requester: unknown;
 
-  private readonly isrc: string;
+  declare private readonly isrc: string;
 
   constructor(vulkava: Vulkava, title: string, author: string, duration?: number, uri?: string, source?: string, isrc?: string) {
     this.vulkava = vulkava;
@@ -22,7 +22,7 @@ export default class UnresolvedTrack {
     this.uri = uri ?? '';
     this.source = source ?? 'Unknown';
 
-    if (isrc) this.isrc = isrc;
+    if (isrc && vulkava.useISRC) this.isrc = isrc;
 
     this.requester = null;
   }

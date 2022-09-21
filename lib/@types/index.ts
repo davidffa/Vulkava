@@ -60,6 +60,8 @@ export type VulkavaOptions = {
   spotify?: SpotifyConfig;
   /** Disables spotify, apple music or deezer */
   disabledSources?: UNRESOLVED_SOURCES[];
+  /** Whether to search for ISRC to resolve tracks or not */
+  useISRC?: boolean;
 };
 
 /** Vulkava events */

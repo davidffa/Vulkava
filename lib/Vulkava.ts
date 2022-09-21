@@ -40,6 +40,7 @@ export class Vulkava extends EventEmitter {
   public nodes: Node[];
   private readonly defaultSearchSource: SEARCH_SOURCE;
   public readonly unresolvedSearchSource: SEARCH_SOURCE;
+  public readonly useISRC: boolean;
 
   private externalSources: AbstractExternalSource[];
 
@@ -74,6 +75,10 @@ export class Vulkava extends EventEmitter {
     if (options.disabledSources && typeof options.disabledSources !== 'object' && !Array.isArray(options.disabledSources)) {
       throw new TypeError('VulkavaOptions.disabledSources must be an array');
     }
+
+    if (options.useISRC && typeof options.useISRC !== 'boolean') {
+      throw new TypeError('VulkavaOptions.useISRC must be a boolean');
+    }
   }
 
   /**
@@ -97,7 +102,8 @@ export class Vulkava extends EventEmitter {
    * @param {String} [options.spotify.clientId] - The spotify client id
    * @param {String} [options.spotify.clientSecret] - The spotify client secret
    * @param {String} [options.spotify.market] - The spotify market
-   * @param {Array<String>} options.disabledSources - Disables, apple music, deezer or spotify
+   * @param {Array<String>} [options.disabledSources] - Disables, apple music, deezer or spotify
+   * @param {Boolean} [options.useISRC] - Whether to use ISRC to resolve tracks or not
    * @param {Function} options.sendWS - The function to send websocket messages to the main gateway
    */
   constructor(options: VulkavaOptions) {
@@ -108,6 +114,7 @@ export class Vulkava extends EventEmitter {
     this.nodes = [];
     this.defaultSearchSource = options.defaultSearchSource ?? 'youtube';
     this.unresolvedSearchSource = options.unresolvedSearchSource ?? 'youtube';
+    this.useISRC = options.useISRC ?? true;
 
     this.externalSources = [];
 
