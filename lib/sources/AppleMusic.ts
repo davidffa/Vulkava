@@ -216,8 +216,6 @@ export default class AppleMusic extends AbstractExternalSource {
       }
     }
 
-    console.log(this.token);
-
     if (!this.token) {
       throw new Error('Could not get Apple Music token!');
     }
