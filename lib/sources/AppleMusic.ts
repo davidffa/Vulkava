@@ -211,7 +211,7 @@ export default class AppleMusic extends AbstractExternalSource {
       const tokenMatch = script.match(AppleMusic.TOKEN_REGEX);
 
       if (tokenMatch) {
-        this.token = tokenMatch.groups['token'];
+        this.token = tokenMatch.groups?.['token'] ?? null;
         break;
       }
     }
