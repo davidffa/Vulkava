@@ -8,8 +8,9 @@ import type { PlaylistInfo, SearchResult } from '../@types';
 
 export default class AppleMusic extends AbstractExternalSource {
   public static readonly APPLE_MUSIC_REGEX = /^(?:https?:\/\/|)?(?:music\.)?apple\.com\/(?<storefront>[a-z]{2})\/(?<type>album|playlist|artist|music-video)(?:\/[^/]+)?\/(?<id>[^/?]+)(?:\?i=(?<albumtrackid>\d+))?/;
-  private static readonly RENEW_URL = 'https://music.apple.com/us/album/%C3%ADgneo/1604813268';
-  private static readonly TOKEN_PAYLOAD_REGEX = /"desktop-music-app\/config\/environment" content="([^"]+)"/;
+  private static readonly RENEW_URL = 'https://music.apple.com';
+  private static readonly SCRIPTS_REGEX = /<script type="module" .+ src="(?<endpoint>\/assets\/index\..+\.js)">/g;
+  private static readonly TOKEN_REGEX = /const \w{2}="(?<token>ey[\w.-]+)"/;
 
   private static readonly USER_AGENT = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.0.0 Safari/537.36';
 
@@ -176,7 +177,7 @@ export default class AppleMusic extends AbstractExternalSource {
       headers: {
         'User-Agent': AppleMusic.USER_AGENT,
         Authorization: `Bearer ${this.token}`,
-        'Origin': 'https://music.apple.com'
+        'Origin': 'https://apple.com'
       }
     });
 
@@ -188,29 +189,41 @@ export default class AppleMusic extends AbstractExternalSource {
   }
 
   private async renewToken() {
-    const html = await request(AppleMusic.RENEW_URL, {
+    const html: string = await request(AppleMusic.RENEW_URL + '/us/browse', {
       headers: {
         'User-Agent': AppleMusic.USER_AGENT
-      }
+      },
     }).then(r => r.body.text());
 
-    const tokenPayloadMatch = html.match(AppleMusic.TOKEN_PAYLOAD_REGEX);
+    const scriptsMatch = [...html.matchAll(AppleMusic.SCRIPTS_REGEX)];
 
-    if (!tokenPayloadMatch) {
-      throw new Error('Could not get Apple Music token payload!');
+    if (!scriptsMatch.length) {
+      throw new Error('Could not get Apple Music token scripts!');
     }
 
-    const tokenPayload = JSON.parse(decodeURIComponent(tokenPayloadMatch[1]));
+    for (const scriptMatch of scriptsMatch) {
+      const script = await request(`${AppleMusic.RENEW_URL}${scriptMatch[1]}`, {
+        headers: {
+          'User-Agent': AppleMusic.USER_AGENT
+        }
+      }).then(r => r.body.text());
 
-    const token = tokenPayload['MEDIA_API']?.token;
+      const tokenMatch = script.match(AppleMusic.TOKEN_REGEX);
 
-    if (!token) {
+      if (tokenMatch) {
+        this.token = tokenMatch.groups['token'];
+        break;
+      }
+    }
+
+    console.log(this.token);
+
+    if (!this.token) {
       throw new Error('Could not get Apple Music token!');
     }
 
-    this.token = token;
-    // 6 months but just in case ;)
-    this.renewDate = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString()).exp * 1000;
+    // 2 months but just in case ;)
+    this.renewDate = JSON.parse(Buffer.from(this.token.split('.')[1], 'base64').toString()).exp * 1000;
   }
 }
 
