@@ -47,7 +47,7 @@
         "max": 2
       }
     ],
-    "no-console": "off",
+    "no-console": "error",
     "no-empty-function": "error",
     "no-floating-decimal": "error",
     "no-inline-comments": "error",
