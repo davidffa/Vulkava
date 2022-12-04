@@ -3,17 +3,17 @@ import Player from '../Player';
 import { AbstractQueue } from '../queue/AbstractQueue';
 import Track from '../Track';
 import UnresolvedTrack from '../UnresolvedTrack';
-export declare type OutgoingDiscordPayload = {
+export type OutgoingDiscordPayload = {
     op: number;
     d: Record<string, unknown>;
 };
-export declare type IncomingDiscordPayload = {
+export type IncomingDiscordPayload = {
     op: number;
     d?: unknown;
     s?: number;
     t?: string;
 };
-export declare type VoiceStateUpdatePayload = IncomingDiscordPayload & {
+export type VoiceStateUpdatePayload = IncomingDiscordPayload & {
     t: 'VOICE_STATE_UPDATE';
     d: {
         session_id: string;
@@ -22,23 +22,23 @@ export declare type VoiceStateUpdatePayload = IncomingDiscordPayload & {
         guild_id: string;
     };
 };
-declare type VoiceServerUpdateData = {
+type VoiceServerUpdateData = {
     token: string;
     guild_id: string;
     endpoint: string;
 };
-export declare type VoiceServerUpdatePayload = IncomingDiscordPayload & {
+export type VoiceServerUpdatePayload = IncomingDiscordPayload & {
     t: 'VOICE_SERVER_UPDATE';
     d: VoiceServerUpdateData;
 };
-declare type SpotifyConfig = {
+type SpotifyConfig = {
     clientId: string;
     clientSecret: string;
     market?: string;
 };
-declare type UNRESOLVED_SOURCES = 'APPLE_MUSIC' | 'DEEZER' | 'SPOTIFY';
+type UNRESOLVED_SOURCES = 'APPLE_MUSIC' | 'DEEZER' | 'SPOTIFY';
 /** Main constructor options */
-export declare type VulkavaOptions = {
+export type VulkavaOptions = {
     /** The array of lavalink nodes */
     nodes: NodeOptions[];
     /** Function to send voice channel connect payloads to discord */
@@ -55,7 +55,7 @@ export declare type VulkavaOptions = {
     useISRC?: boolean;
 };
 /** Vulkava events */
-export declare type EventListeners<T> = {
+export type EventListeners<T> = {
     (event: 'debug', listener: (message: string) => void): T;
     (event: 'raw', listener: (node: Node, payload: unknown) => void): T;
     (event: 'nodeConnect', listener: (node: Node) => void): T;
@@ -79,13 +79,13 @@ export declare type EventListeners<T> = {
     (event: 'speakingStop', listener: (player: Player, userId: string) => void): T;
     (event: 'userDisconnect', listener: (player: Player, userId: string) => void): T;
 };
-export declare type SEARCH_SOURCE = 'youtube' | 'youtubemusic' | 'soundcloud' | 'odysee' | 'yandex';
-export declare type PlaylistInfo = {
+export type SEARCH_SOURCE = 'youtube' | 'youtubemusic' | 'soundcloud' | 'odysee' | 'yandex';
+export type PlaylistInfo = {
     selectedTrack: number;
     name: string;
     duration: number;
 };
-export declare type TrackInfo = {
+export type TrackInfo = {
     identifier: string;
     thumbnail?: string;
     isSeekable: boolean;
@@ -101,23 +101,23 @@ export interface ITrack {
     track: string;
     info: TrackInfo;
 }
-declare type LoadException = {
+type LoadException = {
     message: string;
     severity: 'COMMON' | 'SUSPIOUS' | 'FAULT';
 };
-declare type LoadResultBase = {
+type LoadResultBase = {
     loadType: 'TRACK_LOADED' | 'PLAYLIST_LOADED' | 'SEARCH_RESULT' | 'NO_MATCHES' | 'LOAD_FAILED';
     playlistInfo: PlaylistInfo;
     exception?: LoadException;
 };
-export declare type LoadTracksResult = LoadResultBase & {
+export type LoadTracksResult = LoadResultBase & {
     tracks: ITrack[];
 };
-export declare type SearchResult = LoadResultBase & {
+export type SearchResult = LoadResultBase & {
     tracks: Array<Track | UnresolvedTrack>;
 };
 /** Lavalink node options */
-export declare type NodeOptions = {
+export type NodeOptions = {
     /** The node identifier */
     id?: string;
     /** The node hostname */
@@ -148,7 +148,7 @@ export declare type NodeOptions = {
     sendSpeakingEvents?: boolean;
 };
 /** Lavalink node stats */
-export declare type NodeStats = {
+export type NodeStats = {
     /** The amount of playing players */
     playingPlayers: number;
     /** The total player amount */
@@ -176,11 +176,11 @@ export declare type NodeStats = {
     };
 };
 /** Route planner API */
-export declare type RoutePlannerStatus = {
+export type RoutePlannerStatus = {
     class: string | null;
     details: RoutePlannerDetails | null;
 };
-declare type RoutePlannerDetails = {
+type RoutePlannerDetails = {
     ipBlock: {
         type: string;
         size: string;
@@ -194,7 +194,7 @@ declare type RoutePlannerDetails = {
     currentAddressIndex?: string;
 };
 /** Versions struct */
-export declare type Versions = {
+export type Versions = {
     /** Lavaplayer version */
     LAVAPLAYER: string;
     /** JVM version */
@@ -224,7 +224,7 @@ export interface TrackStartEvent extends PlayerEventPayload {
     type: 'TrackStartEvent';
     track: string;
 }
-declare type TrackEndReason = 'FINISHED' | 'LOAD_FAILED' | 'STOPPED' | 'REPLACED' | 'CLEANUP';
+type TrackEndReason = 'FINISHED' | 'LOAD_FAILED' | 'STOPPED' | 'REPLACED' | 'CLEANUP';
 export interface TrackEndEvent extends PlayerEventPayload {
     type: 'TrackEndEvent';
     track: string;
@@ -247,7 +247,7 @@ export interface WebSocketClosedEvent extends PlayerEventPayload {
     reason: string;
     byRemote: boolean;
 }
-export declare type PlayerState = {
+export type PlayerState = {
     /** Unix timestamp when the position was picked */
     time: number;
     /** Track position in ms */
@@ -255,7 +255,7 @@ export declare type PlayerState = {
     /** Whether the player is connected to discord voice gateway */
     connected: boolean;
 };
-export declare type PlayerOptions = {
+export type PlayerOptions = {
     /** The guild id that player belongs to */
     guildId: string;
     /** The voice channel id */
@@ -269,17 +269,17 @@ export declare type PlayerOptions = {
     /** The queue object that player will use */
     queue?: AbstractQueue;
 };
-export declare type VoiceState = {
+export type VoiceState = {
     sessionId?: string;
     event?: VoiceServerUpdateData;
 };
-export declare type PlayOptions = {
+export type PlayOptions = {
     startTime?: number;
     endTime?: number;
     pause?: boolean;
     noReplace?: boolean;
 };
-export declare type RecordOptions = {
+export type RecordOptions = {
     /** The record id */
     id: string;
     /** The bitrate value */
@@ -293,13 +293,13 @@ export declare type RecordOptions = {
     /** The output audio file format (currently the available formats are PCM and MP3), default is MP3 */
     format?: 'PCM' | 'MP3';
 };
-export declare type ChannelMixOptions = {
+export type ChannelMixOptions = {
     leftToLeft?: number;
     leftToRight?: number;
     rightToLeft?: number;
     rightToRight?: number;
 };
-export declare type DistortionOptions = {
+export type DistortionOptions = {
     sinOffset?: number;
     sinScale?: number;
     tanOffset?: number;
@@ -309,32 +309,32 @@ export declare type DistortionOptions = {
     offset?: number;
     scale?: number;
 };
-export declare type KaraokeOptions = {
+export type KaraokeOptions = {
     level?: number;
     monoLevel?: number;
     filterBand?: number;
     filterWidth?: number;
 };
-export declare type LowPassOptions = {
+export type LowPassOptions = {
     smoothing?: number;
 };
-export declare type RotationOptions = {
+export type RotationOptions = {
     rotationHz?: number;
 };
-export declare type TimescaleOptions = {
+export type TimescaleOptions = {
     speed?: number;
     pitch?: number;
     rate?: number;
 };
-export declare type TremoloOptions = {
+export type TremoloOptions = {
     frequency?: number;
     depth?: number;
 };
-export declare type VibratoOptions = {
+export type VibratoOptions = {
     frequency?: number;
     depth?: number;
 };
-export declare type FilterOptions = {
+export type FilterOptions = {
     channelMix?: ChannelMixOptions;
     distortion?: DistortionOptions;
     /**

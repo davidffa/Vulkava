@@ -4,7 +4,8 @@ import type { SearchResult } from '../@types';
 export default class AppleMusic extends AbstractExternalSource {
     static readonly APPLE_MUSIC_REGEX: RegExp;
     private static readonly RENEW_URL;
-    private static readonly TOKEN_PAYLOAD_REGEX;
+    private static readonly SCRIPTS_REGEX;
+    private static readonly TOKEN_REGEX;
     private static readonly USER_AGENT;
     private token;
     private renewDate;
