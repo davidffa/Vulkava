@@ -45,6 +45,15 @@ export default class UnresolvedTrack {
     const track = res.tracks[0] as Track;
     track.setRequester(this.requester);
 
+    track.metadata = {
+      title: this.title,
+      author: this.author,
+      duration: this.duration,
+      uri: this.uri,
+      source: this.source,
+      isrc: this.isrc,
+    };
+
     return track;
   }
 

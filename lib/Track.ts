@@ -1,4 +1,4 @@
-import { ITrack } from './@types';
+import type { ITrack, Metadata } from './@types';
 
 export default class Track {
   public readonly identifier: string;
@@ -11,6 +11,8 @@ export default class Track {
   public position?: number;
   public readonly title: string;
   public readonly uri: string;
+
+  declare public metadata?: Metadata;
 
   public encodedTrack: string;
 

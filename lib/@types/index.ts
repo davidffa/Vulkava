@@ -45,6 +45,12 @@ type SpotifyConfig = {
   market?: string;
 }
 
+export type Metadata = Pick<TrackInfo, 'title' | 'author' | 'uri'> & {
+  duration: number;
+  source: string;
+  isrc?: string;
+};
+
 type UNRESOLVED_SOURCES = 'APPLE_MUSIC' | 'DEEZER' | 'SPOTIFY';
 
 /** Main constructor options */
