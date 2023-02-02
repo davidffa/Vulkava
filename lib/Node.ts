@@ -270,9 +270,7 @@ export default class Node {
   private setupResuming() {
     if (!this.options.resumeKey) return;
 
-
     if (this.options.transport === 'rest') {
-      this.rest.updateSession(this.options.resumeKey, this.options.resumeTimeout ?? 60);
       return;
     }
 
@@ -507,7 +505,11 @@ export default class Node {
         if (this.rest) {
           this.rest.sessionId = payload.sessionId;
         }
-        break;
+
+        if (!payload.resumed && this.options.resumeKey) {
+          this.rest.updateSession(this.options.resumeKey, this.options.resumeTimeout ?? 60);
+        }
+        {break;}
       case 'stats':
         delete payload.op;
         this.stats = payload as NodeStats;
