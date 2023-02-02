@@ -226,10 +226,14 @@ export default class Player {
   public destroy() {
     this.disconnect();
 
-    this.node?.send({
-      op: 'destroy',
-      guildId: this.guildId
-    });
+    if (this.node?.options.transport === 'rest') {
+      this.node?.rest.destroyPlayer(this.guildId);
+    } else {
+      this.node?.send({
+        op: 'destroy',
+        guildId: this.guildId
+      });
+    }
 
     this.vulkava.players.delete(this.guildId);
 
@@ -251,10 +255,15 @@ export default class Player {
     const wasRecording = !!this.recorderObj?.started;
     if (wasRecording) this.recorderObj?.stop();
 
-    this.node?.send({
-      op: 'destroy',
-      guildId: this.guildId,
-    });
+    if (this.node?.options.transport === 'rest') {
+      this.node?.rest.destroyPlayer(this.guildId);
+    } else {
+      this.node?.send({
+        op: 'destroy',
+        guildId: this.guildId,
+      });
+    }
+
 
     this.node = node;
 
@@ -270,6 +279,13 @@ export default class Player {
 
     if (wasRecording) this.recorderObj?.resume();
     if (this.playing && this.current) {
+      if (this.node.options.transport === 'rest') {
+        this.node.rest.updatePlayer(this.guildId, {
+          encodedTrack: this.current.encodedTrack,
+          position: this.current.isStream ? 0 : this.position
+        });
+        return;
+      }
       const payload = {
         op: 'play',
         guildId: this.guildId,
@@ -325,6 +341,15 @@ export default class Player {
     }
 
     this.playing = true;
+
+    if (this.node?.options.transport === 'rest') {
+      this.node?.rest.updatePlayer(this.guildId, {
+        encodedTrack: this.current.encodedTrack,
+        position: options?.startTime ?? 0,
+        ...options
+      });
+      return;
+    }
 
     this.node?.send({
       op: 'play',
@@ -430,6 +455,13 @@ export default class Player {
       await this.queue.skipNTracks(amount);
     }
 
+    if (this.node?.options.transport === 'rest') {
+      this.node.rest.updatePlayer(this.guildId, {
+        encodedTrack: null
+      });
+      return;
+    }
+
     this.node?.send({
       op: 'stop',
       guildId: this.guildId
@@ -450,6 +482,13 @@ export default class Player {
     if (this.node === null) throw new Error('Assertion failed. The player does not have a node.');
 
     this.paused = state;
+
+    if (this.node?.options.transport === 'rest') {
+      this.node.rest.updatePlayer(this.guildId, {
+        paused: state
+      });
+      return;
+    }
 
     this.node.send({
       op: 'pause',
@@ -473,6 +512,13 @@ export default class Player {
       return;
     }
 
+    if (this.node?.options.transport === 'rest') {
+      this.node.rest.updatePlayer(this.guildId, {
+        position
+      });
+      return;
+    }
+
     this.node?.send({
       op: 'seek',
       guildId: this.guildId,
@@ -492,11 +538,21 @@ export default class Player {
 
     this.state = ConnectionState.CONNECTED;
 
-    this.node?.send({
-      op: 'voiceUpdate',
-      guildId: this.guildId,
-      ...this.voiceState
-    });
+    if (this.node?.options.transport === 'rest') {
+      this.node.rest.updatePlayer(this.guildId, {
+        voice: {
+          sessionId: this.voiceState.sessionId!,
+          token: this.voiceState.event!.token!,
+          endpoint: this.voiceState.event!.endpoint!
+        }
+      });
+    }else {
+      this.node?.send({
+        op: 'voiceUpdate',
+        guildId: this.guildId,
+        ...this.voiceState
+      });
+    }
 
     this.vulkava.emit('debug', `Sent voiceUpdate to lavalink node for player ${this.guildId}.`);
   }

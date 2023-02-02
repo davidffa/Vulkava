@@ -3,6 +3,7 @@ import Player from '../Player';
 import { AbstractQueue } from '../queue/AbstractQueue';
 import Track from '../Track';
 import UnresolvedTrack from '../UnresolvedTrack';
+import type { Dispatcher } from 'undici';
 
 // ---------- Vulkava typings ----------
 export type OutgoingDiscordPayload = {
@@ -95,6 +96,38 @@ export type SEARCH_SOURCE = 'youtube' | 'youtubemusic' | 'soundcloud' | 'odysee'
 
 // -- REST --
 
+export type UpdatePlayerOptions = {
+  encodedTrack?: string | null;
+  // identifier?: string;
+  position?: number;
+  endTime?: number;
+  volume?: number;
+  paused?: boolean;
+  filters?: FilterOptions;
+  voice?: {
+    sessionId: string;
+    token: string;
+    endpoint: string;
+  };
+  noReplace?: boolean;
+}
+
+export type LavalinkRESTError = {
+  timestamp: number;
+  status: number;
+  error: string;
+  trace?: string;
+  message: string;
+  path: string;
+}
+
+export type RequestOptions = {
+  path: string;
+  method: Dispatcher.HttpMethod;
+  json?: unknown;
+  headers?: Record<string, string>;
+}
+
 export type PlaylistInfo = {
   selectedTrack: number;
   name: string;
@@ -172,6 +205,11 @@ export type NodeOptions = {
    * Only supported by my custom lavalink (https://github.com/davidffa/lavalink/releases) and if recording audio
   */
   sendSpeakingEvents?: boolean;
+  /**
+   * The transport method to use
+   * default = websocket
+   */
+  transport?: 'websocket' | 'rest';
 };
 
 /** Lavalink node stats */
@@ -223,7 +261,7 @@ type RoutePlannerDetails = {
   currentAddressIndex?: string;
 };
 
-/** Versions struct */
+/** Versions struct (my custom lavalink) */
 export type Versions = {
   /** Lavaplayer version */
   LAVAPLAYER: string;
@@ -237,6 +275,31 @@ export type Versions = {
   SPRING: string;
   /** Kotlin version */
   KOTLIN: string;
+}
+
+/** Info struct (original lavalink) */
+export type Info = {
+  version: {
+    semver: string;
+    major: number;
+    minor: number;
+    patch: number;
+    preRelease: string | null;
+  };
+  buildTime: number;
+  git: {
+    branch: string;
+    commit: string;
+    commitTime: number;
+  };
+  jvm: string;
+  lavaplayer: string;
+  sourceManagers: string[];
+  filters: string[];
+  plugins: Array<{
+    name: string;
+    version: string;
+  }>;
 }
 
 /** Lavalink node incoming payloads */

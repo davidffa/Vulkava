@@ -237,6 +237,11 @@ export default class Filters {
   public clear(): void {
     this.options = {};
 
+    if (this.player.node?.options.transport === 'rest') {
+      this.player.node?.rest.updatePlayer(this.player.guildId, { filters: {} });
+      return;
+    }
+
     this.player.node?.send({
       op: 'filters',
       guildId: this.player.guildId
@@ -245,6 +250,14 @@ export default class Filters {
 
   /** Sends filters payload to Lavalink Node */
   public apply(): void {
+    if (this.player.node?.options.transport === 'rest') {
+      const payload = this.options;
+      if (this.options.equalizer) { Object.assign(payload, { equalizer: this.options.equalizer.map((gain, band) => ({ band, gain })) }); }
+
+      this.player.node?.rest.updatePlayer(this.player.guildId, this.options);
+      return;
+    }
+
     const payload = {
       op: 'filters',
       guildId: this.player.guildId

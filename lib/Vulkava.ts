@@ -3,25 +3,23 @@ import { EventEmitter } from 'events';
 import Node, { NodeState } from './Node';
 import Track from './Track';
 import { ConnectionState, Player } from '..';
-import Spotify from './sources/Spotify';
+
+import { AbstractExternalSource } from './sources/AbstractExternalSource';
+import AppleMusic from './sources/AppleMusic';
 import Deezer from './sources/Deezer';
+import Spotify from './sources/Spotify';
 
 import type {
   IncomingDiscordPayload,
   OutgoingDiscordPayload,
   EventListeners,
-  LoadTracksResult,
   PlayerOptions,
   SearchResult,
   SEARCH_SOURCE,
   VoiceServerUpdatePayload,
   VoiceStateUpdatePayload,
-  VulkavaOptions,
-  TrackInfo,
-  ITrack
+  VulkavaOptions
 } from './@types';
-import AppleMusic from './sources/AppleMusic';
-import { AbstractExternalSource } from './sources/AbstractExternalSource';
 
 export interface Vulkava {
   once: EventListeners<this>;
@@ -183,7 +181,7 @@ export class Vulkava extends EventEmitter {
   public async decodeTrack(encodedTrack: string): Promise<Track> {
     const node = this.bestNode;
 
-    const trackInfo = await node.request<TrackInfo>('GET', `decodetrack?track=${encodedTrack}`);
+    const trackInfo = await node.rest.decodeTrack(encodedTrack);
 
     return new Track({ track: encodedTrack, info: { ...trackInfo } });
   }
@@ -196,7 +194,7 @@ export class Vulkava extends EventEmitter {
   public async decodeTracks(encodedTracks: string[]): Promise<Track[]> {
     const node = this.bestNode;
 
-    const res = await node.request<ITrack[]>('POST', 'decodetracks', encodedTracks);
+    const res = await node.rest.decodeTracks(encodedTracks);
 
     return res.map(it => new Track(it));
   }
@@ -254,7 +252,7 @@ export class Vulkava extends EventEmitter {
 
     const node = this.bestNode;
 
-    const res = await node.request<LoadTracksResult>('GET', `loadtracks?identifier=${encodeURIComponent(query)}`);
+    const res = await node.rest.loadTracks(query);
 
     if (res.loadType === 'LOAD_FAILED' || res.loadType === 'NO_MATCHES') {
       return res as unknown as SearchResult;

@@ -1,6 +1,6 @@
 import { IncomingMessage } from 'http';
-import { Pool, Dispatcher } from 'undici';
 import WebSocket, { CloseEvent, ErrorEvent, MessageEvent } from 'ws';
+import { RESTManager } from './rest/RESTManager';
 import { Vulkava } from './Vulkava';
 import { Player, VERSION } from '..';
 
@@ -19,6 +19,7 @@ import type {
 } from './@types';
 import { ConnectionState } from './Player';
 import UnresolvedTrack from './UnresolvedTrack';
+import { LAVALINK_API_VERSION } from './rest/Endpoints';
 
 export enum NodeState {
   CONNECTING,
@@ -42,7 +43,7 @@ export default class Node {
 
   private packetQueue: string[];
 
-  private pool: Pool;
+  public readonly rest: RESTManager;
 
   public retryAttempts: number;
 
@@ -71,6 +72,7 @@ export default class Node {
     if (options.maxRetryAttempts && typeof options.maxRetryAttempts !== 'number') throw new TypeError('NodeOptions.maxRetryAttempts must be a number');
     if (options.retryAttemptsInterval && typeof options.retryAttemptsInterval !== 'number') throw new TypeError('NodeOptions.retryAttemptsInterval must be a number');
     if (options.sendSpeakingEvents && typeof options.sendSpeakingEvents !== 'boolean') throw new TypeError('NodeOptions.sendSpeakingEvents must be a boolean');
+    if (options.transport && (typeof options.transport !== 'string' || !['websocket', 'rest'].includes(options.transport))) throw new TypeError('NodeOptions.transport must be a string and must be either "websocket" or "rest"');
   }
 
   /**
@@ -89,6 +91,7 @@ export default class Node {
    * @param {Number} [options.retryAttemptsInterval] - The interval between reconnect attempts, in milliseconds
    * @param {Boolean} [options.followRedirects] - Whether to follow redirects (3xx status codes)
    * @param {Boolean} [options.sendSpeakingEvents=false] - Tells the lavalink node to send speaking events (Supported in my custom lavalink fork)
+   * @param {String} [options.transport] - The transport method to use (websocket or rest)
    */
   constructor(vulkava: Vulkava, options: NodeOptions) {
     Node.checkOptions(options);
@@ -123,8 +126,7 @@ export default class Node {
 
     this.packetQueue = [];
 
-    this.pool = new Pool(`http${this.options.secure ? 's' : ''}://${this.options.hostname}:${this.options.port}`);
-
+    this.rest = new RESTManager(this);
     this.ws = null;
   }
 
@@ -170,7 +172,13 @@ export default class Node {
 
     if (this.options.resumeKey) Object.assign(headers, { 'Resume-Key': this.options.resumeKey });
 
-    this.ws = new WebSocket(`ws${this.options.secure ? 's' : ''}://${this.options.hostname}:${this.options.port}`, {
+    let wsUrl = `ws${this.options.secure ? 's' : ''}://${this.options.hostname}:${this.options.port}`;
+
+    if (this.options.transport === 'rest') {
+      wsUrl += `/v${LAVALINK_API_VERSION}/websocket`;
+    }
+
+    this.ws = new WebSocket(wsUrl, {
       headers,
       followRedirects: this.options.followRedirects
     });
@@ -190,7 +198,7 @@ export default class Node {
 
   /** Fetches versions from lavalink Node */
   private async fetchVersions(): Promise<void> {
-    const versions = await this.request<Versions>('GET', 'versions');
+    const versions = await this.rest.versions();
 
     if (versions.BUILD) this.versions = versions;
   }
@@ -200,7 +208,7 @@ export default class Node {
    * @returns {Promise<Object>}
    */
   public getRoutePlannerStatus(): Promise<RoutePlannerStatus> {
-    return this.request<RoutePlannerStatus>('GET', 'routeplanner/status');
+    return this.rest.getRoutePlannerStatus();
   }
 
   /**
@@ -208,14 +216,14 @@ export default class Node {
    * @param {String} address - The address to unmark
    */
   public unmarkFailedAddress(address: string) {
-    return this.request('POST', 'routeplanner/free/address', { address });
+    return this.rest.freeRoutePlannerAddress(address);
   }
 
   /**
    * Unmarks all failed address
    */
   public unmarkAllFailedAddress() {
-    return this.request('POST', 'routeplanner/free/all');
+    return this.rest.freeAllRoutePlannerAddresses();
   }
 
   /**
@@ -261,6 +269,12 @@ export default class Node {
 
   private setupResuming() {
     if (!this.options.resumeKey) return;
+
+
+    if (this.options.transport === 'rest') {
+      this.rest.updateSession(this.options.resumeKey, this.options.resumeTimeout ?? 60);
+      return;
+    }
 
     const payload = {
       op: 'configureResuming',
@@ -423,7 +437,7 @@ export default class Node {
     if (!guildId || typeof guildId !== 'string') throw new TypeError('guildId must be a non-empty string');
     if (!id || typeof id !== 'string') throw new TypeError('id must be a non-empty string');
 
-    const rec = await this.requestBinary('GET', `records/${guildId}/${id}`);
+    const rec = await this.rest.getRecord(guildId, id);
     if (!rec.length) throw new Error('Record not found');
 
     return rec;
@@ -437,7 +451,7 @@ export default class Node {
   public getAllRecords(guildId: string): Promise<string[]> {
     if (!guildId || typeof guildId !== 'string') throw new TypeError('guildId must be a non-empty string');
 
-    return this.request<string[]>('GET', `records/${guildId}`);
+    return this.rest.getRecords(guildId);
   }
 
   /**
@@ -448,7 +462,7 @@ export default class Node {
   public async deleteAllRecords(guildId: string): Promise<void> {
     if (!guildId || typeof guildId !== 'string') throw new TypeError('guildId must be a non-empty string');
 
-    await this.requestBinary('DELETE', `records/${guildId}`);
+    await this.rest.deleteRecords(guildId);
   }
 
   /**
@@ -461,7 +475,7 @@ export default class Node {
     if (!guildId || typeof guildId !== 'string') throw new TypeError('guildId must be a non-empty string');
     if (!id || typeof id !== 'string') throw new TypeError('id must be a non-empty string');
 
-    await this.requestBinary('DELETE', `records/${guildId}/${id}`);
+    await this.rest.deleteRecord(guildId, id);
   }
 
   // ---------- WebSocket event handlers ----------
@@ -479,7 +493,9 @@ export default class Node {
 
     for (let i = 0; i < this.packetQueue.length; i++) {
       if (this.state !== NodeState.CONNECTED) break;
-      this.ws?.send(this.packetQueue.shift());
+      const packet = this.packetQueue.shift();
+
+      if (packet) this.ws?.send(packet);
     }
   }
 
@@ -487,6 +503,11 @@ export default class Node {
     const payload = JSON.parse(data as string);
 
     switch (payload.op) {
+      case 'ready':
+        if (this.rest) {
+          this.rest.sessionId = payload.sessionId;
+        }
+        break;
       case 'stats':
         delete payload.op;
         this.stats = payload as NodeStats;
@@ -569,28 +590,5 @@ export default class Node {
     if (msg.headers['lavalink-version'] === 'davidffa/lavalink') {
       this.fetchVersions();
     }
-  }
-
-  // REST
-  public request<T>(method: Dispatcher.HttpMethod, endpoint: string, body?: Record<string, unknown> | Array<unknown>): Promise<T> {
-    return this.pool.request({
-      path: `/${endpoint}`,
-      method,
-      headers: {
-        'authorization': this.options.password,
-        'content-type': 'application/json'
-      },
-      body: JSON.stringify(body)
-    }).then(r => r.body.json());
-  }
-
-  public requestBinary(method: Dispatcher.HttpMethod, endpoint: string): Promise<Buffer> {
-    return this.pool.request({
-      path: `/${endpoint}`,
-      method,
-      headers: {
-        'authorization': this.options.password,
-      },
-    }).then(async r => Buffer.from(await r.body.arrayBuffer()));
   }
 }
