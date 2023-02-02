@@ -16,6 +16,7 @@
     "@typescript-eslint"
   ],
   "rules": {
+    "@typescript-eslint/no-non-null-assertion": "off",
     "comma-spacing": "error",
     "comma-style": "error",
     "curly": [
