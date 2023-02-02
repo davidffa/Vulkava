@@ -1,4 +1,4 @@
-import { ITrack } from './@types';
+import type { ITrack, Metadata } from './@types';
 export default class Track {
     readonly identifier: string;
     private readonly thumbnailUrl?;
@@ -10,6 +10,7 @@ export default class Track {
     position?: number;
     readonly title: string;
     readonly uri: string;
+    metadata?: Metadata;
     encodedTrack: string;
     requester: unknown;
     constructor(data: ITrack);

@@ -3,8 +3,8 @@ import { EventEmitter } from 'events';
 import Node from './Node';
 import Track from './Track';
 import { Player } from '..';
-import type { IncomingDiscordPayload, OutgoingDiscordPayload, EventListeners, PlayerOptions, SearchResult, SEARCH_SOURCE, VulkavaOptions } from './@types';
 import { AbstractExternalSource } from './sources/AbstractExternalSource';
+import type { IncomingDiscordPayload, OutgoingDiscordPayload, EventListeners, PlayerOptions, SearchResult, SEARCH_SOURCE, VulkavaOptions } from './@types';
 export interface Vulkava {
     once: EventListeners<this>;
     on: EventListeners<this>;

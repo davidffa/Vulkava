@@ -1,5 +1,5 @@
 /// <reference types="node" />
-import { Dispatcher } from 'undici';
+import { RESTManager } from './rest/RESTManager';
 import { Vulkava } from './Vulkava';
 import type { NodeOptions, NodeStats, RoutePlannerStatus, Versions } from './@types';
 export declare enum NodeState {
@@ -20,7 +20,7 @@ export default class Node {
     private penalties?;
     private ws;
     private packetQueue;
-    private pool;
+    readonly rest: RESTManager;
     retryAttempts: number;
     state: NodeState;
     stats: NodeStats;
@@ -43,6 +43,7 @@ export default class Node {
      * @param {Number} [options.retryAttemptsInterval] - The interval between reconnect attempts, in milliseconds
      * @param {Boolean} [options.followRedirects] - Whether to follow redirects (3xx status codes)
      * @param {Boolean} [options.sendSpeakingEvents=false] - Tells the lavalink node to send speaking events (Supported in my custom lavalink fork)
+     * @param {String} [options.transport] - The transport method to use (websocket or rest)
      */
     constructor(vulkava: Vulkava, options: NodeOptions);
     get totalPenalties(): number;
@@ -61,11 +62,11 @@ export default class Node {
      * Unmarks a failed address
      * @param {String} address - The address to unmark
      */
-    unmarkFailedAddress(address: string): Promise<unknown>;
+    unmarkFailedAddress(address: string): Promise<void>;
     /**
      * Unmarks all failed address
      */
-    unmarkAllFailedAddress(): Promise<unknown>;
+    unmarkAllFailedAddress(): Promise<void>;
     /**
      * Gets the node ws connection latency or the latency between discord gateway & lavalink if guildId param provided.
      * @param {String} [guildId]
@@ -113,6 +114,4 @@ export default class Node {
     private error;
     private close;
     private upgrade;
-    request<T>(method: Dispatcher.HttpMethod, endpoint: string, body?: Record<string, unknown> | Array<unknown>): Promise<T>;
-    requestBinary(method: Dispatcher.HttpMethod, endpoint: string): Promise<Buffer>;
 }
