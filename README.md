@@ -3,6 +3,7 @@ A lavalink wrapper in Node.JS
 
 - [Documentation](https://vulkava.js.org)
 - [Common errors/Issues](https://vulkava.js.org/common-issues)
+- [Discord Support Server](https://discord.gg/uT6ePwmPaK)
 
 ## 🔌 Installation
 You will need NodeJS v14+ and a running lavalink server.
