@@ -9,7 +9,7 @@ import type { PlaylistInfo, SearchResult } from '../@types';
 export default class AppleMusic extends AbstractExternalSource {
   public static readonly APPLE_MUSIC_REGEX = /^(?:https?:\/\/|)?(?:music\.)?apple\.com\/(?<storefront>[a-z]{2})\/(?<type>album|playlist|artist|music-video)(?:\/[^/]+)?\/(?<id>[^/?]+)(?:\?i=(?<albumtrackid>\d+))?/;
   private static readonly RENEW_URL = 'https://music.apple.com';
-  private static readonly SCRIPTS_REGEX = /<script type="module" .+ src="(?<endpoint>\/assets\/index\..+\.js)">/g;
+  private static readonly SCRIPTS_REGEX = /<script type="module" .+ src="(?<endpoint>\/assets\/index.+\.js)">/g;
   private static readonly TOKEN_REGEX = /const \w{2}="(?<token>ey[\w.-]+)"/;
 
   private static readonly USER_AGENT = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.0.0 Safari/537.36';
