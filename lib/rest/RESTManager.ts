@@ -209,7 +209,7 @@ export class RESTManager {
     } else if (res.headers.get('content-type') === 'application/json') {
       resBody = await res.json();
     } else {
-      resBody = await res.arrayBuffer();
+      resBody = Buffer.from(await res.arrayBuffer());
     }
 
     return resBody as T;
