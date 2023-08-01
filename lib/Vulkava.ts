@@ -21,6 +21,7 @@ import type {
   VulkavaOptions
 } from './@types';
 
+// eslint-disable-next-line @typescript-eslint/no-unsafe-declaration-merging
 export interface Vulkava {
   once: EventListeners<this>;
   on: EventListeners<this>;
@@ -33,6 +34,7 @@ export interface Vulkava {
  * @prop {String} clientId - The bot id
  * @prop {Map<String, Player>} players - The players map
  */
+// eslint-disable-next-line @typescript-eslint/no-unsafe-declaration-merging
 export class Vulkava extends EventEmitter {
   public clientId: string;
   public nodes: Node[];
