@@ -206,13 +206,13 @@ export default class Spotify extends AbstractExternalSource {
       headers: {
         Authorization: this.token as string,
       }
-    }).then(r => r.body.json());
+    }).then(r => r.body.json()) as ISpotifyResponse;
 
     if (res.error) {
       return new SpotifyError(res.error.message);
     }
 
-    return res;
+    return res as T;
   }
 
   private async renewToken() {
@@ -264,6 +264,10 @@ class SpotifyError implements ISpotifyError {
   toString(): string {
     return `SpotifyError: ${this.message}`;
   }
+}
+
+interface ISpotifyResponse {
+  error?: ISpotifyError;
 }
 
 interface ISpotifyError {

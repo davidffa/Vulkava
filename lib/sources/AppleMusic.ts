@@ -182,9 +182,9 @@ export default class AppleMusic extends AbstractExternalSource {
     });
 
     if (res.statusCode === 200) {
-      return res.body.json();
+      return res.body.json() as T;
     } else {
-      return new AppleMusicError(await res.body.json());
+      return new AppleMusicError(await res.body.json() as IErrorResponse);
     }
   }
 

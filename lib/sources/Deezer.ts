@@ -92,13 +92,13 @@ export default class Deezer extends AbstractExternalSource {
   }
 
   private async makeRequest<T>(endpoint: string): Promise<T | DeezerError> {
-    const res = await request(`https://api.deezer.com/${endpoint}`).then(r => r.body.json());
+    const res = await request(`https://api.deezer.com/${endpoint}`).then(r => r.body.json()) as IDeezerResponse;
 
     if (res.error) {
       return new DeezerError(res.error.type, res.error.message);
     }
 
-    return res;
+    return res as T;
   }
 }
 
@@ -114,6 +114,10 @@ class DeezerError implements IDeezerError {
   toString(): string {
     return `DeezerError: ${this.type}: ${this.message}`;
   }
+}
+
+interface IDeezerResponse {
+  error?: IDeezerError;
 }
 
 interface IDeezerError {
