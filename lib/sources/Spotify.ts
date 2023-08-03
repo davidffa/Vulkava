@@ -7,7 +7,7 @@ import UnresolvedTrack from '../UnresolvedTrack';
 import type { PlaylistInfo, SearchResult } from '../@types';
 
 export default class Spotify extends AbstractExternalSource {
-  public static readonly SPOTIFY_REGEX = /^(?:https?:\/\/(?:open\.)?spotify\.com|spotify)[/:](?<type>track|album|playlist|artist)[/:](?<id>[a-zA-Z0-9]+)/;
+  public static readonly SPOTIFY_REGEX = /^(?:https?:\/\/(?:open\.)?spotify\.com|spotify)[/:](?:intl-[a-zA-Z]+\/)?(?<type>track|album|playlist|artist)[/:](?<id>[a-zA-Z0-9]+)/;
 
   private readonly auth: string | null;
 

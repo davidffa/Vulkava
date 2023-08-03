@@ -18,6 +18,10 @@ describe('Spotify track loading', () => {
     await expect(vulkava.search('https://open.spotify.com/track/5bBQI31u2eqXJE5OyP4hxq').then(r => r.loadType)).resolves.toBe('TRACK_LOADED');
   });
 
+  it('should be able to load a track (intl- URLs)', async () => {
+    await expect(vulkava.search('https://open.spotify.com/intl-pt/track/2FDTHlrBguDzQkp7PVj16Q?si=049d306d96c140cd').then(r => r.loadType)).resolves.toBe('TRACK_LOADED');
+  });
+
   it('should be able to load an album', async () => {
     await expect(vulkava.search('https://open.spotify.com/album/2PQwfmnKL23wejkx0qArUw').then(r => r.loadType)).resolves.toBe('PLAYLIST_LOADED');
   });
