@@ -37,7 +37,7 @@
     "url": "https://github.com/davidffa/Vulkava/issues"
   },
   "engines": {
-    "node": ">=14.x.x"
+    "node": ">=16.x.x"
   },
   "keywords": [
     "lavalink",
