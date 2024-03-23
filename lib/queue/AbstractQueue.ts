@@ -2,6 +2,8 @@ import Track from '../Track';
 import UnresolvedTrack from '../UnresolvedTrack';
 
 export abstract class AbstractQueue {
+  abstract tracks: Array<Track | UnresolvedTrack>;
+  
   /**
    * Gets the queue duration
    * @abstract
