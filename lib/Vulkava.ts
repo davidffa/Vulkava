@@ -232,7 +232,9 @@ export class Vulkava extends EventEmitter {
    * @returns {Promise<SearchResult>}
    */
   public async search(query: string, source: SEARCH_SOURCE = this.defaultSearchSource): Promise<SearchResult> {
-    if (typeof query !== 'string') { throw new TypeError('Search query must be a non-empty string'); }
+    if (typeof query !== 'string') {
+      throw new TypeError('Search query must be a non-empty string');
+    }
 
     for (const source of this.externalSources) {
       const loadRes = await source.loadItem(query);
