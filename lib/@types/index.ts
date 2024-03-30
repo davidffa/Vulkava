@@ -63,9 +63,9 @@ export type VulkavaOptions = {
   defaultSearchSource?: SEARCH_SOURCE;
   /** The default source to search for unresolved tracks */
   unresolvedSearchSource?: SEARCH_SOURCE;
-  /** The spotify credentials */
+  /** The spotify credentials. Not needed if you use the lavasrc plugin. */
   spotify?: SpotifyConfig;
-  /** Disables spotify, apple music or deezer */
+  /** Disables spotify, apple music or deezer. Doesn't have any effect if you use the lavasrc plugin. */
   disabledSources?: UNRESOLVED_SOURCES[];
   /** Whether to search for ISRC to resolve tracks or not */
   useISRC?: boolean;
@@ -97,8 +97,8 @@ export type EventListeners<T> = {
   (event: 'userDisconnect', listener: (player: Player, userId: string) => void): T;
 }
 
-// Search sources (the last two only works on my lavalink (https://github.com/davidffa/lavalink/releases) )
-export type SEARCH_SOURCE = 'youtube' | 'youtubemusic' | 'soundcloud' | 'odysee' | 'yandex';
+// Search sources (spotify, apple music and deezer only work with the https://github.com/topi314/LavaSrc plugin (though urls work by default) the last two only work on my lavalink (https://github.com/davidffa/lavalink/releases) )
+export type SEARCH_SOURCE = 'youtube' | 'youtubemusic' | 'spotify' | 'applemusic' | 'deezer' | 'soundcloud' | 'odysee' | 'yandex';
 
 // -- REST --
 
