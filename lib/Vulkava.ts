@@ -98,7 +98,7 @@ export class Vulkava extends EventEmitter {
    * @param {Number} [options.nodes[].retryAttemptsInterval] - The interval between retry attempts
    * @param {String} [options.defaultSearchSource] - The default search source
    * @param {String} [options.unresolvedSearchSource] - The unresolved search source
-   * @param {Object} [options.spotify] - The spotify credential options
+   * @param {Object} [options.spotify] - The spotify credential options. Not needed if you use the lavasrc plugin.
    * @param {String} [options.spotify.clientId] - The spotify client id
    * @param {String} [options.spotify.clientSecret] - The spotify client secret
    * @param {String} [options.spotify.market] - The spotify market
