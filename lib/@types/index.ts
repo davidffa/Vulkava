@@ -97,7 +97,7 @@ export type EventListeners<T> = {
   (event: 'userDisconnect', listener: (player: Player, userId: string) => void): T;
 }
 
-// Search sources (spotify, apple music and deezer work only with the https://github.com/topi314/LavaSrc plugin (though urls work by default) the last two only work on my lavalink (https://github.com/davidffa/lavalink/releases) )
+// Search sources (spotify, apple music and deezer only work with the https://github.com/topi314/LavaSrc plugin (though urls work by default) the last two only work on my lavalink (https://github.com/davidffa/lavalink/releases) )
 export type SEARCH_SOURCE = 'youtube' | 'youtubemusic' | 'spotify' | 'applemusic' | 'deezer' | 'soundcloud' | 'odysee' | 'yandex';
 
 // -- REST --
