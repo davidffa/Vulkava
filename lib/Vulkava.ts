@@ -102,7 +102,7 @@ export class Vulkava extends EventEmitter {
    * @param {String} [options.spotify.clientId] - The spotify client id
    * @param {String} [options.spotify.clientSecret] - The spotify client secret
    * @param {String} [options.spotify.market] - The spotify market
-   * @param {Array<String>} [options.disabledSources] - Disables, apple music, deezer or spotify
+   * @param {Array<String>} [options.disabledSources] - Disables apple music, deezer or spotify. Doesn't have any effect if you use the lavasrc plugin.
    * @param {Boolean} [options.useISRC] - Whether to use ISRC to resolve tracks or not
    * @param {Function} options.sendWS - The function to send websocket messages to the main gateway
    */
@@ -228,7 +228,7 @@ export class Vulkava extends EventEmitter {
   /**
    *
    * @param {String} query - The query to search for
-   * @param {('youtube' | 'youtubemusic' | 'spotify' | 'applemusic' | 'deezer'| 'soundcloud' | 'odysee' | 'yandex')} [source=youtube] - The search source. Spotify, Apple Music and Deezer search are not supported by default (only urls are supported by default), you can use the https://github.com/topi314/LavaSrc to enable them.
+   * @param {('youtube' | 'youtubemusic' | 'spotify' | 'applemusic' | 'deezer'| 'soundcloud' | 'odysee' | 'yandex')} [source=youtube] - The search source. spotify, apple music and deezer search are not supported by default (only urls are supported by default), you can use the https://github.com/topi314/LavaSrc plugin to enable them.
    * @returns {Promise<SearchResult>}
    */
   public async search(query: string, source: SEARCH_SOURCE = this.defaultSearchSource): Promise<SearchResult> {
