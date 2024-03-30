@@ -228,7 +228,7 @@ export class Vulkava extends EventEmitter {
   /**
    *
    * @param {String} query - The query to search for
-   * @param {('youtube' | 'youtubemusic' | 'soundcloud' | 'odysee' | 'yandex')} [source=youtube] - The search source
+   * @param {('youtube' | 'youtubemusic' | 'spotify' | 'applemusic' | 'deezer'| 'soundcloud' | 'odysee' | 'yandex')} [source=youtube] - The search source. Spotify, Apple Music and Deezer search are not supported by default (only urls are supported by default), you can use the https://github.com/topi314/LavaSrc to enable them.
    * @returns {Promise<SearchResult>}
    */
   public async search(query: string, source: SEARCH_SOURCE = this.defaultSearchSource): Promise<SearchResult> {
@@ -243,6 +243,9 @@ export class Vulkava extends EventEmitter {
     const sourceMap = {
       youtube: 'ytsearch:',
       youtubemusic: 'ytmsearch:',
+      spotify: 'spsearch:',
+      applemusic: 'amsearch:',
+      deezer: 'dzisearch:',
       soundcloud: 'scsearch:',
       odysee: 'odsearch:',
       yandex: 'ymsearch:'
