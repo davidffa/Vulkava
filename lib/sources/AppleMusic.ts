@@ -189,7 +189,7 @@ export default class AppleMusic extends AbstractExternalSource {
   }
 
   private async renewToken() {
-    const html: string = await request(AppleMusic.RENEW_URL + '/us/browse', {
+    const html: string = await request(AppleMusic.RENEW_URL + '/us/new', {
       headers: {
         'User-Agent': AppleMusic.USER_AGENT
       },
