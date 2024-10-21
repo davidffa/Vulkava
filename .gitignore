@@ -5,5 +5,6 @@ typings
 
 yarn.lock
 package-lock.json
+bun.lockb
 
 coverage
