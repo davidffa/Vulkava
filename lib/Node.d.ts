@@ -1,4 +1,3 @@
-/// <reference types="node" />
 import { RESTManager } from './rest/RESTManager';
 import { Vulkava } from './Vulkava';
 import type { NodeOptions, NodeStats, RoutePlannerStatus, Versions } from './@types';

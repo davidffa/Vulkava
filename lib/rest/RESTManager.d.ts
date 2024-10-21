@@ -1,4 +1,3 @@
-/// <reference types="node" />
 import Node from '../Node';
 import { Info, ITrack, LoadTracksResult, RequestOptions, RoutePlannerStatus, TrackInfo, UpdatePlayerOptions, Versions } from '../@types';
 export declare class RESTManager {

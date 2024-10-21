@@ -61,30 +61,78 @@ export type VulkavaOptions = {
     useISRC?: boolean;
 };
 /** Vulkava events */
-export type EventListeners<T> = {
-    (event: 'debug', listener: (message: string) => void): T;
-    (event: 'raw', listener: (node: Node, payload: unknown) => void): T;
-    (event: 'nodeConnect', listener: (node: Node) => void): T;
-    (event: 'nodeResume', listener: (node: Node) => void): T;
-    (event: 'nodeDisconnect', listener: (node: Node, code: number, reason: string) => void): T;
-    (event: 'warn', listener: (node: Node, warn: string) => void): T;
-    (event: 'error', listener: (node: Node, error: Error) => void): T;
-    (event: 'trackStart', listener: (player: Player, track: Track) => void): T;
-    (event: 'trackEnd', listener: (player: Player, track: Track, reason: TrackEndReason) => void): T;
-    (event: 'trackStuck', listener: (player: Player, track: Track, thresholdMs: number) => void): T;
-    (event: 'trackException', listener: (player: Player, track: Track | UnresolvedTrack, exception: LoadException & {
-        cause: string;
-    }) => void): T;
-    (event: 'playerCreate', listener: (player: Player) => void): T;
-    (event: 'playerDestroy', listener: (player: Player) => void): T;
-    (event: 'playerDisconnect', listener: (player: Player, code: number, reason: string) => void): T;
-    (event: 'queueEnd', listener: (player: Player) => void): T;
-    (event: 'pong', listener: (node: Node, ping?: number) => void): T;
-    (event: 'recordFinished', listener: (node: Node, guildId: string, id: string) => void): T;
-    (event: 'speakingStart', listener: (player: Player, userId: string) => void): T;
-    (event: 'speakingStop', listener: (player: Player, userId: string) => void): T;
-    (event: 'userDisconnect', listener: (player: Player, userId: string) => void): T;
-};
+export interface VulkavaEvents {
+    debug: [message: string];
+    raw: [
+        node: Node,
+        payload: unknown
+    ];
+    nodeConnect: [node: Node];
+    nodeResume: [node: Node];
+    nodeDisconnect: [
+        node: Node,
+        code: number,
+        reason: string
+    ];
+    warn: [
+        node: Node,
+        warn: string
+    ];
+    error: [
+        node: Node,
+        error: Error
+    ];
+    trackStart: [
+        player: Player,
+        track: Track
+    ];
+    trackEnd: [
+        player: Player,
+        track: Track,
+        reason: TrackEndReason
+    ];
+    trackStuck: [
+        player: Player,
+        track: Track,
+        thresholdMs: number
+    ];
+    trackException: [
+        player: Player,
+        track: Track | UnresolvedTrack,
+        exception: LoadException & {
+            cause: string;
+        }
+    ];
+    playerCreate: [player: Player];
+    playerDestroy: [player: Player];
+    playerDisconnect: [
+        player: Player,
+        code: number,
+        reason: string
+    ];
+    queueEnd: [player: Player];
+    pong: [
+        node: Node,
+        ping?: number
+    ];
+    recordFinished: [
+        node: Node,
+        guildId: string,
+        id: string
+    ];
+    speakingStart: [
+        player: Player,
+        userId: string
+    ];
+    speakingStop: [
+        player: Player,
+        userId: string
+    ];
+    userDisconnect: [
+        player: Player,
+        userId: string
+    ];
+}
 export type SEARCH_SOURCE = 'youtube' | 'youtubemusic' | 'soundcloud' | 'odysee' | 'yandex';
 export type UpdatePlayerOptions = {
     encodedTrack?: string | null;

@@ -1,13 +1,12 @@
-/// <reference types="node" />
 import { EventEmitter } from 'events';
 import Node from './Node';
 import Track from './Track';
 import { Player } from '..';
 import { AbstractExternalSource } from './sources/AbstractExternalSource';
-import type { IncomingDiscordPayload, OutgoingDiscordPayload, EventListeners, PlayerOptions, SearchResult, SEARCH_SOURCE, VulkavaOptions } from './@types';
+import type { IncomingDiscordPayload, OutgoingDiscordPayload, VulkavaEvents, PlayerOptions, SearchResult, SEARCH_SOURCE, VulkavaOptions } from './@types';
 export interface Vulkava {
-    once: EventListeners<this>;
-    on: EventListeners<this>;
+    on<Event extends keyof VulkavaEvents>(event: Event, listener: (...args: VulkavaEvents[Event]) => void): this;
+    once<Event extends keyof VulkavaEvents>(event: Event, listener: (...args: VulkavaEvents[Event]) => void): this;
 }
 /**
  * Represents the main Vulkava client.
