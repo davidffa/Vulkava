@@ -12,7 +12,7 @@ import Spotify from './sources/Spotify';
 import type {
   IncomingDiscordPayload,
   OutgoingDiscordPayload,
-  EventListeners,
+  VulkavaEvents,
   PlayerOptions,
   SearchResult,
   SEARCH_SOURCE,
@@ -21,10 +21,9 @@ import type {
   VulkavaOptions
 } from './@types';
 
-// eslint-disable-next-line @typescript-eslint/no-unsafe-declaration-merging
 export interface Vulkava {
-  once: EventListeners<this>;
-  on: EventListeners<this>;
+  on<Event extends keyof VulkavaEvents>(event: Event, listener: (...args: VulkavaEvents[Event]) => void): this;
+  once<Event extends keyof VulkavaEvents>(event: Event, listener: (...args: VulkavaEvents[Event]) => void): this;
 }
 
 /**
