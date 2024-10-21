@@ -21,6 +21,7 @@ import type {
   VulkavaOptions
 } from './@types';
 
+// eslint-disable-next-line @typescript-eslint/no-unsafe-declaration-merging
 export interface Vulkava {
   on<Event extends keyof VulkavaEvents>(event: Event, listener: (...args: VulkavaEvents[Event]) => void): this;
   once<Event extends keyof VulkavaEvents>(event: Event, listener: (...args: VulkavaEvents[Event]) => void): this;
