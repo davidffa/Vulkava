@@ -1,5 +1,9 @@
+/* eslint-disable @typescript-eslint/no-this-alias */
+
+import { EventEmitter } from 'events';
+
 import { Node, Vulkava, AbstractQueue } from '..';
-import { PlayerOptions, PlayerState, PlayOptions, VoiceState } from './@types';
+import { PlayerEvents, PlayerOptions, PlayerState, PlayOptions, VoiceState } from './@types';
 import Filters from './Filters';
 import { NodeState } from './Node';
 import { DefaultQueue } from './queue/DefaultQueue';
@@ -13,8 +17,15 @@ export enum ConnectionState {
   DISCONNECTED
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unsafe-declaration-merging
+export interface Player {
+  on<Event extends keyof PlayerEvents>(event: Event, listener: (...args: PlayerEvents[Event]) => void): this;
+  once<Event extends keyof PlayerEvents>(event: Event, listener: (...args: PlayerEvents[Event]) => void): this;
+}
+
 /**
  * Represents a Player structure
+ * @extends EventEmitter
  * @prop {Node} node - The node that this player is connected to
  * @prop {Filters} filters - The filters instance of this player
  * @prop {String} guildId - The guild id of this player
@@ -31,7 +42,8 @@ export enum ConnectionState {
  * @prop {State} state - The state of this player (CONNECTING, CONNECTED, DISCONNECTED)
  * @prop {Object} voiceState - The player voicestate
  */
-export default class Player {
+// eslint-disable-next-line @typescript-eslint/no-unsafe-declaration-merging
+export class Player extends EventEmitter {
   private readonly vulkava: Vulkava;
   public node: Node | null;
 
@@ -88,6 +100,8 @@ export default class Player {
    * @param {AbstractQueue} [options.queue] - The queue for this player
    */
   constructor(vulkava: Vulkava, options: PlayerOptions) {
+    super();
+
     Player.checkOptions(options);
 
     this.vulkava = vulkava;
@@ -167,7 +181,11 @@ export default class Player {
   private assignNode() {
     const node = this.vulkava.bestNode;
 
+    const oldPlayer = this;
+
     this.node = node;
+
+    this.vulkava.emit('playerUpdate', oldPlayer, this);
     this.vulkava.emit('debug', `Assigned node ${node.identifier} to player ${this.guildId}`);
   }
 
@@ -320,6 +338,8 @@ export default class Player {
       this.assignNode();
     }
 
+    const oldPlayer = this;
+
     if (!this.current) {
       let newTrack = await this.queue.poll();
 
@@ -341,6 +361,8 @@ export default class Player {
     }
 
     this.playing = true;
+
+    this.vulkava.emit('playerUpdate', oldPlayer, this);
 
     if (this.node?.options.transport === 'rest') {
       this.node?.rest.updatePlayer(this.guildId, {
@@ -408,7 +430,13 @@ export default class Player {
    * @param {Boolean} state - Whether to enable track looping or not
    */
   public setTrackLoop(state: boolean) {
+    const oldPlayer = this;
+
     this.trackRepeat = state;
+
+    if (oldPlayer.trackRepeat !== state) {
+      this.vulkava.emit('playerUpdate', oldPlayer, this);
+    }
   }
 
   /**
@@ -416,7 +444,13 @@ export default class Player {
    * @param {Boolean} state - Whether to enable queue looping or not
    */
   public setQueueLoop(state: boolean) {
+    const oldPlayer = this;
+
     this.queueRepeat = state;
+
+    if (oldPlayer.queueRepeat !== state) {
+      this.vulkava.emit('playerUpdate', oldPlayer, this);
+    }
   }
 
   /**
@@ -427,9 +461,13 @@ export default class Player {
     if (!channelId || typeof channelId !== 'string') throw new TypeError('Voice channel id must be a string.');
     if (this.voiceChannelId === channelId) return;
 
+    const oldPlayer = this;
+
     this.voiceChannelId = channelId;
     this.state = ConnectionState.DISCONNECTED;
     this.connect();
+
+    this.vulkava.emit('playerUpdate', oldPlayer, this);
   }
 
   /**
@@ -438,7 +476,11 @@ export default class Player {
    */
   public shuffleQueue() {
     if (this.queue instanceof DefaultQueue) {
+      const oldQueue = this.queue as DefaultQueue;
+
       (this.queue as DefaultQueue).shuffle();
+
+      this.emit('queueShuffle', this, oldQueue, this.queue);
     }
   }
 
@@ -454,6 +496,8 @@ export default class Player {
     } else {
       await this.queue.skipNTracks(amount);
     }
+
+    this.emit('skip', this, amount > this.queue.size ? this.queue.size : amount);
 
     if (this.node?.options.transport === 'rest') {
       this.node.rest.updatePlayer(this.guildId, {
@@ -481,7 +525,13 @@ export default class Player {
 
     if (this.node === null) throw new Error('Assertion failed. The player does not have a node.');
 
+    const oldPlayer = this;
+
     this.paused = state;
+
+    if (oldPlayer.paused !== state) {
+      this.vulkava.emit('playerUpdate', oldPlayer, this);
+    }
 
     if (this.node?.options.transport === 'rest') {
       this.node.rest.updatePlayer(this.guildId, {
@@ -511,6 +561,8 @@ export default class Player {
       this.skip();
       return;
     }
+
+    this.emit('seek', this, this.current.position, position);
 
     if (this.node?.options.transport === 'rest') {
       this.node.rest.updatePlayer(this.guildId, {
@@ -558,13 +610,31 @@ export default class Player {
   }
 
   public update(state: PlayerState): void {
-    if (state.position) this.position = state.position;
-    if (state.time) this.positionTimestamp = state.time;
+    const oldPlayer = this;
+    let hasChanged = false;
+
+    if (state.position && this.position !== state.position) {
+      this.position = state.position;
+      hasChanged = true;
+    }
+
+    if (state.time && this.positionTimestamp !== state.time) {
+      this.positionTimestamp = state.time;
+      hasChanged = true;
+    }
 
     if (state.connected) {
-      this.state = ConnectionState.CONNECTED;
+      if (this.state !== ConnectionState.CONNECTED) {
+        this.state = ConnectionState.CONNECTED;
+        hasChanged = true;
+      }
     } else if (this.state === ConnectionState.CONNECTED) {
       this.state = ConnectionState.DISCONNECTED;
+      hasChanged = true;
+    }
+
+    if (hasChanged) {
+      this.vulkava.emit('playerUpdate', oldPlayer, this);
     }
   }
 }
