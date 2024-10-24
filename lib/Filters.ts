@@ -9,7 +9,7 @@ import {
   TremoloOptions,
   VibratoOptions
 } from './@types';
-import Player from './Player';
+import { Player } from './Player';
 
 export default class Filters {
   private readonly player: Player;
