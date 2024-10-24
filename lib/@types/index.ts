@@ -1,5 +1,5 @@
-import { Node } from '../..';
-import Player from '../Player';
+import { DefaultQueue, Node } from '../..';
+import { Player } from '../Player';
 import { AbstractQueue } from '../queue/AbstractQueue';
 import Track from '../Track';
 import UnresolvedTrack from '../UnresolvedTrack';
@@ -74,43 +74,9 @@ export type VulkavaOptions = {
 /** Vulkava events */
 export interface VulkavaEvents {
   debug: [message: string];
-  raw: [
-    node: Node,
-    payload: unknown,
-  ];
-  nodeConnect: [node: Node];
-  nodeResume: [node: Node];
-  nodeDisconnect: [
-    node: Node,
-    code: number,
-    reason: string,
-  ];
-  warn: [
-    node: Node,
-    warn: string,
-  ];
   error: [
     node: Node,
     error: Error,
-  ];
-  trackStart: [
-    player: Player,
-    track: Track,
-  ];
-  trackEnd: [
-    player: Player,
-    track: Track,
-    reason: TrackEndReason,
-  ];
-  trackStuck: [
-    player: Player,
-    track: Track,
-    thresholdMs: number,
-  ];
-  trackException: [
-    player: Player,
-    track: Track | UnresolvedTrack,
-    exception: LoadException & { cause: string },
   ];
   playerCreate: [player: Player];
   playerDestroy: [player: Player];
@@ -119,10 +85,18 @@ export interface VulkavaEvents {
     code: number,
     reason: string,
   ];
-  queueEnd: [player: Player];
+  playerUpdate: [
+    oldPlayer: Player,
+    newPlayer: Player,
+  ];
   pong: [
     node: Node,
     ping?: number,
+  ];
+  queueEnd: [player: Player];
+  raw: [
+    node: Node,
+    payload: unknown,
   ];
   recordFinished: [
     node: Node,
@@ -130,18 +104,71 @@ export interface VulkavaEvents {
     id: string,
   ];
 
-  // Speaking Events (only work on my lavalink (https://github.com/davidffa/lavalink/releases) and while recording audio)
+  // This event only works on my lavalink (https://github.com/davidffa/lavalink/releases) and while recording audio
   speakingStart: [
     player: Player,
     userId: string,
   ];
+  // This event only works on my lavalink (https://github.com/davidffa/lavalink/releases) and while recording audio
   speakingStop: [
     player: Player,
     userId: string,
   ];
+
+  trackEnd: [
+    player: Player,
+    track: Track,
+    reason: TrackEndReason,
+  ];
+  trackException: [
+    player: Player,
+    track: Track | UnresolvedTrack,
+    exception: LoadException & { cause: string },
+  ];
+  trackStart: [
+    player: Player,
+    track: Track,
+  ];
+  trackStuck: [
+    player: Player,
+    track: Track,
+    thresholdMs: number,
+  ];
+
+  // This event only works on my lavalink (https://github.com/davidffa/lavalink/releases) and while recording audio
   userDisconnect: [
     player: Player,
     userId: string,
+  ];
+
+  nodeConnect: [node: Node];
+  nodeDisconnect: [
+    node: Node,
+    code: number,
+    reason: string,
+  ];
+  nodeResume: [node: Node];
+  warn: [
+    node: Node,
+    warn: string,
+  ];
+}
+
+/** Player events */
+export interface PlayerEvents {
+  queueShuffle: [
+    player: Player,
+    oldQueue: DefaultQueue,
+    newQueue: DefaultQueue,
+  ];
+  seek: [
+    player: Player,
+    oldPosition: number,
+    newPosition: number,
+  ];
+  skip: [
+    player: Player,
+    amount: number,
   ];
 }
 

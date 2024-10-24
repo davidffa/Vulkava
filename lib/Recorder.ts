@@ -1,5 +1,5 @@
 import { RecordOptions } from './@types';
-import Player from './Player';
+import { Player } from './Player';
 import { Vulkava } from './Vulkava';
 
 export default class Recorder {
